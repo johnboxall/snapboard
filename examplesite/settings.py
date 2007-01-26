@@ -33,7 +33,7 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/bshi/sandbox/snapboard/media'
+MEDIA_ROOT = '/home/bshi/sandbox/snapboard/trunk/media'
 
 # URL that handles the media served from MEDIA_ROOT.
 # Example: "http://media.lawrence.com"
@@ -67,7 +67,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/home/bshi/sandbox/snapboard/templates",
+    "/home/bshi/sandbox/snapboard/trunk/templates",
 )
 
 INSTALLED_APPS = (

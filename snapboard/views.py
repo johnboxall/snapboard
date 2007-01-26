@@ -57,18 +57,25 @@ def rpc(request):
 
 
 
-def thread(request, thread_id, page=0):
-    # return HttpResponse("You're looking at thread %s." % thread_id)
+def thread(request, thread_id, page=1):
+    # split results into pages
+    ppp = 20                # P(osts) P(er) P(age)
+    page = int(page)        # indexed starting at 1
+    pindex = page - 1       # indexed starting at 0
+
     try:
         thr = Thread.objects.get(pk=thread_id)
+        post_list = Post.objects.filter(thread=thr).order_by('-date').exclude(
+                revision__isnull=False)
+
+        paginator = ObjectPaginator(post_list, ppp)
+        post_page = paginator.get_page(pindex)
     except Thread.DoesNotExist:
+        raise Http404
+    except InvalidPage:
         raise Http404
 
     render_dict = {}
-    ppp = 5                 # P(osts) P(er) P(age)
-
-    post_list = Post.objects.filter(thread=thr).order_by('-date').exclude(
-            revision__isnull=False)
 
     try:
         wl = WatchList.objects.get(user=request.user, thread=thr)
@@ -91,20 +98,39 @@ def thread(request, thread_id, page=0):
     else:
         postform = PostForm()
 
-    paginator = ObjectPaginator(post_list, ppp)
+    # general info to render the page navigation (back/forward/etc)
+    render_dict.update(paginate_render_dict(paginator, page))
+
     render_dict.update({
             'thr': thr,
-            'page': page,
-            'page_next': paginator.has_next_page(page),
-            'page_prev': paginator.has_previous_page(page),
-            'page_range': [x+1 for x in range(0, paginator.pages)],
-            'post_page': paginator.get_page(page),
             'postform': postform,
+            'post_page': post_page,
             })
 
     return render_to_response('snapboard/thread.html',
             render_dict,
             context_instance = RequestContext(request))
+
+
+def paginate_render_dict(paginator, page):
+    pindex = page - 1
+    page_next = None
+    page_prev = None
+    page_range = None
+    if paginator.has_next_page(pindex):
+        page_next = page + 1
+    if paginator.has_previous_page(pindex):
+        page_prev = page - 1
+    if paginator.pages > 2:
+        page_range = range(1, paginator.pages+1)
+
+    return {
+            'page': page,
+            'page_total': paginator.pages,
+            'page_next': page_next,
+            'page_prev': page_prev,
+            'page_range': page_range,
+        }
 
 
 def edit_post(request, original):
@@ -175,14 +201,22 @@ def new_thread(request):
             context_instance = RequestContext(request))
 
 
-def thread_index(request, cat_id=None):
-    if cat_id is None:
-        thread_list = Thread.objects.all()
-        page_title = "Recent Discussions"
-    else:
-        cat = Category.objects.get(pk=cat_id)
-        thread_list = Thread.objects.filter(category=cat)
-        page_title = ''.join(("Category: ", cat.label))
+def thread_index(request, cat_id=None, page=1):
+    tpp = 20                # (T)threads (P)er (P)age
+    page = int(page)
+    pindex = page - 1
+
+    try:
+        if cat_id is None:
+            thread_list = Thread.objects.all()
+            page_title = "Recent Discussions"
+        else:
+            cat = Category.objects.get(pk=cat_id)
+            thread_list = Thread.objects.filter(category=cat)
+            page_title = ''.join(("Category: ", cat.label))
+
+    except Category.DoesNotExist:
+        raise Http404
 
     # number of posts in thread
     extra_post_count = """
@@ -226,12 +260,24 @@ def thread_index(request, cat_id=None):
     # the bug is that any extra columns must match their names
     # TODO: sorting on boolean fields is undefined in SQL theory
 
-    return render_to_response('snapboard/thread_index.html',
-            {
-            'thread_list': thread_list,
+
+    render_dict = {}
+
+    try:
+        paginator = ObjectPaginator(thread_list, tpp)
+        thread_page = paginator.get_page(pindex)
+        render_dict.update(paginate_render_dict(paginator, page))
+    except InvalidPage:
+        raise Http404
+
+    render_dict.update({
+            'thread_page': thread_page,
             'page_title': page_title,
             'category': cat_id,
-            },
+            })
+
+    return render_to_response('snapboard/thread_index.html',
+            render_dict,
             context_instance = RequestContext(request))
 
 def category_index(request):

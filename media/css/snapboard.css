@@ -12,13 +12,6 @@ A {
     display: inline;
 }
 
-hr.postend {
-    width: 80%;
-    height: 1px;
-    background-color: #CCC;
-    border: 0px solid #CCC;
-}
-
 div.thread {
     padding: 0.2em 0.2em 0.2em 1em;
     border-bottom: 1px solid #B0BFAC;
@@ -54,6 +47,20 @@ textarea, input, button, select {
 
 /* POSTS & THREADS ***************************************/
 
+hr.postend {
+    width: 80%;
+    height: 1px;
+    background-color: #CCC;
+    border: 0px solid #CCC;
+}
+
+hr.firstpost {
+    width: 80%;
+    height: 1px;
+    background-color: black;
+    border: 0px solid black;
+}
+
 .post p {
     margin-top: 10px;
     margin-bottom: 10px;
@@ -61,6 +68,11 @@ textarea, input, button, select {
 
 p.post_header {
     padding-left: 2em;
+}
+
+p.thread_page_nav {
+    margin-left: 10%;
+    margin-right: 10%;
 }
 
 span.thread_menu {

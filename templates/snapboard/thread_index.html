@@ -1,15 +1,15 @@
 {% extends "snapboard/base_forum.html" %}
 
 {% block snapboard_main %}
-    {% if thread_list %}
-        {% for thread in thread_list %}
+    {% if thread_page %}
+        {% for thread in thread_page %}
         <div class="thread">
             <span style="color: #999; font-size: small; float:right;">
                 {{ thread.post_count }} posts started by <b>{{ thread.starter }}</b>
             </span>
             <span style="font-size:medium;">
                 <b>
-                    {% if thread.gsticky %}
+                    {% if not category and thread.gsticky %}
                     STICKY
                     {% endif %}
                     {% if category and thread.csticky %}
