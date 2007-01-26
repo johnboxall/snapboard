@@ -1,73 +1,83 @@
 <html>
 <head>
-<title>example.com</title>
+    <title>example.com</title>
+    <link type="text/css" rel="stylesheet" href="/media/css/yui/reset-fonts-grids.css">
+    <link type="text/css" rel="stylesheet" href="/media/css/snapboard.css" />    
 
-<link rel="stylesheet" type="text/css" href="/media/css/snapboard.css" />	
-
-<script src="/media/js/thread.js"></script>
-<script src="/media/js/yui/yahoo/yahoo-min.js"></script>
-<script src="/media/js/yui/connection/connection-min.js"></script>
+    <script src="/media/js/thread.js"></script>
+    <script src="/media/js/yui/yahoo/yahoo-min.js"></script>
+    <script src="/media/js/yui/connection/connection-min.js"></script>
 </head>
 
-<body>
-
-{% block navigation %}
-    <div id="navigation">
-        <ul>
-            <li><a href="/snapboard/threads/"><span>All Discussions</span></a></li>
-            <li><a href="/snapboard/categories/"><span>Categories</span></a></li>
-            <li><a href="/snapboard/search/"><span>Search</span></a></li>
-        </ul>
+<body id="yahoo-com">
+<div id="doc3" class="yui-t4"><!-- "doc" here for example only; use any page width -->            
+    <div id="hd">
+        <p>MASTHEAD</p>
+        <div id="navigation">
+            <ul>
+                <li><a href="/snapboard/threads/"><span>All Discussions</span></a></li>
+                <li><a href="/snapboard/categories/"><span>Categories</span></a></li>
+                <li><a href="/snapboard/search/"><span>Search</span></a></li>
+            </ul>
+        </div>
     </div>
-{% endblock %}
 
-<div>
-    {% block snapboard_main %}
-    {% endblock %}
-</div>
-
-{% block right %}
-    <div class="forummenu">
-        {% if user.is_authenticated %}
-            <p><b><a href="/snapboard/newtopic/">New Topic</a></b></p>
-            <p>
-                You are signed in as <a href="#">{{ user.username }}</a>
-                {% if user.is_staff %}
-                <b>(STAFF)</b>
+    <div id="bd">
+        <div id="yui-main">
+            <div class="yui-b">
+                {% block snapboard_main %}
+                {% endblock %}
+            </div>
+        </div>
+        <div class="yui-b">
+        <p>SECONDARY</p>
+            <div class="forummenu">
+                {% if user.is_authenticated %}
+                    <p><b><a href="/snapboard/newtopic/">New Topic</a></b></p>
+                    <p>
+                        You are signed in as <a href="#">{{ user.username }}</a>
+                        {% if user.is_staff %}
+                        <b>(STAFF)</b>
+                        {% endif %}
+                    </p>
+                    <p><a href="/accounts/logout">Sign out</a></p>
+                {% else %}
+                    <p>You are not logged in.</p>
+                    <p style="font-size:small"><a href="/accounts/register/">Register for the Forums</a></p>
                 {% endif %}
-            </p>
-            <p><a href="/accounts/logout">Sign out</a></p>
-        {% else %}
-            <p>You are not logged in.</p>
-            <p style="font-size:small"><a href="/accounts/register/">Register for the Forums</a></p>
-        {% endif %}
+            </div>
+            
+            {% if user.is_staff %}
+                <div class="forummenu">
+                <p><b>Admin Panel</b></p>
+                <ul>
+                    <li>&#187; <i><a href="#">Admin Overview</a></i></li>
+                    <li>&#187; <a href="#">Censored threads</a></li>
+                    <li>&#187; <a href="#">Abuse Reports</a></li>
+                    <li>&#187; <a href="#">Sticky threads</a></li>
+                    <li>&#187; <a href="#">Action Log</a></li>
+                </ul>
+                </div>
+            {% endif %}
+            
+            {% if user.is_authenticated %}
+                <div class="forummenu">
+                <ul>
+                    <li>&#187; <a href="#">Watched Topics<b></a> <br /> <a href="#">(2 new!)</b></a></li>
+                    <li>&#187; <a href="#">Private Posts<b></a> <br /> <a href="#">(4 new!)</b></a></li>
+                </ul>
+                </div>
+                
+                <div class="forummenu">
+                    <p><b><a href="#">Forum Preferences</a></b></p>
+                </div>
+            {% endif %}
+        </div>
     </div>
-    
-    {% if user.is_staff %}
-        <div class="forummenu">
-        <p><b>Admin Panel</b></p>
-        <ul>
-            <li>&#187; <i><a href="#">Admin Overview</a></i></li>
-            <li>&#187; <a href="#">Censored threads</a></li>
-            <li>&#187; <a href="#">Abuse Reports</a></li>
-            <li>&#187; <a href="#">Sticky threads</a></li>
-            <li>&#187; <a href="#">Action Log</a></li>
-        </ul>
-        </div>
-    {% endif %}
-    
-    {% if user.is_authenticated %}
-        <div class="forummenu">
-        <ul>
-            <li>&#187; <a href="#">Watched Topics<b></a> <br /> <a href="#">(2 new!)</b></a></li>
-            <li>&#187; <a href="#">Private Posts<b></a> <br /> <a href="#">(4 new!)</b></a></li>
-        </ul>
-        </div>
-        
-        <div class="forummenu">
-            <p><b><a href="#">Forum Preferences</a></b></p>
-        </div>
-    {% endif %}
-{% endblock %}
-
+    <div id="ft">
+        <p>FOOTER
+        </p>
+    </div>
+</div>
 </body>
+</html>
