@@ -17,11 +17,11 @@ def rpc_csticky(request, **kwargs):
     thr.save()
     if thr.csticky:
         return {'link':'unset csticky',
-                'msg':'Removed thread from category sticky list',
+                'msg':'This thread is sticky in its category.',
                 }
     else:
         return {'link':'set csticky',
-                'msg':'This thread is sticky in its category.',
+                'msg':'Removed thread from category sticky list',
                 }
 
 
@@ -34,11 +34,11 @@ def rpc_gsticky(request, **kwargs):
     thr.save()
     if thr.gsticky:
         return {'link':'unset gsticky',
-                'msg':'Removed thread from global sticky list',
+                'msg':'This thread is now globally sticky.',
                 }
     else:
         return {'link':'set gsticky',
-                'msg':'This thread is now globally sticky.',
+                'msg':'Removed thread from global sticky list',
                 }
 
 
@@ -50,13 +50,13 @@ def rpc_watch(request, **kwargs):
         wl = WatchList.objects.get(user=request.user, thread=thr)
         wl.delete()
         return {'link':'watch',
-                'msg':'You\re now monitoring this thread.'}
+                'msg':'You are no longer monitoring this thread.'}
     except WatchList.DoesNotExist:
         # create it
         wl = WatchList(user=request.user, thread=thr)
         wl.save()
         return {'link':'dont watch',
-                'msg':'You are no longer monitoring this thread.'}
+                'msg':'You\re now monitoring this thread.'}
 
 
 def rpc_abuse(request, **kwargs):

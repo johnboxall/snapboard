@@ -210,10 +210,10 @@ def thread_index(request, cat_id=None):
             #'last_updated': extra_last_updated,  # bug: http://code.djangoproject.com/ticket/2210
             'date': extra_last_updated,
             'last_poster': extra_last_poster,
-        },).order_by('-csticky', '-date')
+        },).order_by('-gsticky', '-date')
 
     if cat_id:
-        thread_list = thread_list.order_by('-gsticky', '-date')
+        thread_list = thread_list.order_by('-csticky', '-date')
 
     # the bug is that any extra columns must match their names
     # TODO: sorting on boolean fields is undefined in SQL theory

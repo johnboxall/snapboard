@@ -9,10 +9,10 @@
             </span>
             <span style="font-size:medium;">
                 <b>
-                    {% if thread.csticky %}
+                    {% if thread.gsticky %}
                     STICKY
                     {% endif %}
-                    {% if category and thread.gsticky %}
+                    {% if category and thread.csticky %}
                     STICKY
                     {% endif %}
                     <a href="/snapboard/threads/id/{{ thread.id }}">{{ thread.subject }}</a>
