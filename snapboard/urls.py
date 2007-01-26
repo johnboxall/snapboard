@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     (r'^categories/$', category_index),
     (r'^edit_post/(?P<original>\d+)/$', edit_post),
     (r'^threads/id/(?P<thread_id>\d+)/$', thread),
+    (r'^threads/id/(?P<thread_id>\d+)/page(?P<page>\d+)/$', thread),
     (r'^threads/category/(?P<cat_id>\d+)/$', thread_index),
 
     (r'^rpc/action/$', rpc),

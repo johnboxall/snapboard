@@ -38,9 +38,20 @@
     </p>
     <br />
 
+    <div style="border:2px solid red;">
+        {% if page_next %}<a href="#">next</a>{% endif %}
+        [page {% page %}]
+        {% if page_prev %}<a href="#">prev</a>{% endif %}
+        {% for page_num in page_range %}
+            {% ifnotequal page_num page %}<a href="$">{% end ifnotequal %}
+                {{ page_num }}
+            {% ifnotequal page_num page %}</a>{% end ifnotequal %}
+        {% endfor %}
+    </div>
+
     <div>
     <hr class="postend" />
-    {% for post in post_list %}
+    {% for post in post_page %}
         <div id="post_rpc_msg_div{{ post.id }}" class="rpc_message">
             <!-- This DIV is for RPC feedback messages for individual posts -->
         </div>

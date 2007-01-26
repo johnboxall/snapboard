@@ -1,3 +1,4 @@
+from django.core.paginator import ObjectPaginator, InvalidPage
 from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
 #from django.template import Context, loader
 from django.shortcuts import render_to_response
@@ -56,7 +57,7 @@ def rpc(request):
 
 
 
-def thread(request, thread_id):
+def thread(request, thread_id, page=0):
     # return HttpResponse("You're looking at thread %s." % thread_id)
     try:
         thr = Thread.objects.get(pk=thread_id)
@@ -64,6 +65,7 @@ def thread(request, thread_id):
         raise Http404
 
     render_dict = {}
+    ppp = 5                 # P(osts) P(er) P(age)
 
     post_list = Post.objects.filter(thread=thr).order_by('-date').exclude(
             revision__isnull=False)
@@ -89,9 +91,14 @@ def thread(request, thread_id):
     else:
         postform = PostForm()
 
+    paginator = ObjectPaginator(post_list, ppp)
     render_dict.update({
             'thr': thr,
-            'post_list': post_list,
+            'page': page,
+            'page_next': paginator.has_next_page(page),
+            'page_prev': paginator.has_previous_page(page),
+            'page_range': [x+1 for x in range(0, paginator.pages)],
+            'post_page': paginator.get_page(page),
             'postform': postform,
             })
 
