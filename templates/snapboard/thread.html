@@ -2,44 +2,43 @@
 
 {% load extras %}
 
-{% block snapboard_header %}
-<b>
-    <a href="/snapboard/threads/category/{{ thr.category.id }}">{{ thr.category }}</a>:
-    {{ thr.subject }}
-</b>
-{% endblock %}
-
 {% block snapboard_main %}
     <div id="thread_rpc_msg_div" class="rpc_message">
         <!-- This DIV is for RPC feedback messages for the whole thread-->
     </div>
-
-    <span class="thread_menu">
-        {% if user.is_staff %}
-            <span>
-                <a id="csticky{{ thr.id }}" href="#" onClick="set_csticky('{{ thr.id }}');">
-                {% if thr.csticky %} unset {% else %} set {% endif %} csticky
-                </a> 
-            </span>
-            &#149;
-            <span>
-                <a id="gsticky{{ thr.id }}" href="#" onClick="set_gsticky('{{ thr.id }}');">
-                {% if thr.gsticky %} unset {% else %} set {% endif %} gsticky
-                </a> 
-            </span>
-            &#149;
-        {% endif %}
-        {% if user.is_authenticated %}
-            <span>
-                <a id="watch{{ thr.id }}" href="#" onClick="set_watch('{{ thr.id }}');">
-                {% if watched %} don't watch {% else %} watch {% endif %}
-                </a> 
-            </span>
-        {% endif %}
-    </span>
+    <p>
+        <span class="thread_menu">
+            {% if user.is_staff %}
+                <span>
+                    <a id="csticky{{ thr.id }}" href="#" onClick="set_csticky('{{ thr.id }}');">
+                    {% if thr.csticky %} unset {% else %} set {% endif %} csticky
+                    </a> 
+                </span>
+                &#149;
+                <span>
+                    <a id="gsticky{{ thr.id }}" href="#" onClick="set_gsticky('{{ thr.id }}');">
+                    {% if thr.gsticky %} unset {% else %} set {% endif %} gsticky
+                    </a> 
+                </span>
+                &#149;
+            {% endif %}
+            {% if user.is_authenticated %}
+                <span>
+                    <a id="watch{{ thr.id }}" href="#" onClick="set_watch('{{ thr.id }}');">
+                    {% if watched %} don't watch {% else %} watch {% endif %}
+                    </a> 
+                </span>
+            {% endif %}
+        </span>
+        <b style="font-size: large;">
+            <a href="/snapboard/threads/category/{{ thr.category.id }}">{{ thr.category }}</a>:
+            {{ thr.subject }}
+        </b>
+    </p>
     <br />
 
     <div>
+    <hr class="postend" />
     {% for post in post_list %}
         <div id="post_rpc_msg_div{{ post.id }}" class="rpc_message">
             <!-- This DIV is for RPC feedback messages for individual posts -->
