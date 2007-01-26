@@ -1,2 +1,2 @@
-INSERT INTO forum_category (label)
+INSERT INTO snapboard_category (label)
     VALUES ('General Discussion');

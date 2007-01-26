@@ -92,7 +92,7 @@ class AbuseList(models.Model):
         list_display = ('post', 'submitter')
 
     class Meta:
-        unique_together(('post', 'submitter'),)
+        unique_together = (('post', 'submitter'),)
 
 class WatchList(models.Model):
     """

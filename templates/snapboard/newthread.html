@@ -1,0 +1,14 @@
+{% extends "snapboard/base_forum.html" %}
+
+{% block snapboard_main %}
+    {% if user.is_authenticated %}
+    <form action="" method="POST">
+        <table class="form">
+            {{ form.as_table }}
+            <tr><th></th>
+                <td><input type="submit" value="Start Subject"> <INPUT type="reset">
+            </td></tr>
+        </table>
+    </form>
+    {% endif %}
+{% endblock %}

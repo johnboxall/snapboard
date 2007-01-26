@@ -1,0 +1,156 @@
+#forumbody{
+    float:left;
+    width:70%;
+    background:#fff;
+    margin-right:15px;
+    padding-bottom:20px;
+}
+
+#navigation {
+	/* background: #AFD5E0 url("/css/tab-bg.png") repeat-x; */
+	border-bottom: 1px solid black;
+	font-size: 1em;
+	margin-top: 1em;
+	padding-top: .6em;
+}
+
+#navigation ul, #navigation ul li {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#navigation ul {
+	padding: 0 0 0;
+	text-align: center;
+}
+
+#navigation ul li {
+	background: #FFF url("/css/tab-bg.png") repeat-x;
+	display: inline;
+	margin-right: .75em;
+}
+
+#navigation ul li.last {
+	margin-right: 0;
+}
+
+#navigation ul li a {
+	background: url("/css/tab-right.png") no-repeat 100% 0;
+	color: #333;
+	padding: 0 0;
+	text-decoration: none;
+}
+
+#navigation ul li a span {
+	background: url("tab-left.png") no-repeat;
+	padding: 0 1em;
+}
+
+#navigation ul li a:hover span {
+	color: #333;
+	text-decoration: underline;
+}
+
+hr.postend {
+    width: 80%;
+    height: 1px;
+    background-color: #CCC;
+    border: 0px solid #CCC;
+}
+
+div.thread {
+    padding: 0.2em 0.2em 0.2em 1em;
+    border-bottom: 1px solid #B0BFAC;
+    background: #f9fff6;
+}
+
+div.forummenu{
+    width: 150px;
+    padding-left: 5px;
+    padding-right: 5px;
+    background: #EBFFE6;
+    border-bottom: 1px solid #999;
+    font-size: small;
+}
+
+div.forummenu ul{
+    list-style: none;
+    margin-left: 0;
+    padding-left: 1em;
+    text-indent: -1em;
+}
+
+/* FORMS ***************************************/
+
+form {
+    border: 1px solid #ccc;
+    padding: 5px;
+    background: #efe;
+}
+
+textarea, input, button, select {
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+/* POSTS & THREADS ***************************************/
+
+p.post_header {
+    padding-left: 2em;
+}
+
+span.thread_menu {
+    font-size: small;
+    padding: 5px;
+    float: right;
+}
+
+span.post_menuright {
+    font-size: x-small;
+    padding-right: 10%;
+    float: right;
+}
+
+span.post_menuleft {
+    font-size: x-small;
+    padding-left: 10%;
+}
+
+span.timesince {
+    font-size: small;
+    color:#999;
+}
+
+span.post_summary {
+    color: #B0BFAC;
+}
+
+div.rpc_message {
+    width:"100%";
+    text-align: center;
+}
+
+p.rpc_message {
+    background-color: #f33;
+    border: 1px solid black;
+}
+
+/*\*//*/
+#navigation ul li a {
+	display: inline-block;
+	white-space: nowrap;
+	width: 1px;
+}
+
+#navigation ul {
+	padding-bottom: 0;
+	margin-bottom: -1px;
+}
+/**/
+
+/*\*/
+* html #navigation ul li a {
+	padding: 0;
+}
+/**/

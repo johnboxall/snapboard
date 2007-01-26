@@ -1,0 +1,25 @@
+{% extends "base_profiles.html" %}
+
+{% block sbreg_title %}
+<br/>
+<b>Registration</b>
+<br/>
+{% endblock %}
+
+{% block sbreg_main %}
+    {% if has_account %}
+    <b>You already have an account!</b>
+    {% endif %}
+    {% if created %}
+    <b>Please check your email to finish account registration.</b>
+    {% endif %}
+
+    {% if form %}
+    <form action="" method="POST">
+        <table class="form">
+            {{ form.as_table }}
+            <tr><th></th><td><input type="submit" value="Register"></td></tr>
+        </table>
+    </form>
+    {% endif %}
+{% endblock %}

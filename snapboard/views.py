@@ -19,6 +19,7 @@ RPC_ACTION_MAP = {
         "gsticky": rpc_gsticky,
         "csticky": rpc_csticky,
         "abuse": rpc_abuse,
+        "watch": rpc_watch,
         }
 
 
@@ -30,15 +31,21 @@ def rpc(request):
     response_dict = {}
 
     try:
+        oclass_str =  request.POST['oclass'].lower()
+        oclass = RPC_OBJECT_MAP[oclass_str]
+    except KeyError:
+        return HttpResponseServerError
+
+    try:
         oid = int(request.POST['oid'])
-        oclass = RPC_OBJECT_MAP[request.POST['oclass'].lower()]
         action = request.POST['action'].lower()
 
-        forum_oject = oclass.objects.get(pk=oid)
+        forum_object = oclass.objects.get(pk=oid)
 
         rpc_func = RPC_ACTION_MAP[action]
 
-        return rpc_func(request, **{oclass:forum_object})
+        response_dict.update(rpc_func(request, **{oclass_str:forum_object}))
+        return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
 
     except oclass.DoesNotExist:
         return HttpResponseServerError
@@ -47,7 +54,6 @@ def rpc(request):
     except AssertionError:
         return HttpResponseServerError
 
-    return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
 
 
 def thread(request, thread_id):
@@ -88,7 +94,7 @@ def thread(request, thread_id):
             'postform': postform,
             })
 
-    return render_to_response('thread.html',
+    return render_to_response('snapboard/thread.html',
             render_dict,
             context_instance = RequestContext(request))
 
@@ -120,10 +126,10 @@ def edit_post(request, original):
         orig_post.revision = post
         orig_post.save()
 
-        return HttpResponseRedirect('/forum/threads/id/'
+        return HttpResponseRedirect('/snapboard/threads/id/'
                 + str(orig_post.thread.id) + '/')
     else:
-        return HttpResponseRedirect('/forum/threads/id/'
+        return HttpResponseRedirect('/snapboard/threads/id/'
                 + str(orig_post.thread.id) + '/')
 
 
@@ -150,11 +156,11 @@ def new_thread(request):
             post.save()
 
             # redirect to new thread
-            return HttpResponseRedirect('/forum/threads/id/' + str(thread.id) + '/')
+            return HttpResponseRedirect('/snapboard/threads/id/' + str(thread.id) + '/')
     else:
         threadform = ThreadForm()
 
-    return render_to_response('newthread.html',
+    return render_to_response('snapboard/newthread.html',
             {
             'form': threadform,
             },
@@ -172,28 +178,28 @@ def thread_index(request, cat_id=None):
 
     # number of posts in thread
     extra_post_count = """
-        SELECT COUNT(*) FROM forum_post
-            WHERE forum_post.thread_id = forum_thread.id
-            AND forum_post.revision_id IS NULL
+        SELECT COUNT(*) FROM snapboard_post
+            WHERE snapboard_post.thread_id = snapboard_thread.id
+            AND snapboard_post.revision_id IS NULL
         """
     # figure out who started the population
     extra_starter = """
         SELECT username FROM auth_user
             WHERE auth_user.id = (SELECT user_id
-                FROM forum_post WHERE forum_post.thread_id = forum_thread.id
-                ORDER BY forum_post.date ASC
+                FROM snapboard_post WHERE snapboard_post.thread_id = snapboard_thread.id
+                ORDER BY snapboard_post.date ASC
                 LIMIT 1)
         """
     extra_last_poster = """
         SELECT username FROM auth_user
             WHERE auth_user.id = (SELECT user_id
-                FROM forum_post WHERE forum_post.thread_id = forum_thread.id
-                ORDER BY forum_post.date DESC
+                FROM snapboard_post WHERE snapboard_post.thread_id = snapboard_thread.id
+                ORDER BY snapboard_post.date DESC
                 LIMIT 1)
         """
     extra_last_updated = """
-        SELECT date FROM forum_post 
-            WHERE forum_post.thread_id = forum_thread.id
+        SELECT date FROM snapboard_post 
+            WHERE snapboard_post.thread_id = snapboard_thread.id
             ORDER BY date DESC LIMIT 1
         """
 
@@ -212,7 +218,7 @@ def thread_index(request, cat_id=None):
     # the bug is that any extra columns must match their names
     # TODO: sorting on boolean fields is undefined in SQL theory
 
-    return render_to_response('thread_index.html',
+    return render_to_response('snapboard/thread_index.html',
             {
             'thread_list': thread_list,
             'page_title': page_title,
@@ -223,13 +229,13 @@ def thread_index(request, cat_id=None):
 def category_index(request):
 
     extra_post_count = """
-        SELECT COUNT(*) FROM forum_thread
-            WHERE forum_thread.category_id = forum_category.id
+        SELECT COUNT(*) FROM snapboard_thread
+            WHERE snapboard_thread.category_id = snapboard_category.id
         """
     cat_list = Category.objects.all().extra(
         select = {'thread_count': extra_post_count},)
 
-    return render_to_response('category_index.html',
+    return render_to_response('snapboard/category_index.html',
             {
             'cat_list': cat_list,
             },
