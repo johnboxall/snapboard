@@ -68,14 +68,15 @@ def thread(request, thread_id):
     post_list = Post.objects.filter(thread=thr).order_by('-date').exclude(
             revision__isnull=False)
 
+    try:
+        wl = WatchList.objects.get(user=request.user, thread=thr)
+        render_dict.update({"watched":True})
+    except WatchList.DoesNotExist:
+        render_dict.update({"watched":False})
+
     if request.user.is_authenticated() and request.POST:
         postform = PostForm(request.POST.copy())
 
-        try:
-            wl = WatchList.objects.get(user=request.user, thread=thr)
-            render_dict.update({"watched":True})
-        except WatchList.DoesNotExist:
-            pass
 
         if postform.is_valid():
             # reset post object

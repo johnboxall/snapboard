@@ -1,3 +1,7 @@
+A {
+    text-decoration: none;
+}
+
 #navigation div {
     text-align: center;
 }
@@ -25,7 +29,7 @@ div.forummenu{
     padding: 5px;
     background: #EBFFE6;
     border-bottom: 1px solid #999;
-    /* font-size: small; */
+    font-size: small;
 }
 
 div.forummenu ul{
@@ -49,6 +53,11 @@ textarea, input, button, select {
 }
 
 /* POSTS & THREADS ***************************************/
+
+.post p {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
 
 p.post_header {
     padding-left: 2em;

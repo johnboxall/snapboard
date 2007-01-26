@@ -33,13 +33,17 @@
         <div class="yui-b">
             <div class="forummenu">
                 {% if user.is_authenticated %}
-                    <p><b><a href="/snapboard/newtopic/">New Topic</a></b></p>
+                    <p style="font-size: 122%;">
+                        <b><a href="/snapboard/newtopic/">New Topic</a></b>
+                    </p>
+                    <br />
                     <p>
                         You are signed in as <a href="#">{{ user.username }}</a>
                         {% if user.is_staff %}
                         <b>(STAFF)</b>
                         {% endif %}
                     </p>
+                    <br />
                     <p><a href="/accounts/logout">Sign out</a></p>
                 {% else %}
                     <p>You are not logged in.</p>

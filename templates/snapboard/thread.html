@@ -1,6 +1,7 @@
 {% extends "snapboard/base_forum.html" %}
 
 {% load extras %}
+{% load markup %}
 
 {% block snapboard_main %}
     <div id="thread_rpc_msg_div" class="rpc_message">
@@ -11,13 +12,13 @@
             {% if user.is_staff %}
                 <span>
                     <a id="csticky{{ thr.id }}" href="#" onClick="set_csticky('{{ thr.id }}');">
-                    {% if thr.csticky %} unset {% else %} set {% endif %} csticky
+                        {{ thr.csticky|yesno:"unset,set" }} csticky
                     </a> 
                 </span>
                 &#149;
                 <span>
                     <a id="gsticky{{ thr.id }}" href="#" onClick="set_gsticky('{{ thr.id }}');">
-                    {% if thr.gsticky %} unset {% else %} set {% endif %} gsticky
+                        {{ thr.gsticky|yesno:"unset,set" }} gsticky
                     </a> 
                 </span>
                 &#149;
@@ -25,7 +26,7 @@
             {% if user.is_authenticated %}
                 <span>
                     <a id="watch{{ thr.id }}" href="#" onClick="set_watch('{{ thr.id }}');">
-                    {% if watched %} don't watch {% else %} watch {% endif %}
+                        {{ watched|yesno:"don't," }} watch
                     </a> 
                 </span>
             {% endif %}
@@ -53,7 +54,9 @@
                 {% endifequal %}
                 {% if user.is_staff %}
                 <span title="ADMIN: mark this post for censorship" class="popup">
-                    <a id="censor{{ post.id }}" href="#" onClick="set_censor('{{ post.id }}');">censor</a>
+                    <a id="censor{{ post.id }}" href="#" onClick="set_censor('{{ post.id }}');">
+                        {{ post.censor|yesno:"uncensor,censor" }}
+                    </a>
                 </span>
                 
                 {% endif %}
@@ -64,10 +67,10 @@
                 {% endif %}
             </span>
 
-            [ICON]
+            <!-- [ICON] -->
             <b>
                 <a href="#" onclick="toggle_post('{{ post.id }}');">
-                    <span title="34 Posts; Moderator" class="popup">{{ post.user }}</span>
+                    <span title="POPUP" class="popup">{{ post.user }}</span>
                 </a>
             </b>
 
@@ -78,13 +81,13 @@
                 {{ post.text|post_summary:"30" }}
             </span>
         </p>
+        <br />
 
-        <!-- POST -->
         <div style="display:block" id="post{{ post.id }}">
 
 
-            <div style="display:block" id="post_text{{ post.id }}">
-                {{ post.text|striptags }}
+            <div class="post" style="display:block" id="post_text{{ post.id }}">
+                {{ post.text|striptags|textile }}
             </div>
 
             {% ifequal post.user_id user.id %}
@@ -105,6 +108,7 @@
             {% endif %}
 
         </div>
+        <br />
         <hr class="postend" />
     {% endfor %}
     </div>

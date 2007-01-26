@@ -78,6 +78,7 @@ class Post(models.Model):
     class Admin:
         list_display = ('user', 'date', 'thread', 'ip')
 
+
 class AbuseList(models.Model):
     '''
     When an abuse report is filed by a registered User, the post is listed
