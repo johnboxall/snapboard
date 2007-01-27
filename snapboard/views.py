@@ -59,7 +59,7 @@ def rpc(request):
 
 def thread(request, thread_id, page=1):
     # split results into pages
-    ppp = 5                # P(osts) P(er) P(age)
+    ppp = 20                # P(osts) P(er) P(age)
     page = int(page)        # indexed starting at 1
     pindex = page - 1       # indexed starting at 0
 
@@ -204,7 +204,7 @@ def new_thread(request):
 
 
 def thread_index(request, cat_id=None, page=1):
-    tpp = 5                # (T)threads (P)er (P)age
+    tpp = 20                # (T)threads (P)er (P)age
     page = int(page)
     pindex = page - 1
 

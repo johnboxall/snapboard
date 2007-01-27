@@ -7,27 +7,28 @@
 
         {% for thread in thread_page %}
         <div class="thread">
-            <span style="color: #999; font-size: small; float:right;">
-                {{ thread.post_count }} posts started by <b>{{ thread.starter }}</b>
-            </span>
-            <span style="font-size:medium;">
-                <b>
-                    {% if not category and thread.gsticky %}
-                    STICKY
-                    {% endif %}
-                    {% if category and thread.csticky %}
-                    STICKY
-                    {% endif %}
-                    <a href="/snapboard/threads/id/{{ thread.id }}">{{ thread.subject }}</a>
-                </b>
-            </span>
+            <p style="margin-top: 10px; margin-bottom: 5px;">
+                <span style="color: #999; font-size: small; float:right;">
+                    {{ thread.post_count }} posts started by <b>{{ thread.starter }}</b>
+                </span>
+                <span style="font-size: 100%;">
+                    <b>
+                        {% if not category and thread.gsticky %}
+                        STICKY
+                        {% endif %}
+                        {% if category and thread.csticky %}
+                        STICKY
+                        {% endif %}
+                        <a href="/snapboard/threads/id/{{ thread.id }}">{{ thread.subject }}</a>
+                    </b>
+                </span>
+            </p>
             <span style="color: #ccc; font-size: small; float:right;">
                 last updated {{ thread.date|timesince }} ago
                 {% ifnotequal thread.last_poster thread.starter %}
                 by {{ thread.last_poster }}
                 {% endifnotequal %}
             </span>
-            <br />
             <span style="color: #999; padding-left: 2em; font-size:small;">
                 category:
                 <a href="/snapboard/threads/category/{{ thread.category.id }}">
