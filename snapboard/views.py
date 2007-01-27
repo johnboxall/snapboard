@@ -57,7 +57,7 @@ def rpc(request):
 
 
 
-def thread(request, thread_id, page=1):
+def thread(request, thread_id, page="1"):
     # split results into pages
     ppp = 20                # P(osts) P(er) P(age)
     page = int(page)        # indexed starting at 1
@@ -65,7 +65,7 @@ def thread(request, thread_id, page=1):
 
     try:
         thr = Thread.objects.get(pk=thread_id)
-        post_list = Post.objects.filter(thread=thr).order_by('-date').exclude(
+        post_list = Post.objects.filter(thread=thr).order_by('date').exclude(
                 revision__isnull=False)
 
         paginator = ObjectPaginator(post_list, ppp)
@@ -78,7 +78,7 @@ def thread(request, thread_id, page=1):
     render_dict = {}
 
     try:
-        wl = WatchList.objects.get(user=request.user, thread=thr)
+        wl = WatchList.objects.filter(user=request.user, thread=thr)
         render_dict.update({"watched":True})
     except WatchList.DoesNotExist:
         render_dict.update({"watched":False})
@@ -101,11 +101,12 @@ def thread(request, thread_id, page=1):
     # general info to render the page navigation (back/forward/etc)
     render_dict.update(paginate_render_dict(paginator, page))
 
+
     render_dict.update({
             'thr': thr,
             'postform': postform,
             'post_page': post_page,
-            'page_nav_urlbase': "/snapboard/threads/id/"+thread_id,
+            'page_nav_urlbase': '/snapboard/threads/id/' + thread_id + '/',
             'page_nav_cssclass': 'thread_page_nav',
             })
 
@@ -208,17 +209,22 @@ def thread_index(request, cat_id=None, page=1):
     page = int(page)
     pindex = page - 1
 
+    render_dict = {}
     try:
         if cat_id is None:
             thread_list = Thread.objects.all()
-            page_title = "Recent Discussions"
+            title = "Recent Discussions"
         else:
             cat = Category.objects.get(pk=cat_id)
             thread_list = Thread.objects.filter(category=cat)
-            page_title = ''.join(("Category: ", cat.label))
-
+            title = ''.join(("Category: ", cat.label))
     except Category.DoesNotExist:
         raise Http404
+
+    render_dict.update({
+        'category': cat_id,
+        'title': title
+        })
 
     # number of posts in thread
     extra_post_count = """
@@ -263,7 +269,6 @@ def thread_index(request, cat_id=None, page=1):
     # TODO: sorting on boolean fields is undefined in SQL theory
 
 
-    render_dict = {}
 
     try:
         paginator = ObjectPaginator(thread_list, tpp)
@@ -273,15 +278,14 @@ def thread_index(request, cat_id=None, page=1):
         raise Http404
 
     if cat_id:
-        page_nav_urlbase = "/snapboard/threads/category/" + str(cat_id)
+        page_nav_urlbase = "/snapboard/threads/category/" + str(cat_id) + '/'
     else:
-        page_nav_urlbase = "/snapboard/threads"
+        page_nav_urlbase = "/snapboard/threads/"
 
     render_dict.update({
             'thread_page': thread_page,
             'page_nav_urlbase': page_nav_urlbase,
-            'page_title': page_title,
-            'category': cat_id,
+            'page_nav_cssclass': 'index_page_nav',
             })
 
     return render_to_response('snapboard/thread_index.html',

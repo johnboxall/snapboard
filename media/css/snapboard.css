@@ -1,5 +1,6 @@
 A {
     text-decoration: none;
+    color: #ACB1BF;
 }
 
 #navigation div {
@@ -12,16 +13,28 @@ A {
     display: inline;
 }
 
+div.index_title {
+    background-color: #D9D4C3;
+    border-bottom: 1px solid #000;
+    padding: 3px;
+}
+
 div.thread {
-    padding: 0.2em 0.2em 0.2em 1em;
-    border-bottom: 1px solid #B0BFAC;
-    background: #f9fff6;
+    padding: 0.2em 0.5em 0.2em 1em;
+    border-bottom: 1px solid #ccc;
+    /* background: #f9fff6; */
+    background: #E6ECFF;
+    /* background: #ccf; */
+}
+
+div.thread A {
+    color: #066;
 }
 
 div.forummenu{
     padding: 5px;
-    background: #EBFFE6;
-    border-bottom: 1px solid #999;
+    background: #E6ECFF;
+    border-bottom: 1px solid #ccc;
     font-size: small;
 }
 
@@ -71,8 +84,13 @@ p.post_header {
 }
 
 p.thread_page_nav {
+    font-size: 77%;
     margin-left: 10%;
     margin-right: 10%;
+}
+
+p.index_page_nav {
+    font-size: 77%;
 }
 
 span.thread_menu {

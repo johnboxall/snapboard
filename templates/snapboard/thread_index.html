@@ -2,8 +2,13 @@
 
 {% block snapboard_main %}
     {% if thread_page %}
+        <div class="index_title">
+        <h2 style="font-size: 152%;">
+        {{ title }}
+        </h2>
 
         {% include "snapboard/page_navigation.html" %}
+        </div>
 
         {% for thread in thread_page %}
         <div class="thread">
