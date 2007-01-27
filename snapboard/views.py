@@ -59,7 +59,7 @@ def rpc(request):
 
 def thread(request, thread_id, page=1):
     # split results into pages
-    ppp = 20                # P(osts) P(er) P(age)
+    ppp = 5                # P(osts) P(er) P(age)
     page = int(page)        # indexed starting at 1
     pindex = page - 1       # indexed starting at 0
 
@@ -105,6 +105,8 @@ def thread(request, thread_id, page=1):
             'thr': thr,
             'postform': postform,
             'post_page': post_page,
+            'page_nav_urlbase': "/snapboard/threads/id/"+thread_id,
+            'page_nav_cssclass': 'thread_page_nav',
             })
 
     return render_to_response('snapboard/thread.html',
@@ -202,7 +204,7 @@ def new_thread(request):
 
 
 def thread_index(request, cat_id=None, page=1):
-    tpp = 20                # (T)threads (P)er (P)age
+    tpp = 5                # (T)threads (P)er (P)age
     page = int(page)
     pindex = page - 1
 
@@ -270,8 +272,14 @@ def thread_index(request, cat_id=None, page=1):
     except InvalidPage:
         raise Http404
 
+    if cat_id:
+        page_nav_urlbase = "/snapboard/threads/category/" + str(cat_id)
+    else:
+        page_nav_urlbase = "/snapboard/threads"
+
     render_dict.update({
             'thread_page': thread_page,
+            'page_nav_urlbase': page_nav_urlbase,
             'page_title': page_title,
             'category': cat_id,
             })

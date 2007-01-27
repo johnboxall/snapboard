@@ -2,6 +2,9 @@
 
 {% block snapboard_main %}
     {% if thread_page %}
+
+        {% include "snapboard/page_navigation.html" %}
+
         {% for thread in thread_page %}
         <div class="thread">
             <span style="color: #999; font-size: small; float:right;">

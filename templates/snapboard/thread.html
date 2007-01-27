@@ -37,26 +37,8 @@
         </b>
     </p>
     <br />
-    <p class="thread_page_nav"> <!-- Page navigation -->
-        <!-- TODO: refactor thread_menu to menu_right -->
-        {% if page_range %}
-            <span id="page_skip" class="thread_menu" style="display:none;">
-                {% for page_num in page_range %}
-                    {% ifnotequal page_num page %}<a href="/snapboard/threads/id/{{ thr.id }}/page{{ page_num }}/">{% endifnotequal %}
-                        {{ page_num }}
-                    {% ifnotequal page_num page %}</a>{% endifnotequal %}
-                {% endfor %}
-            </span>
-        {% endif %}
 
-        {% if page_prev %}<a href="/snapboard/threads/id/{{ thr.id }}/page{{ page_prev }}">previous</a> &#149; {% endif %}
-        page {{ page }} of {{ page_total }}
-        {% if page_next %} &#149; <a href="/snapboard/threads/id/{{ thr.id }}/page{{ page_next }}">next</a> {% endif %}
-
-        {% if page_range %}
-        &#149; <a href="#" onClick="toggle('page_skip', 'inline');">skip to page...</a>
-        {% endif %}
-    </p>
+    {% include "snapboard/page_navigation.html" %}
 
     <div>
     <hr class="firstpost" />
