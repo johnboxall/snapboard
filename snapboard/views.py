@@ -1,3 +1,4 @@
+from django.contrib.auth import decorators
 from django.contrib.auth import login, logout
 from django.core.paginator import ObjectPaginator, InvalidPage
 from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
@@ -10,6 +11,9 @@ from models import Thread, Post, Category, WatchList
 from forms import PostForm, ThreadForm, LoginForm
 from rpc import *
 
+SB_LOGIN_URL = '/snapboard/signin'
+TPP = 20                # (T)threads (P)er (P)age
+PPP = 20                # P(osts) P(er) P(age)
 
 RPC_OBJECT_MAP = {
         "thread": Thread,
@@ -70,7 +74,6 @@ def rpc(request):
 
 def thread(request, thread_id, page="1"):
     # split results into pages
-    ppp = 20                # P(osts) P(er) P(age)
     page = int(page)        # indexed starting at 1
     pindex = page - 1       # indexed starting at 0
 
@@ -79,7 +82,7 @@ def thread(request, thread_id, page="1"):
         post_list = Post.objects.filter(thread=thr).order_by('date').exclude(
                 revision__isnull=False)
 
-        paginator = ObjectPaginator(post_list, ppp)
+        paginator = ObjectPaginator(post_list, PPP)
         post_page = paginator.get_page(pindex)
     except Thread.DoesNotExist:
         raise Http404
@@ -88,11 +91,13 @@ def thread(request, thread_id, page="1"):
 
     render_dict = {}
 
-    try:
-        wl = WatchList.objects.filter(user=request.user, thread=thr)
-        render_dict.update({"watched":True})
-    except WatchList.DoesNotExist:
-        render_dict.update({"watched":False})
+    if request.user.is_authenticated():
+        try:
+            wl = WatchList.objects.get(user=request.user, thread=thr)
+            print 'watched is true for', request.user, thr, wl
+            render_dict.update({"watched":True})
+        except WatchList.DoesNotExist:
+            render_dict.update({"watched":False})
 
     if request.user.is_authenticated() and request.POST:
         postform = PostForm(request.POST.copy())
@@ -181,7 +186,6 @@ def edit_post(request, original):
                 + str(orig_post.thread.id) + '/')
 
 
-
 def new_thread(request):
     if request.user.is_authenticated() and request.POST:
         threadform= ThreadForm(request.POST.copy())
@@ -215,28 +219,7 @@ def new_thread(request):
             context_instance=RequestContext(request, processors=[login_context,]))
 
 
-def thread_index(request, cat_id=None, page=1):
-    tpp = 20                # (T)threads (P)er (P)age
-    page = int(page)
-    pindex = page - 1
-
-    render_dict = {}
-    try:
-        if cat_id is None:
-            thread_list = Thread.objects.all()
-            title = "Recent Discussions"
-        else:
-            cat = Category.objects.get(pk=cat_id)
-            thread_list = Thread.objects.filter(category=cat)
-            title = ''.join(("Category: ", cat.label))
-    except Category.DoesNotExist:
-        raise Http404
-
-    render_dict.update({
-        'category': cat_id,
-        'title': title
-        })
-
+def base_thread_queryset(qset=None):
     # number of posts in thread
     extra_post_count = """
         SELECT COUNT(*) FROM snapboard_post
@@ -264,7 +247,10 @@ def thread_index(request, cat_id=None, page=1):
             ORDER BY date DESC LIMIT 1
         """
 
-    thread_list = thread_list.extra(
+    if not qset:
+        qset = Thread.objects
+
+    return qset.extra(
         select = {
             'post_count': extra_post_count,
             'starter': extra_starter,
@@ -273,16 +259,70 @@ def thread_index(request, cat_id=None, page=1):
             'last_poster': extra_last_poster,
         },).order_by('-gsticky', '-date')
 
+
+@decorators.user_passes_test(lambda u: u.is_authenticated(), login_url=SB_LOGIN_URL)
+def favorite_index(request, page=1):
+    page = int(page)
+    pindex = page - 1
+
+    wl = WatchList.objects.filter(user=request.user)
+    thread_list = base_thread_queryset(
+            Thread.objects.filter(pk__in=[x.id for x in wl])
+            ).order_by('-date')
+    title = request.user.username + "'s Watched Discussions"
+
+    render_dict = {'title': title}
+    page_nav_urlbase = "/snapboard/favorites/"
+
+    try:
+        paginator = ObjectPaginator(thread_list, TPP)
+        thread_page = paginator.get_page(pindex)
+        render_dict.update(paginate_render_dict(paginator, page))
+    except InvalidPage:
+        raise Http404
+
+
+    render_dict.update({
+            'thread_page': thread_page,
+            'page_nav_urlbase': page_nav_urlbase,
+            'page_nav_cssclass': 'index_page_nav',
+            })
+
+    return render_to_response('snapboard/thread_index.html',
+            render_dict,
+            context_instance=RequestContext(request, processors=[login_context,]))
+
+
+def thread_index(request, cat_id=None, page=1):
+    page = int(page)
+    pindex = page - 1
+
+    render_dict = {}
+    try:
+        if cat_id is None:
+            #thread_list = Thread.objects.all()
+            thread_list = base_thread_queryset()
+            title = "Recent Discussions"
+        else:
+            cat = Category.objects.get(pk=cat_id)
+            thread_list = base_thread_queryset().filter(category=cat)
+            title = ''.join(("Category: ", cat.label))
+    except Category.DoesNotExist:
+        raise Http404
+
+    render_dict.update({
+        'category': cat_id,
+        'title': title
+        })
+
     if cat_id:
         thread_list = thread_list.order_by('-csticky', '-date')
 
     # the bug is that any extra columns must match their names
     # TODO: sorting on boolean fields is undefined in SQL theory
 
-
-
     try:
-        paginator = ObjectPaginator(thread_list, tpp)
+        paginator = ObjectPaginator(thread_list, TPP)
         thread_page = paginator.get_page(pindex)
         render_dict.update(paginate_render_dict(paginator, page))
     except InvalidPage:
@@ -327,6 +367,14 @@ def signout(request):
 
 
 def signin(request):
+    try:
+        next = request.POST['next']
+    except KeyError:
+        try:
+            next = request.GET['next']
+        except KeyError:
+            next = '/'
+
     if request.POST:
         form_data = request.POST.copy()
         form = LoginForm(form_data)
@@ -335,12 +383,12 @@ def signin(request):
             user = form.user
             login(request, user)
             form = LoginForm()
-            return redirect_to(request, request.POST['next'])
+            return redirect_to(request, next)
     else:
         form = LoginForm()
 
     return render_to_response('snapboard/signin.html',
         {
         'login_form': form,
-        'login_next': request.POST.get('next', '/'),
+        'login_next': next,
         })

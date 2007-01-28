@@ -56,7 +56,7 @@ def rpc_watch(request, **kwargs):
         wl = WatchList(user=request.user, thread=thr)
         wl.save()
         return {'link':'dont watch',
-                'msg':'You\re now monitoring this thread.'}
+                'msg':'You are now monitoring this thread.'}
 
 
 def rpc_abuse(request, **kwargs):
