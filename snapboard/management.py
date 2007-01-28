@@ -15,12 +15,17 @@ def test_setup():
     from models import Thread, Post, Category
     from random import choice
     import chomsky
+    from django.conf import settings
+
+    if not settings.DEBUG:
+        return 
 
     # create 10 random users
+
     users = ('john', 'sally', 'susan', 'amanda', 'bob', 'tully', 'fran')
     for u in users:
-        user = User.objects.get_or_create(username=u,
-                password='foo')
+        user = User.objects.get_or_create(username=u)
+        user.set_password('foo')
         # user.is_staff = True
 
     cats = ('Random Topics',
@@ -30,9 +35,10 @@ def test_setup():
     for c in cats:
         cat = Category.objects.get_or_create(label=c)
 
-    # create 50 threads
+    # create up to 30 posts
     tc = range(1, 50)
     for i in range(0, 100):
+        print 'thread ', i, 'created'
         cat= choice(Category.objects.all())
         subj = choice(chomsky.objects.split('\n'))
         thread = Thread(subject=subj, category=cat)
@@ -48,4 +54,7 @@ def test_setup():
                     ip='.'.join([str(choice(range(1,255))) for x in (1,2,3,4)]),
                     )
             post.save()
+
+import models as snapboard_app
+dispatcher.connect(test_setup, sender=snapboard_app, signal=signals.post_syncdb) 
 

@@ -1,9 +1,11 @@
 from django.conf.urls.defaults import *
 
-from views import thread, thread_index, new_thread, category_index, edit_post, rpc
+from views import thread, thread_index, new_thread, category_index, edit_post, rpc, signout, signin
 
 urlpatterns = patterns('',
     (r'^$', thread_index),
+    (r'^signout/$', signout),
+    (r'^signin/$', signin),
     (r'^newtopic/$', new_thread),
     (r'^categories/$', category_index),
     (r'^edit_post/(?P<original>\d+)/$', edit_post),

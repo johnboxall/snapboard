@@ -1,7 +1,15 @@
 A {
     text-decoration: none;
-    color: #ACB1BF;
+    /* color: #ACB1BF; */
+    color: #099;
 }
+
+HR {
+    height: 1px;
+    background-color: black;
+    border: 0px solid black;
+}
+
 
 #navigation div {
     text-align: center;
@@ -9,7 +17,8 @@ A {
 
 #navigation ul li {
     list-style: none;
-    margin-left: auto;
+    /* margin-left: auto; */
+    margin-right: 1em;
     display: inline;
 }
 

@@ -1,12 +1,13 @@
+from django.contrib.auth import login, logout
 from django.core.paginator import ObjectPaginator, InvalidPage
 from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
-#from django.template import Context, loader
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import simplejson
+from django.views.generic.simple import redirect_to
 
 from models import Thread, Post, Category, WatchList
-from forms import PostForm, ThreadForm
+from forms import PostForm, ThreadForm, LoginForm
 from rpc import *
 
 
@@ -22,6 +23,16 @@ RPC_ACTION_MAP = {
         "abuse": rpc_abuse,
         "watch": rpc_watch,
         }
+
+def login_context(request):
+    response_dict = {}
+    if not request.user.is_authenticated():
+        response_dict.update({
+                'login_form': LoginForm(),
+                'login_next': request.META['PATH_INFO'],
+                })
+
+    return response_dict
 
 
 # Create your views here.
@@ -112,7 +123,7 @@ def thread(request, thread_id, page="1"):
 
     return render_to_response('snapboard/thread.html',
             render_dict,
-            context_instance = RequestContext(request))
+            context_instance=RequestContext(request, processors=[login_context,]))
 
 
 def paginate_render_dict(paginator, page):
@@ -201,7 +212,7 @@ def new_thread(request):
             {
             'form': threadform,
             },
-            context_instance = RequestContext(request))
+            context_instance=RequestContext(request, processors=[login_context,]))
 
 
 def thread_index(request, cat_id=None, page=1):
@@ -290,7 +301,7 @@ def thread_index(request, cat_id=None, page=1):
 
     return render_to_response('snapboard/thread_index.html',
             render_dict,
-            context_instance = RequestContext(request))
+            context_instance=RequestContext(request, processors=[login_context,]))
 
 def category_index(request):
 
@@ -305,4 +316,31 @@ def category_index(request):
             {
             'cat_list': cat_list,
             },
-            context_instance = RequestContext(request))
+            context_instance=RequestContext(request, processors=[login_context,]))
+
+
+def signout(request):
+    logout(request)
+    referrer = request.META.get('HTTP_REFERER', '/')
+    # Redirect to the same page we're on
+    return redirect_to(request, referrer)
+
+
+def signin(request):
+    if request.POST:
+        form_data = request.POST.copy()
+        form = LoginForm(form_data)
+
+        if form.is_valid():
+            user = form.user
+            login(request, user)
+            form = LoginForm()
+            return redirect_to(request, request.POST['next'])
+    else:
+        form = LoginForm()
+
+    return render_to_response('snapboard/signin.html',
+        {
+        'login_form': form,
+        'login_next': request.POST.get('next', '/'),
+        })

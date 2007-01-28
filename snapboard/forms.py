@@ -37,3 +37,20 @@ class ThreadForm(forms.Form):
     def clean_category(self):
         id = int(self.clean_data['category'])
         return id
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=30)
+    password = forms.CharField(widget=widgets.PasswordInput)
+
+    def clean_password(self):
+        scd = self.clean_data
+        self.user = authenticate(username=scd['username'], password=scd['password'])
+
+        if self.user is not None:
+            if self.user.is_active:
+                return self.clean_data['password']
+            else:
+                raise ValidationError('Your account has been disabled.')
+        else:
+            raise ValidationError('Your username or password were incorrect.')

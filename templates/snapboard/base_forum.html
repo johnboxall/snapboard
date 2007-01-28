@@ -10,8 +10,15 @@
 </head>
 
 <body id="yahoo-com">
-<div id="doc2" class="yui-t4"><!-- "doc" here for example only; use any page width -->            
+<div id="doc2" class="yui-t4"><!-- "doc" here for example only; use any page width -->
+
     <div id="hd">
+        <br />
+        {% block site_title %}
+        example.com
+        {% endblock %}
+        <br />
+        <br />
         <div id="navigation">
             <ul>
                 <li><a href="/snapboard/threads/"><span>All Discussions</span></a></li>
@@ -19,6 +26,7 @@
             </ul>
         </div>
     </div>
+    <hr />
 
     <div id="bd">
         <div id="yui-main">
@@ -30,6 +38,7 @@
             </div>
         </div>
         <div class="yui-b">
+            {% block side_panel %}
             <div class="forummenu">
                 {% if user.is_authenticated %}
                     <p style="font-size: 122%;">
@@ -43,9 +52,23 @@
                         {% endif %}
                     </p>
                     <br />
-                    <p><a href="/accounts/logout">Sign out</a></p>
+                    <p><a href="/snapboard/signout">Sign out</a></p>
                 {% else %}
                     <p>You are not logged in.</p>
+                    <br />
+                    {% if form.has_errors %}
+                    <p>Your username and password didn't match.</p>
+                    {% endif %}
+
+                    <form method="post" action="/snapboard/signin/">
+                        {{ login_form.as_p }}
+                        <input type="submit" value="Sign In" />
+                        <input type="hidden" name="next" value="{{ login_next }}" />
+                    </form>
+                    <br />
+
+                    <p>You need to have a user account in order to contribute
+                    to discussions on this forum.</p>
                     <p style="font-size:small"><a href="/accounts/register/">Register for the Forums</a></p>
                 {% endif %}
             </div>
@@ -78,6 +101,7 @@
                     <p><b><a href="#">Forum Preferences</a></b></p>
                 </div>
             {% endif %}
+            {% endblock %}
         </div>
     </div>
     <div id="ft">
