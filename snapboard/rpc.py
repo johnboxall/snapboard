@@ -41,6 +41,22 @@ def rpc_gsticky(request, **kwargs):
                 'msg':'Removed thread from global sticky list',
                 }
 
+def rpc_close(request, **kwargs):
+    assert(request.user.is_staff)
+    assert('thread' in kwargs, 'rpc_close() requires "thread"')
+    thr = kwargs['thread']
+
+    thr.closed = (not thr.closed)
+    thr.save()
+    if thr.closed:
+        return {'link':'open thread',
+                'msg':'This discussion is now CLOSED.',
+                }
+    else:
+        return {'link':'close thread',
+                'msg':'This discussion is now OPEN.',
+                }
+
 
 def rpc_watch(request, **kwargs):
     assert('thread' in kwargs, 'rpc_gsticky() requires "thread"')

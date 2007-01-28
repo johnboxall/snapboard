@@ -22,8 +22,14 @@
                     </a> 
                 </span>
                 &#149;
+                <span>
+                    <a id="close{{ thr.id }}" href="#" onClick="set_close('{{ thr.id }}');">
+                        {{ thr.closed|yesno:"open,close" }} thread
+                    </a> 
+                </span>
             {% endif %}
             {% if user.is_authenticated %}
+                &#149;
                 <span>
                     <a id="watch{{ thr.id }}" href="#" onClick="set_watch('{{ thr.id }}');">
                         {{ watched|yesno:"don't," }} watch
@@ -114,16 +120,20 @@
     {% endfor %} {# iterate through posts #}
     </div>
 
-    {% if user.is_authenticated %}
-    <!-- div style="border: 1px solid #ccc; padding: 5px; background: #efe" -->
-    <form action="" method="POST">
-        Got something to say?
-        <br />
-        {{ postform.as_p }}
-        <input type="submit" value="Post">
-    </form>
+    {% if not thr.closed %}
+        {% if user.is_authenticated %}
+        <!-- div style="border: 1px solid #ccc; padding: 5px; background: #efe" -->
+        <form action="" method="POST">
+            Got something to say?
+            <br />
+            {{ postform.as_p }}
+            <input type="submit" value="Post">
+        </form>
+        {% else %}
+        <p>You need to <a href="/login">sign in</a> to post messages.</p>
+        {% endif %}
     {% else %}
-    <p>You need to <a href="/login">sign in</a> to post messages.</p>
+        <p>This discussion has been closed by the staff.  You can no longer add posts.</p>
     {% endif %}
 
 {% endblock %}

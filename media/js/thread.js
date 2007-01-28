@@ -60,6 +60,7 @@ function toggle_variable(action, oclass, oid, msgdivid) {
 function set_csticky(id) { toggle_variable('csticky', 'thread', id, 'thread_rpc_msg_div'); }
 function set_gsticky(id) { toggle_variable('gsticky', 'thread', id, 'thread_rpc_msg_div'); }
 function set_watch(id) { toggle_variable('watch', 'thread', id, 'thread_rpc_msg_div'); }
+function set_close(id) { toggle_variable('close', 'thread', id, 'thread_rpc_msg_div'); }
 
 // post level function
 function set_censor(id) { toggle_variable('censor', 'post', id, ('post_rpc_msg_div' + id));}

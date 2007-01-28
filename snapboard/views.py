@@ -24,6 +24,7 @@ RPC_ACTION_MAP = {
         "censor": rpc_censor,
         "gsticky": rpc_gsticky,
         "csticky": rpc_csticky,
+        "close": rpc_close,
         "abuse": rpc_abuse,
         "watch": rpc_watch,
         }
