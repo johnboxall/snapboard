@@ -1,15 +1,16 @@
 {% extends "snapboard/base_forum.html" %}
 
 {% block snapboard_main %}
+    <div class="index_title">
+    <h2 style="font-size: 152%;">
+    {{ title }}
+    </h2>
+        {% if thread_page %}
+            {% include "snapboard/page_navigation.html" %}
+        {% endif %}
+    </div>
+
     {% if thread_page %}
-        <div class="index_title">
-        <h2 style="font-size: 152%;">
-        {{ title }}
-        </h2>
-
-        {% include "snapboard/page_navigation.html" %}
-        </div>
-
         {% for thread in thread_page %}
         <div class="thread">
             <p style="margin-top: 10px; margin-bottom: 5px;">

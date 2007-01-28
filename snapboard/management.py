@@ -25,7 +25,6 @@ def test_setup():
     users = ('john', 'sally', 'susan', 'amanda', 'bob', 'tully', 'fran')
     for u in users:
         user = User.objects.get_or_create(username=u)
-        user.set_password('foo')
         # user.is_staff = True
 
     cats = ('Random Topics',

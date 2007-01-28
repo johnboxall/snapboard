@@ -264,7 +264,7 @@ def base_thread_queryset(qset=None):
             ORDER BY date DESC LIMIT 1
         """
 
-    if not qset:
+    if qset == None:
         qset = Thread.objects
 
     return qset.extra(

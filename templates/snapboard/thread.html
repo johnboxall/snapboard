@@ -120,9 +120,11 @@
     {% endfor %} {# iterate through posts #}
     </div>
 
-    {% if not thr.closed %}
+    {% include "snapboard/page_navigation.html" %}
+    {% if not thr.closed and not page_next%}
         {% if user.is_authenticated %}
         <!-- div style="border: 1px solid #ccc; padding: 5px; background: #efe" -->
+        <br />
         <form action="" method="POST">
             Got something to say?
             <br />
@@ -132,7 +134,9 @@
         {% else %}
         <p>You need to <a href="/login">sign in</a> to post messages.</p>
         {% endif %}
-    {% else %}
+    {% endif %}
+    {% if thr.closed %}
+        <br />
         <p>This discussion has been closed by the staff.  You can no longer add posts.</p>
     {% endif %}
 
