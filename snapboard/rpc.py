@@ -8,6 +8,30 @@ from models import Thread, Post, Category, WatchList, AbuseList
 from forms import PostForm, ThreadForm
 
 
+def rpc_post(request, **kwargs):
+    assert('post' in kwargs, 'rpc_gsticky() requires "post"')
+    post = kwargs['post']
+    
+    # TODO
+
+    #"""
+    #%s
+    #This post has been revised. < previous] [next >
+    #""" % (post.text)
+
+    prev_id = ''
+    rev_id = ''
+    if post.revision is not None:
+        rev_id = post.revision.id
+    if post.previous is not None:
+        prev_id = post.previous.id
+
+    return {'text': post.text,
+            'prev_id': prev_id,
+            'rev_id': rev_id,
+            }
+    pass
+
 def rpc_csticky(request, **kwargs):
     assert(request.user.is_staff)
     assert('thread' in kwargs, 'rpc_csticky() requires "thread"')

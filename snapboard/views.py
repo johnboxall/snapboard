@@ -80,17 +80,7 @@ def thread(request, thread_id, page="1"):
 
     try:
         thr = Thread.objects.get(pk=thread_id)
-        post_list = Post.objects.filter(thread=thr).order_by('date').exclude(
-                revision__isnull=False)
-
-        if request.user.is_authenticated() and not request.user.is_staff:
-            post_list = post_list.exclude(censor=True)
-
-        paginator = ObjectPaginator(post_list, PPP)
-        post_page = paginator.get_page(pindex)
     except Thread.DoesNotExist:
-        raise Http404
-    except InvalidPage:
         raise Http404
 
     render_dict = {}
@@ -117,8 +107,21 @@ def thread(request, thread_id, page="1"):
     else:
         postform = PostForm()
 
+    # this must come after the post so new messages show up
+    try:
+        post_list = Post.objects.filter(thread=thr).order_by('date').exclude(
+                revision__isnull=False)
+
+        if request.user.is_authenticated() and not request.user.is_staff:
+            post_list = post_list.exclude(censor=True)
+
+        paginator = ObjectPaginator(post_list, PPP)
+        post_page = paginator.get_page(pindex)
+    except InvalidPage:
+        raise Http404
+
     # general info to render the page navigation (back/forward/etc)
-    render_dict.update(paginate_render_dict(paginator, page))
+    render_dict.update(paginate_context(paginator, page))
 
 
     render_dict.update({
@@ -134,7 +137,7 @@ def thread(request, thread_id, page="1"):
             context_instance=RequestContext(request, processors=[login_context,]))
 
 
-def paginate_render_dict(paginator, page):
+def paginate_context(paginator, page):
     pindex = page - 1
     page_next = None
     page_prev = None
@@ -297,7 +300,7 @@ def favorite_index(request, page=1):
     try:
         paginator = ObjectPaginator(thread_list, TPP)
         thread_page = paginator.get_page(pindex)
-        render_dict.update(paginate_render_dict(paginator, page))
+        render_dict.update(paginate_context(paginator, page))
     except InvalidPage:
         raise Http404
 
@@ -347,7 +350,7 @@ def thread_index(request, cat_id=None, page=1):
     try:
         paginator = ObjectPaginator(thread_list, TPP)
         thread_page = paginator.get_page(pindex)
-        render_dict.update(paginate_render_dict(paginator, page))
+        render_dict.update(paginate_context(paginator, page))
     except InvalidPage:
         raise Http404
 
