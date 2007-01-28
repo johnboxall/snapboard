@@ -82,6 +82,9 @@ def thread(request, thread_id, page="1"):
         post_list = Post.objects.filter(thread=thr).order_by('date').exclude(
                 revision__isnull=False)
 
+        if request.user.is_authenticated() and not request.user.is_staff:
+            post_list = post_list.exclude(censor=True)
+
         paginator = ObjectPaginator(post_list, PPP)
         post_page = paginator.get_page(pindex)
     except Thread.DoesNotExist:
@@ -101,7 +104,6 @@ def thread(request, thread_id, page="1"):
 
     if request.user.is_authenticated() and request.POST:
         postform = PostForm(request.POST.copy())
-
 
         if postform.is_valid():
             # reset post object
@@ -220,12 +222,23 @@ def new_thread(request):
 
 
 def base_thread_queryset(qset=None):
+    '''
+    This generates a QuerySet containing Threads and additional data used in
+    generating a web page with a listing of discussions.
+
+    qset allows the caller to specify an initial queryset to work with.  If this
+    is not set, all Threads will be returned.
+    '''
+
     # number of posts in thread
+    # censored threads don't count toward the total
     extra_post_count = """
         SELECT COUNT(*) FROM snapboard_post
             WHERE snapboard_post.thread_id = snapboard_thread.id
             AND snapboard_post.revision_id IS NULL
+            AND NOT snapboard_post.censor
         """
+
     # figure out who started the population
     extra_starter = """
         SELECT username FROM auth_user
@@ -255,6 +268,8 @@ def base_thread_queryset(qset=None):
             'post_count': extra_post_count,
             'starter': extra_starter,
             #'last_updated': extra_last_updated,  # bug: http://code.djangoproject.com/ticket/2210
+            # the bug is that any extra columns must match their names
+            # TODO: sorting on boolean fields is undefined in SQL theory
             'date': extra_last_updated,
             'last_poster': extra_last_poster,
         },).order_by('-gsticky', '-date')
@@ -262,6 +277,10 @@ def base_thread_queryset(qset=None):
 
 @decorators.user_passes_test(lambda u: u.is_authenticated(), login_url=SB_LOGIN_URL)
 def favorite_index(request, page=1):
+    '''
+    This page shows the threads/discussions that have been marked as 'watched'
+    by the user.
+    '''
     page = int(page)
     pindex = page - 1
 
@@ -293,6 +312,11 @@ def favorite_index(request, page=1):
             context_instance=RequestContext(request, processors=[login_context,]))
 
 
+@decorators.user_passes_test(lambda u: u.is_authenticated(), login_url=SB_LOGIN_URL)
+def private_index(request, page=1):
+    pass
+
+
 def thread_index(request, cat_id=None, page=1):
     page = int(page)
     pindex = page - 1
@@ -318,8 +342,6 @@ def thread_index(request, cat_id=None, page=1):
     if cat_id:
         thread_list = thread_list.order_by('-csticky', '-date')
 
-    # the bug is that any extra columns must match their names
-    # TODO: sorting on boolean fields is undefined in SQL theory
 
     try:
         paginator = ObjectPaginator(thread_list, TPP)

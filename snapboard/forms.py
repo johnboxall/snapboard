@@ -15,6 +15,12 @@ class PostForm(forms.Form):
                 'cols': '80',
             }),
         )
+    # private = forms.CharField(
+    #         label="Recipients",
+    #         max_length=150,
+    #         widget=forms.TextInput(attrs={'size':'80'}),
+    #         required=False,
+    #         )
 
 
 class ThreadForm(forms.Form):

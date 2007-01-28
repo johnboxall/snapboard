@@ -22,6 +22,10 @@ HR {
     display: inline;
 }
 
+.errorlist {
+    color: red;
+}
+
 div.index_title {
     background-color: #D9D4C3;
     border-bottom: 1px solid #000;
@@ -60,6 +64,10 @@ form {
     border: 1px solid #ccc;
     padding: 5px;
     background: #efe;
+}
+
+form p {
+    padding: 2px;
 }
 
 textarea, input, button, select {
