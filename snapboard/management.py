@@ -1,11 +1,15 @@
+import os
+
 from django.dispatch import dispatcher 
 from django.db.models import signals 
+from django.conf import settings
+
+import models as snapboard_app
 
 def sync_hook(): 
-    # TODO
     pass
 
-dispatcher.connect(sync_hook, signal=signals.post_syncdb) 
+dispatcher.connect(sync_hook, sender=snapboard_app, signal=signals.post_syncdb) 
 
 
 
@@ -15,7 +19,6 @@ def test_setup():
     from models import Thread, Post, Category
     from random import choice
     import chomsky
-    from django.conf import settings
 
     if not settings.DEBUG:
         return 
@@ -36,7 +39,7 @@ def test_setup():
 
     # create up to 30 posts
     tc = range(1, 50)
-    for i in range(0, 100):
+    for i in range(0, 35):
         print 'thread ', i, 'created'
         cat= choice(Category.objects.all())
         subj = choice(chomsky.objects.split('\n'))
@@ -54,6 +57,4 @@ def test_setup():
                     )
             post.save()
 
-import models as snapboard_app
 dispatcher.connect(test_setup, sender=snapboard_app, signal=signals.post_syncdb) 
-

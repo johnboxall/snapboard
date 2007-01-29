@@ -4,26 +4,32 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import simplejson
 
+# template filters for post text
+from django.contrib.markup.templatetags.markup import textile
+from django.template.defaultfilters import striptags
+
 from models import Thread, Post, Category, WatchList, AbuseList
 from forms import PostForm, ThreadForm
 
 
-def rpc_post(request, **kwargs):
-    assert('post' in kwargs, 'rpc_gsticky() requires "post"')
-    post = kwargs['post']
-    
+def rpc_post(request):
+    show_id = int(request.GET['show'])
+    orig_id = int(request.GET['orig'])
+    post = Post.objects.get(pk=show_id)
+
     prev_id = ''
     rev_id = ''
     if post.revision is not None:
-        rev_id = post.revision.id
+        rev_id = str(post.revision.id)
     if post.previous is not None:
-        prev_id = post.previous.id
+        prev_id = str(post.previous.id)
 
-    return {'text': post.text,
+    resp = {'text': textile(striptags(post.text)),
             'prev_id': prev_id,
             'rev_id': rev_id,
             }
-    pass
+    return HttpResponse(simplejson.dumps(resp), mimetype='application/javascript')
+
 
 def rpc_csticky(request, **kwargs):
     assert(request.user.is_staff)

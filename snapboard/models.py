@@ -1,9 +1,10 @@
-from django.db import models
+from datetime import datetime
 
+from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
 
-
-# Create your models here.
+from fields import PhotoField
 
 class Category(models.Model):
     label = models.CharField(maxlength=32)
@@ -59,6 +60,7 @@ class Post(models.Model):
     # private (list of usernames)
 
     # (null or ID of post - most recent revision is always a diff of previous)
+    odate = models.DateTimeField(editable=False, null=True)
     revision = models.ForeignKey("self", related_name="rev",
             editable=False, null=True, blank=True)
     previous = models.ForeignKey("self", related_name="prev",
@@ -67,6 +69,18 @@ class Post(models.Model):
     # (boolean set by mod.; true if abuse report deemed false)
     censor = models.BooleanField(default=False) # moderator level access
     freespeech = models.BooleanField(default=False) # superuser level access
+
+    def save(self):
+        if self.previous is not None:
+            self.odate = self.previous.odate
+        elif self.odate is None:
+            # the above if important; we don't want to update the odate if the
+            # object is being modified
+            self.odate = datetime.now()
+        super(Post, self).save()
+
+    def get_absolute_url(self):
+        return '/threads/id/' + str(self.thread.id)
 
     def get_edit_form(self):
         from forms import PostForm
@@ -109,7 +123,8 @@ class ForumUserData(models.Model):
     nickname = models.CharField(maxlength=32)
     posts = models.IntegerField()
     profile = models.TextField()
-    # avatar (15x15 xpm/svg)
+    avatar = PhotoField(upload_to='img/snapboard/avatars/',
+            width=20, height=20)
     # signature (hrm... waste of space IMHO)
 
     ppp = models.IntegerField()

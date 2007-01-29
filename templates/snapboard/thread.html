@@ -56,7 +56,7 @@
             <span class="post_menuright">
                 {% ifequal post.user_id user.id %}
                 <span title="Edit this post.  All revisions are saved!" class="popup">
-                    <b><a href="#" onclick="toggle_edit('{{ post.id }}')">edit post</a></b>
+                    <b><a href="#post{{ post.id }}" onclick="toggle_edit('{{ post.id }}')">edit post</a></b>
                 </span>
                 &#149;
                 {% endifequal %}
@@ -76,6 +76,9 @@
             </span>
 
             <!-- [ICON] -->
+            {% if post.avatar %}
+                <img src="/media/{{ post.avatar }}" />
+            {% endif %}
             <b>
                 <a href="#" onclick="toggle_post('{{ post.id }}');">
                     <span title="POPUP" class="popup">{{ post.user }}</span>
@@ -96,6 +99,15 @@
             <div class="post" style="display:block" id="post_text{{ post.id }}">
                 {{ post.text|striptags|textile }}
             </div>
+            {% if post.previous %}
+            <span id="post_revision_links{{ post.id }}" class="post_menuleft">
+                {# redirect is not possible here in the href property below since it resets the page #}
+                {# need to do it w/ javascript #}
+                <a href="#post{{ post.id }}" onClick="revision('{{ post.id }}','{{ post.previous.id }}');">&#171; previous</a>
+                <b style="color: #c00">This message has been revised</b>
+            </span>
+            <br />
+            {% endif %}
 
             {% ifequal post.user_id user.id %}
             <div style="display:none" id="post_edit{{ post.id }}">
@@ -107,12 +119,6 @@
             </div>
             {% endifequal %}
 
-            {% if post.previous %}
-            <span class="post_menuleft">
-                <a href="#">This message has been revised</a>
-            </span>
-            <br />
-            {% endif %}
 
         </div>
         <br />
@@ -121,22 +127,21 @@
     </div>
 
     {% include "snapboard/page_navigation.html" %}
+    <br />
     {% if not thr.closed and not page_next%}
         {% if user.is_authenticated %}
         <!-- div style="border: 1px solid #ccc; padding: 5px; background: #efe" -->
-        <br />
-        <form action="" method="POST">
+        <form id="add_post_div" action="" method="POST">
             Got something to say?
             <br />
             {{ postform.as_p }}
             <input type="submit" value="Post">
         </form>
         {% else %}
-        <p>You need to <a href="/login">sign in</a> to post messages.</p>
+        <p>You need to <a href="/snapboard/signin/?next={{ request.path|urlencode }}#add_post_div">sign in</a> to post messages.</p>
         {% endif %}
     {% endif %}
     {% if thr.closed %}
-        <br />
         <p>This discussion has been closed by the staff.  You can no longer add posts.</p>
     {% endif %}
 

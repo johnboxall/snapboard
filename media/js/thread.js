@@ -16,6 +16,59 @@ function toggle(id, type) {
         e.style.display = 'none';
 }
 
+
+function revision(orig_id, show_id) {
+    urlq = '/snapboard/rpc/postrev/?orig=' + orig_id + '&show=' + show_id
+
+    div_text = document.getElementById('post_text' + orig_id)
+    div_links = document.getElementById('post_revision_links' + orig_id)
+
+    var handleSuccess = function(o) {
+        if(o.responseText !== undefined) {
+            res = eval('(' + o.responseText + ')');
+            div_text.innerHTML = res['text'];
+
+            // create links content
+            links_html = '';
+
+            if(res['prev_id'] !== '') {
+                links_html += '<a href="#post' + orig_id + '" onClick="revision(\'';
+                //links_html += '<a href="#" onClick="revision(\'';
+                links_html += orig_id + '\',\'' + res['prev_id'];
+                links_html += '\');">&#171; previous</a>';
+            }
+            links_html += ' <b style="color: #c00;">This message has been revised</b> '
+            if(res['rev_id'] !== '') {
+                links_html += '<a href="#post' + orig_id + '" onClick="revision(\'';
+                //links_html += '<a href="#" onClick="revision(\'';
+                links_html += orig_id + '\',\'' + res['rev_id'];
+                links_html += '\');">next &#187;</a>';
+            }
+            div_links.innerHTML = links_html;
+        }
+    };
+
+    var handleFailure = function(o) {
+        var errordiv = document.getElementById("thread_rpc_msg_div");
+        if(o.responseText !== undefined) {
+            for (var n in o) {
+                if (o.hasOwnProperty(n)) {
+                    errordiv.innerHTML += o[n];
+                }
+            }
+        }
+    };
+
+    var callback = {
+      success:handleSuccess,
+      failure:handleFailure,
+      argument: []
+    };
+
+    var request = YAHOO.util.Connect.asyncRequest('GET', urlq, callback, null);
+}
+
+
 // --- yahoo connection stuff ---
 function toggle_variable(action, oclass, oid, msgdivid) {
     // This function sends an RPC request to the server to toggle a
