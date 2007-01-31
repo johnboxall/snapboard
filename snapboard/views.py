@@ -1,3 +1,6 @@
+# vim: ai ts=4 sts=4 et sw=4
+
+from django import newforms as forms
 from django.contrib.auth import decorators
 from django.contrib.auth import login, logout
 from django.core.paginator import ObjectPaginator, InvalidPage
@@ -7,7 +10,8 @@ from django.template import RequestContext
 from django.utils import simplejson
 from django.views.generic.simple import redirect_to
 
-from models import Thread, Post, Category, WatchList
+#from models import Thread, Post, Category, WatchList
+from models import *
 from forms import PostForm, ThreadForm, LoginForm
 from rpc import *
 
@@ -29,7 +33,20 @@ RPC_ACTION_MAP = {
         "watch": rpc_watch,
         }
 
+
+def snapboard_require_signin(f):
+    '''
+    Equivalent to @login_required decorator, except that it defines a custom
+    template path for login.
+    '''
+    return decorators.user_passes_test(lambda u: u.is_authenticated(), login_url=SB_LOGIN_URL)(f)
+
+
 def login_context(request):
+    '''
+    All content pages that have additional content for authenticated users but
+    that are also publicly viewable should have a login form in the side panel.
+    '''
     response_dict = {}
     if not request.user.is_authenticated():
         response_dict.update({
@@ -40,8 +57,36 @@ def login_context(request):
     return response_dict
 
 
+def paginate_context(paginator, page):
+    '''
+    Helper function to make standard pagination available for the template
+    "snapboard/page_navigation.html"
+    '''
+    pindex = page - 1
+    page_next = None
+    page_prev = None
+    page_range = None
+    if paginator.has_next_page(pindex):
+        page_next = page + 1
+    if paginator.has_previous_page(pindex):
+        page_prev = page - 1
+    if paginator.pages > 2:
+        page_range = range(1, paginator.pages+1)
+
+    return {
+            'page': page,
+            'page_total': paginator.pages,
+            'page_next': page_next,
+            'page_prev': page_prev,
+            'page_range': page_range,
+        }
+
+
 # Create your views here.
 def rpc(request):
+    '''
+    Delegates simple rpc requests.
+    '''
     if not request.POST or not request.user.is_authenticated():
         return HttpResponseServerError
 
@@ -70,7 +115,6 @@ def rpc(request):
         return HttpResponseServerError
     except AssertionError:
         return HttpResponseServerError
-
 
 
 def thread(request, thread_id, page="1"):
@@ -146,28 +190,7 @@ def thread(request, thread_id, page="1"):
             context_instance=RequestContext(request, processors=[login_context,]))
 
 
-def paginate_context(paginator, page):
-    pindex = page - 1
-    page_next = None
-    page_prev = None
-    page_range = None
-    if paginator.has_next_page(pindex):
-        page_next = page + 1
-    if paginator.has_previous_page(pindex):
-        page_prev = page - 1
-    if paginator.pages > 2:
-        page_range = range(1, paginator.pages+1)
-
-    return {
-            'page': page,
-            'page_total': paginator.pages,
-            'page_next': page_next,
-            'page_prev': page_prev,
-            'page_range': page_range,
-        }
-
-
-def edit_post(request, original):
+def edit_post(request, original, next=None):
     '''
     Edit an original post.
     '''
@@ -178,6 +201,7 @@ def edit_post(request, original):
         orig_post = Post.objects.get(pk=int(original))
     except Post.DoesNotExist:
         raise Http404
+
 
     postform = PostForm(request.POST.copy())
     if postform.is_valid():
@@ -194,11 +218,16 @@ def edit_post(request, original):
         orig_post.revision = post
         orig_post.save()
 
-        return HttpResponseRedirect('/snapboard/threads/id/'
-                + str(orig_post.thread.id) + '/')
+        div_id_num = post.id
     else:
-        return HttpResponseRedirect('/snapboard/threads/id/'
-                + str(orig_post.thread.id) + '/')
+        div_id_num = orig_post.id
+
+    try:
+        next = request.POST['next'] + '#post' + str(div_id_num)
+    except KeyError:
+        next = '/snapboard/threads/id/' + str(orig_post.thread.id) + '/'
+
+    return HttpResponseRedirect(next)
 
 
 def new_thread(request):
@@ -288,7 +317,6 @@ def base_thread_queryset(qset=None):
         },).order_by('-gsticky', '-date')
 
 
-@decorators.user_passes_test(lambda u: u.is_authenticated(), login_url=SB_LOGIN_URL)
 def favorite_index(request, page=1):
     '''
     This page shows the threads/discussions that have been marked as 'watched'
@@ -322,12 +350,8 @@ def favorite_index(request, page=1):
 
     return render_to_response('snapboard/thread_index.html',
             render_dict,
-            context_instance=RequestContext(request, processors=[login_context,]))
-
-
-@decorators.user_passes_test(lambda u: u.is_authenticated(), login_url=SB_LOGIN_URL)
-def private_index(request, page=1):
-    pass
+            context_instance=RequestContext(request))
+favorite_index = snapboard_require_signin(favorite_index)
 
 
 def thread_index(request, cat_id=None, page=1):
@@ -427,3 +451,47 @@ def signin(request):
         'login_form': form,
         'login_next': next,
         })
+
+
+def profile(request, next='/'):
+    '''
+    Allow user to edit his/her profile.  Requires login.
+
+    The form generated from ForumUserData class/object has a field allowing
+    the user to select a User from a dropdown list despite editable=False in
+    the model definition;  this is a bug:
+
+        http://code.djangoproject.com/ticket/3247
+
+    ForumUserData.avatar does not render properly in newforms:
+
+        http://code.djangoproject.com/ticket/3297
+    '''
+    user = request.user
+
+    # create ForumUserData on demand
+    try:
+        userdata = ForumUserData.objects.get(user=user)
+        ProfileForm = forms.models.form_for_model(ForumUserData)
+    except:
+        userdata = ForumUserData(user=user)
+        userdata.save()
+        ProfileForm = forms.models.form_for_instance(userdata)
+
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            form.clean_data['user'] = user.id
+            form.save()
+            HttpResponseRedirect(next)
+    else:
+        form = ProfileForm()
+
+    return render_to_response('snapboard/profile.html',
+            {
+            'form': form,
+            },
+            context_instance=RequestContext(request))
+profile = snapboard_require_signin(profile)
+

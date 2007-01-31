@@ -6,8 +6,8 @@
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/snapboard/feeds/latest/">
 
     <script src="/media/js/thread.js"></script>
-    <script src="/media/js/yui/yahoo/yahoo-min.js"></script>
-    <script src="/media/js/yui/connection/connection-min.js"></script>
+    <script src="/media/js/yui/yahoo-min.js"></script>
+    <script src="/media/js/yui/connection-min.js"></script>
 </head>
 
 <body id="yahoo-com">
@@ -78,25 +78,26 @@
             {% if user.is_staff %}
                 <br />
                 <div class="forummenu">
-                <p><b>Admin Panel</b></p>
+                <p><b>Admin Shortcuts</b></p>
+                <br />
                 <ul>
-                    <li>&#187; <i><a href="#">Admin Overview</a></i></li>
-                    <li>&#187; <a href="#">Censored threads</a></li>
-                    <li>&#187; <a href="#">Abuse Reports</a></li>
-                    <li>&#187; <a href="#">Sticky threads</a></li>
-                    <li>&#187; <a href="#">Action Log</a></li>
+                    <li>&#187; <b><a href="/admin/">Admin Site</a></b></li>
+                    <li>&#187; <a href="/admin/snapboard/post/?censor__exact=1">Censored posts</a></li>
+                    <li>&#187; <a href="/admin/snapboard/abuselist/">Abuse Reports</a></li>
+                    <li>&#187; <a href="/admin/snapboard/thread/?csticky__exact=1">Category Sticky</a></li>
+                    <li>&#187; <a href="/admin/snapboard/thread/?gsticky__exact=1">Global Sticky</a></li>
                 </ul>
                 </div>
             {% endif %}
             
             {% if user.is_authenticated %}
-                <br />
+                <!-- br />
                 <div class="forummenu">
                 <ul>
                     <li>&#187; <a href="#">Watched Topics<b></a> <br /> <a href="#">(2 new!)</b></a></li>
                     <li>&#187; <a href="#">Private Posts<b></a> <br /> <a href="#">(4 new!)</b></a></li>
                 </ul>
-                </div>
+                </div -->
                 
                 <br />
                 <div class="forummenu">

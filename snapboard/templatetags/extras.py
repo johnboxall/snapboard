@@ -1,6 +1,10 @@
 from django import template
 
+from textile import textile
+
 register = template.Library()
+
+register.filter('textile', textile)
 
 def post_summary(value, arg):
     """

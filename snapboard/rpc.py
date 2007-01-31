@@ -4,12 +4,12 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import simplejson
 
-# template filters for post text
-from django.contrib.markup.templatetags.markup import textile
+#from django.contrib.markup.templatetags.markup import textile
 from django.template.defaultfilters import striptags
 
-from models import Thread, Post, Category, WatchList, AbuseList
 from forms import PostForm, ThreadForm
+from models import Thread, Post, Category, WatchList, AbuseList
+from templatetags.textile import textile
 
 
 def rpc_post(request):
@@ -29,6 +29,15 @@ def rpc_post(request):
             'rev_id': rev_id,
             }
     return HttpResponse(simplejson.dumps(resp), mimetype='application/javascript')
+
+
+def rpc_lookup(request, queryset, field, limit=5):
+    obj_list = []
+    lookup = { '%s__icontains' % field: request.GET['query'],}
+    for obj in queryset.filter(**lookup)[:limit]:
+                obj_list.append({"id": obj.id, "name": getattr(obj, field)}) 
+    object = {"ResultSet": { "total": str(limit), "Result": obj_list } }
+    return HttpResponse(simplejson.dumps(object), mimetype='application/javascript')
 
 
 def rpc_csticky(request, **kwargs):

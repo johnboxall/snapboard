@@ -1,10 +1,11 @@
 from django.conf.urls.defaults import *
+from django.contrib.auth.models import User
 
 from views import thread, thread_index, new_thread, category_index
 from views import edit_post, rpc, signout, signin
-from views import favorite_index
+from views import favorite_index, profile
 
-from rpc import rpc_post
+from rpc import rpc_post, rpc_lookup
 from feeds import LatestPosts
 
 feeds = {
@@ -14,6 +15,7 @@ feeds = {
 
 urlpatterns = patterns('',
     (r'^$', thread_index),
+    (r'^profile/$', profile),
     (r'^signout/$', signout),
     (r'^signin/$', signin),
     (r'^newtopic/$', new_thread),
@@ -30,6 +32,12 @@ urlpatterns = patterns('',
     # RPC
     (r'^rpc/action/$', rpc),
     (r'^rpc/postrev/$', rpc_post),
+    (r'^rpc/user_lookup/$', rpc_lookup,
+            {
+                'queryset':User.objects.all(),
+                'field':'username',
+            }
+        ),
 
     # feeds
     (r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),

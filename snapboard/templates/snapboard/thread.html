@@ -1,7 +1,6 @@
 {% extends "snapboard/base_forum.html" %}
 
-{% load extras %}
-{% load markup %}
+{% load extras %} {# also includes textile #}
 
 {% block snapboard_main %}
     <div id="thread_rpc_msg_div" class="rpc_message">
@@ -80,7 +79,7 @@
                 <img src="/media/{{ post.avatar }}" />
             {% endif %}
             <b>
-                <a href="#" onclick="toggle_post('{{ post.id }}');">
+                <a href="#post{{ post.id }}" onclick="toggle_post('{{ post.id }}');">
                     <span title="POPUP" class="popup">{{ post.user }}</span>
                 </a>
             </b>
@@ -115,6 +114,7 @@
                 <b>All revisions of this post are stored and publicly viewable.</b>
                 {{ post.get_edit_form.as_p }}
                 <input type="submit" value="Update">
+                <input type="hidden" name="next" value="{{ request.path }}">
                 </form>
             </div>
             {% endifequal %}
@@ -132,9 +132,27 @@
         {% if user.is_authenticated %}
         <!-- div style="border: 1px solid #ccc; padding: 5px; background: #efe" -->
         <form id="add_post_div" action="" method="POST">
+            <script type="text/javascript" src="/media/js/yui/yahoo-min.js"></script>
+            <script type="text/javascript" src="/media/js/yui/dom-min.js"></script>
+            <script type="text/javascript" src="/media/js/yui/event-min.js"></script>
+            <script type="text/javascript" src="/media/js/yui/connection-min.js"></script>
+            <script type="text/javascript" src="/media/js/yui/autocomplete-min.js"></script>
             Got something to say?
             <br />
-            {{ postform.as_p }}
+            {# {{ postform.as_p }} #}
+            <p>{{ postform.post }} {{ postform.post.errors }}</p>
+            <p><a href="#add_post_div" onClick="toggle()">set private recipients</a></p>
+            <div id="autocomplete_input" style="display:block">
+                <p>{{ postform.private }}{{ postform.private.errors }}</p>
+                <div id="autocomplete_div" style="padding-right: 1em; position:absolute; left: 120px; z-index: 9000;  background-color:#cfc; color:#333; border: 1px solid black;"></div>
+            </div>
+            <script type="text/javascript">
+                dataSource = new YAHOO.widget.DS_XHR("/snapboard/rpc/user_lookup/", ["ResultSet.Result","name","id"]);
+                autoComp = new YAHOO.widget.AutoComplete("id_private","autocomplete_div",dataSource);
+                autoComp.delimChar = ","; 
+                autoComp.typeAhead = true; 
+            </script>
+
             <input type="submit" value="Post">
         </form>
         {% else %}

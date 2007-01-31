@@ -1,10 +1,20 @@
+# vim: ai ts=4 sts=4 et sw=4
+
 from datetime import datetime
 
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 from fields import PhotoField
+
+## NOTES
+# TODO: banlist model
+#
+# Field option editable=False works as advertised in the Admin pages but
+# does not hide form fields when used with newforms and the functions
+# form_from_model() and form_from_instance():
+#   http://code.djangoproject.com/ticket/3247
 
 class Category(models.Model):
     label = models.CharField(maxlength=32)
@@ -22,22 +32,22 @@ class Category(models.Model):
     class Admin:
         pass
 
+
 class Moderator(models.Model):
-    user = models.ForeignKey(User)
     category = models.ForeignKey(Category)
-    class Admin:
-        list_display = ('user', 'category')
+    user = models.ForeignKey(User)
+
 
 class Thread(models.Model):
-    subject = models.CharField(maxlength=80)
+    subject = models.CharField(maxlength=160)
     category = models.ForeignKey(Category)
 
     closed = models.BooleanField(default=False)
 
-    # (Boolean, "Category sticky - will show up at the top of category listings.")
+    # Category sticky - will show up at the top of category listings.
     csticky = models.BooleanField(default=False)
 
-    # (Boolean, "Global sticky - will show up at the top of home listing.")
+    # Global sticky - will show up at the top of home listing.
     gsticky = models.BooleanField(default=False)
 
     def __str__(self):
@@ -45,15 +55,36 @@ class Thread(models.Model):
 
     class Admin:
         list_display = ('subject', 'category')
+        list_filter = ('closed', 'csticky', 'gsticky', 'category')
+
+
+class CategoryAccessControlList(models.Model):
+    category = models.ForeignKey(Category)
+    user = models.ForeignKey(User)
+    group = models.ForeignKey(Group)
+
+    read = models.BooleanField(default = True)
+    write = models.BooleanField(default = True)
+    censor = models.BooleanField(default = False)
+    close = models.BooleanField(default = False)
+
+    # unique on category and user or category and group
+    class Admin:
+        list_display = ('category', 'user', 'group', 'read', 'write', 'censor')
+        list_filter = ('category', 'group', 'read', 'write', 'censor', 'close')
+
+    class Meta:
+        unique_together = (('category', 'user', 'group'),)
+
 
 class Post(models.Model):
     """
-    Logins are integrated into the post form.  If you aren't logged in and
-    authentication is required, a username/password entry will be integrated
-    into the post form.  Otherwise, business as usual.
+    Post objects store information about revisions.
+
+    Both forward and backward revisions are stored as ForeignKeys.
     """
     user = models.ForeignKey(User)
-    thread = models.ForeignKey(Thread)
+    thread = models.ForeignKey(Thread, core=True, edit_inline=models.STACKED, num_in_admin=1)
     text = models.TextField()
     date = models.DateTimeField(editable=False,auto_now_add=True)
     ip = models.IPAddressField()
@@ -73,9 +104,8 @@ class Post(models.Model):
     def save(self):
         if self.previous is not None:
             self.odate = self.previous.odate
-        elif self.odate is None:
-            # the above if important; we don't want to update the odate if the
-            # object is being modified
+        elif not self.id:
+            # only do the following on creation, not modification
             self.odate = datetime.now()
         super(Post, self).save()
 
@@ -91,6 +121,8 @@ class Post(models.Model):
 
     class Admin:
         list_display = ('user', 'date', 'thread', 'ip')
+        list_filter    = ('censor', 'freespeech', 'user',)
+        search_fields  = ('text', 'user')
 
 
 class AbuseList(models.Model):
@@ -115,27 +147,46 @@ class WatchList(models.Model):
     """
     user = models.ForeignKey(User)
     thread = models.ForeignKey(Thread)
-    class Admin:
-        pass
+    # no need to be in the admin
 
+## TODO: currently unused
 class ForumUserData(models.Model):
-    user = models.OneToOneField(User)
-    nickname = models.CharField(maxlength=32)
-    posts = models.IntegerField()
-    profile = models.TextField()
+    '''
+    User data tied to user accounts from the auth module.
+
+    Real name, email, and date joined information are stored in the built-in
+    auth module.
+    '''
+    user = models.ForeignKey(User, unique=True, editable=False,
+            core=True, edit_inline=models.STACKED, max_num_in_admin=1)
+    profile = models.TextField(blank=True)
+
+    ## views.profile(...) does not handle this properly:
+    # http://code.djangoproject.com/ticket/3297
     avatar = PhotoField(upload_to='img/snapboard/avatars/',
             width=20, height=20)
     # signature (hrm... waste of space IMHO)
 
-    ppp = models.IntegerField()
+    # browsing options
+    ppp = models.IntegerField(null=True,
+            help_text = "Posts per page")
+    notify_email = models.BooleanField(default=False,
+            help_text = "Email notifications for watched discussions")
+    reverse_posts = models.BooleanField(
+            default=False,
+            help_text = "Display Newest Posts First")
+    frontpage_filters = models.ManyToManyField(Category,
+            help_text = "Filter your front page on these categories")
 
-    notify_email = models.BooleanField(default=False)
-    reverse_date_disp = models.BooleanField(default=False)
-    # frontpage_filter
-    class Admin:
-        pass
-
-    # class Meta:
-    #     permissions = (
-    #         ("moderator", "Forum Moderator Status"),
+    ## edit inline
+    # class Admin:
+    #     fields = (
+    #         (None, 
+    #             {'fields': ('user', 'avatar',)}),
+    #         ('Profile', 
+    #             {'fields': ('profile',)}),
+    #         ('Browsing Options', 
+    #             {'fields': 
+    #                 ('ppp', 'notify_email', 'reverse_posts', 'frontpage_filters',)}),
     #     )
+

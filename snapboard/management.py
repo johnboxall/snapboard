@@ -23,6 +23,23 @@ def test_setup():
     if not settings.DEBUG:
         return 
 
+    if Thread.objects.all().count() > 0:
+        # return, since there seem to already be threads in the database.
+        return
+    
+    # ask for permission to create the test
+    msg = """
+    You've installed SNAPboard with DEBUG=True, do you want to populate
+    the board with random users/threads/posts to test-drive the application?
+    (yes/no):
+    """
+    populate = raw_input(msg).strip()
+    while not (populate == "yes" or populate == "no"):
+        if populate == "no":
+            return
+        elif populate is not "yes":
+            populate = raw_input("\nPlease type 'yes' or 'no': ").strip()
+
     # create 10 random users
 
     users = ('john', 'sally', 'susan', 'amanda', 'bob', 'tully', 'fran')

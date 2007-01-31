@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 
 from models import Category
 
+
 class PostForm(forms.Form):
     post = forms.CharField(
             label = '',
@@ -15,12 +16,29 @@ class PostForm(forms.Form):
                 'cols': '80',
             }),
         )
-    # private = forms.CharField(
-    #         label="Recipients",
-    #         max_length=150,
-    #         widget=forms.TextInput(attrs={'size':'80'}),
-    #         required=False,
-    #         )
+    private = forms.CharField(
+            label="Recipients",
+            max_length=150,
+            widget=forms.TextInput(attrs={'size':'80'}),
+            required=False,
+            )
+
+    def clean_private(self):
+        recipients = self.clean_data['private']
+        if len(recipients.strip()) < 1:
+            return ''
+        recipients = recipients.split(',')
+        recipients = [x.strip() for x in recipients]
+        cleandata = []
+        for r in recipients:
+            # make sure recipients exist
+            try:
+                if len(r) > 0:
+                    cleandata.append(str(User.objects.get(username=r).id))
+            except User.DoesNotExist:
+                raise ValidationError(r + " is not a valid user.")
+
+        return ','.join(cleandata)
 
 
 class ThreadForm(forms.Form):
