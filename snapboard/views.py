@@ -145,6 +145,7 @@ def thread(request, thread_id, page="1"):
             postobj = Post(thread = thr,
                     user = request.user,
                     text = postform.clean_data['post'],
+                    private = postform.clean_data['private'],
                     ip = request.META.get('REMOTE_ADDR', ''))
             postobj.save()
             postform = PostForm()
@@ -192,7 +193,7 @@ def thread(request, thread_id, page="1"):
 
 def edit_post(request, original, next=None):
     '''
-    Edit an original post.
+    Edit an existing post.
     '''
     if not request.user.is_authenticated() or not request.POST:
         raise Http404
@@ -209,6 +210,7 @@ def edit_post(request, original, next=None):
         post = Post(
                 user = request.user,
                 thread = orig_post.thread,
+                private = orig_post.private,
                 text = postform.clean_data['post'],
                 ip = request.META.get('REMOTE_ADDR', ''),
                 previous = orig_post,
@@ -229,8 +231,13 @@ def edit_post(request, original, next=None):
 
     return HttpResponseRedirect(next)
 
-
+##
+# Should new discussions be allowed to be private?  Leaning toward no.
 def new_thread(request):
+    '''
+    Start a new discussion.
+    '''
+
     if request.user.is_authenticated() and request.POST:
         threadform= ThreadForm(request.POST.copy())
         if threadform.is_valid():

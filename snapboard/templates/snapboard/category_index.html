@@ -1,12 +1,14 @@
 {% extends "snapboard/base_forum.html" %}
 
-{% block snapboard_header %}
-<b>
-    Topics Category List
-</b>
-{% endblock %}
-
 {% block snapboard_main %}
+    <div class="index_title">
+    <h2 style="font-size: 152%;">
+    Topics Category List
+    </h2>
+        {% if thread_page %}
+            {% include "snapboard/page_navigation.html" %}
+        {% endif %}
+    </div>
     {% if cat_list %}
         {% for category in cat_list %}
         <div class="thread">

@@ -13,13 +13,12 @@ class PostForm(forms.Form):
             label = '',
             widget=forms.Textarea(attrs={
                 'rows':'5',
-                'cols': '80',
             }),
         )
     private = forms.CharField(
             label="Recipients",
             max_length=150,
-            widget=forms.TextInput(attrs={'size':'80'}),
+            widget=forms.TextInput(),
             required=False,
             )
 

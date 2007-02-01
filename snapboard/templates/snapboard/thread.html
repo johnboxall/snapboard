@@ -74,8 +74,8 @@
                 {% endif %}
             </span>
 
-            <!-- [ICON] -->
             {% if post.avatar %}
+                {# [ICON] #}
                 <img src="/media/{{ post.avatar }}" />
             {% endif %}
             <b>
@@ -90,11 +90,13 @@
             <span class="post_summary" style="display:none;" id="sum{{ post.id }}">:
                 {{ post.text|post_summary:"30" }}
             </span>
+            {% if post.private %}
+            <!-- TODO: filter out private posts -->
+            to {{ post.private }}
+            {% endif %}
         </p>
 
         <div style="display:block" id="post{{ post.id }}">
-
-
             <div class="post" style="display:block" id="post_text{{ post.id }}">
                 {{ post.text|striptags|textile }}
             </div>
@@ -112,14 +114,12 @@
             <div style="display:none" id="post_edit{{ post.id }}">
                 <form action="/snapboard/edit_post/{{ post.id }}/" method="POST">
                 <b>All revisions of this post are stored and publicly viewable.</b>
-                {{ post.get_edit_form.as_p }}
+                <p>{{ post.get_edit_form.post }} {# TODO: what about errors? #}</p>
                 <input type="submit" value="Update">
                 <input type="hidden" name="next" value="{{ request.path }}">
                 </form>
             </div>
             {% endifequal %}
-
-
         </div>
         <br />
         <hr class="postend" />
@@ -139,19 +139,19 @@
             <script type="text/javascript" src="/media/js/yui/autocomplete-min.js"></script>
             Got something to say?
             <br />
-            {# {{ postform.as_p }} #}
             <p>{{ postform.post }} {{ postform.post.errors }}</p>
-            <p><a href="#add_post_div" onClick="toggle()">set private recipients</a></p>
-            <div id="autocomplete_input" style="display:block">
+            <p id="autocomplete_p"><a href="#add_post_div" onClick="toggle('autocomplete_input', 'block'); toggle('autocomplete_p', 'inline');">set private recipients</a></p>
+            <div id="autocomplete_input" style="display:none">
                 <p>{{ postform.private }}{{ postform.private.errors }}</p>
-                <div id="autocomplete_div" style="padding-right: 1em; position:absolute; left: 120px; z-index: 9000;  background-color:#cfc; color:#333; border: 1px solid black;"></div>
+                <div id="autocomplete_div" style="padding-right: 1em; position:absolute; z-index: 9000;  background-color:#cfc; color:#333; border: 1px solid black;"></div>
+                <script type="text/javascript">
+                    dataSource = new YAHOO.widget.DS_XHR("/snapboard/rpc/user_lookup/", ["ResultSet.Result","name","id"]);
+                    autoComp = new YAHOO.widget.AutoComplete("id_private","autocomplete_div",dataSource);
+                    autoComp.delimChar = ","; 
+                    autoComp.typeAhead = true;
+                    autoComp.highlightClassName = "highlight";
+                </script>
             </div>
-            <script type="text/javascript">
-                dataSource = new YAHOO.widget.DS_XHR("/snapboard/rpc/user_lookup/", ["ResultSet.Result","name","id"]);
-                autoComp = new YAHOO.widget.AutoComplete("id_private","autocomplete_div",dataSource);
-                autoComp.delimChar = ","; 
-                autoComp.typeAhead = true; 
-            </script>
 
             <input type="submit" value="Post">
         </form>

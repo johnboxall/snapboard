@@ -1,13 +1,14 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
     <title>example.com</title>
-    <link type="text/css" rel="stylesheet" href="/media/css/yui/reset-fonts-grids.css">
+    <link type="text/css" rel="stylesheet" href="/media/css/yui/reset-fonts-grids.css" />
     <link type="text/css" rel="stylesheet" href="/media/css/snapboard.css" />    
-    <link rel="alternate" type="application/rss+xml" title="RSS" href="/snapboard/feeds/latest/">
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/snapboard/feeds/latest/" />
 
-    <script src="/media/js/thread.js"></script>
-    <script src="/media/js/yui/yahoo-min.js"></script>
-    <script src="/media/js/yui/connection-min.js"></script>
+    <script src="/media/js/thread.js" type="text/javascript"></script>
+    <script src="/media/js/yui/yahoo-min.js" type="text/javascript"></script>
+    <script src="/media/js/yui/connection-min.js" type="text/javascript"></script>
 </head>
 
 <body id="yahoo-com">
@@ -24,7 +25,10 @@
             <ul>
                 <li><a href="/snapboard/threads/"><span>All Discussions</span></a></li>
                 <li><a href="/snapboard/categories/"><span>Categories</span></a></li>
+                {% if user.is_authenticated %}
                 <li><a href="/snapboard/favorites/"><span>Favorites</span></a></li>
+                <li><a href="#"><span>Private Posts</span></a></li>
+                {% endif %}
             </ul>
         </div>
     </div>
@@ -41,7 +45,7 @@
         </div>
         <div class="yui-b">
             {% block side_panel %}
-            <div class="forummenu">
+            <div class="forummenu-first">
                 {% if user.is_authenticated %}
                     <p style="font-size: 122%;">
                         <b><a href="/snapboard/newtopic/">New Topic</a></b>
@@ -64,8 +68,10 @@
 
                     <form method="post" action="/snapboard/signin/">
                         {{ login_form.as_p }}
-                        <input type="submit" value="Sign In" />
-                        <input type="hidden" name="next" value="{{ login_next }}" />
+                        <div>
+                            <input type="submit" value="Sign In" />
+                            <input type="hidden" name="next" value="{{ login_next }}" />
+                        </div>
                     </form>
                     <br />
 
@@ -106,9 +112,18 @@
             {% endif %}
             {% endblock %}
         </div>
+
     </div>
     <div id="ft">
+        <br />
+        <div style="text-align:center; font-size: 85%;">
+            <a href="http://validator.w3.org/check/referer" title="Check the validity of this site&#8217;s XHTML">xhtml</a> &nbsp; 
+            <a href="http://jigsaw.w3.org/css-validator/check/referer" title="Check the validity of this site&#8217;s CSS">css</a> &nbsp; 
+        </div>
+        <br />
     </div>
 </div>
 </body>
 </html>
+
+

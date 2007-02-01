@@ -34,9 +34,9 @@ div.index_title {
 
 div.thread {
     padding: 0.2em 0.5em 0.2em 1em;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #999;
     /* background: #f9fff6; */
-    background: #E6ECFF;
+    background: #CDD;
     /* background: #ccf; */
 }
 
@@ -44,11 +44,18 @@ div.thread A {
     color: #066;
 }
 
-div.forummenu{
+div.forummenu, .forummenu-first{
     padding: 5px;
-    background: #E6ECFF;
-    border-bottom: 1px solid #ccc;
+    /* background: #E6ECFF; */
+    background: #CDD;
+    border-bottom: 1px solid #999;
     font-size: small;
+}
+
+.forummenu-first {
+    background-image: url('/media/img/cdd_topleft.png');
+    background-position: top right;
+    background-repeat: no-repeat;
 }
 
 div.forummenu ul{
@@ -63,16 +70,29 @@ div.forummenu ul{
 form {
     border: 1px solid #ccc;
     padding: 5px;
-    background: #efe;
-}
-
-form p {
-    padding: 2px;
+    background: #e4efe2;
 }
 
 textarea, input, button, select {
     border: 1px solid #ccc;
+    margin-bottom: 5px;
+    margin-top: 5px;
     background: #fff;
+}
+
+textarea, input[type="text"], input[type="password"] {
+    width: 100%;
+}
+
+input[type="submit"] {
+    background-color: #ccc;
+    color: black;
+    border: 1px solid black;
+}
+
+#autocomplete_div .highlight {
+    background: yellow;
+    font-weight: bold;
 }
 
 /* POSTS & THREADS ***************************************/
@@ -136,7 +156,7 @@ span.post_summary {
 }
 
 div.rpc_message {
-    width:"100%";
+    width: 100%;
     text-align: center;
 }
 

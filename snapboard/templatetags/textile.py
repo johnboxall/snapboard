@@ -123,6 +123,10 @@ __history__ = """
   beginning of first line; tweaked list loop to handle consecutive lists
 1.1 - 2003/06/06 - MAP - created initial test suite for links and images,
   and fixed a bunch of related bugs to pass them
+
+Modified 2007/01/30 by Bo Shi
+- added "rel='nofollow'" attribute to all hyperlinks, since this library will
+  only be used in snapboard posts
 """
 import re
 
@@ -219,10 +223,10 @@ def textile(text):
 
     # image with hyperlink
     hyperlink = r"""(\S+?)([^\w\s\/;=\?]*?)(\s|$)"""
-    text = preg_replace(r"""(<img.+ \/>):""" + hyperlink, r"""<a href="\2">\1</a>\3\4""", text);
+    text = preg_replace(r"""(<img.+ \/>):""" + hyperlink, r"""<a rel='nofollow' href="\2">\1</a>\3\4""", text);
 
     # hyperlink qtag
-    text = preg_replace(r'''"([^"\(]+)\s?(\(([^\)]+)\))?":''' + hyperlink, r'''<a href="\4" title="\3">\1</a>\5\6''', text)
+    text = preg_replace(r'''"([^"\(]+)\s?(\(([^\)]+)\))?":''' + hyperlink, r'''<a rel='nofollow' href="\4" title="\3">\1</a>\5\6''', text)
     
     # arrange qtag delineators and replacements in an array
     qtags = [(r'\*\*', 'b'),

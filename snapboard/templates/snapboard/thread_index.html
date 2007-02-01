@@ -29,13 +29,13 @@
                     </b>
                 </span>
             </p>
-            <span style="color: #ccc; font-size: small; float:right;">
+            <span style="color: #677; font-size: small; float:right;">
                 last updated {{ thread.date|timesince }} ago
                 {% ifnotequal thread.last_poster thread.starter %}
                 by {{ thread.last_poster }}
                 {% endifnotequal %}
             </span>
-            <span style="color: #999; padding-left: 2em; font-size:small;">
+            <span style="color: #888; padding-left: 2em; font-size:small;">
                 category:
                 <a href="/snapboard/threads/category/{{ thread.category.id }}">
                     {{ thread.category }}

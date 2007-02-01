@@ -84,11 +84,15 @@ class Post(models.Model):
     Both forward and backward revisions are stored as ForeignKeys.
     """
     user = models.ForeignKey(User)
-    thread = models.ForeignKey(Thread, core=True, edit_inline=models.STACKED, num_in_admin=1)
+    thread = models.ForeignKey(Thread,
+            core=True, edit_inline=models.STACKED, num_in_admin=1)
     text = models.TextField()
     date = models.DateTimeField(editable=False,auto_now_add=True)
     ip = models.IPAddressField()
-    # private (list of usernames)
+
+    ## Note: I can see the max_length coming back to bite me in the ass...
+    # for now, 256 should be reasonable.
+    private = models.CommaSeparatedIntegerField(maxlength=256, blank=True, default='')
 
     # (null or ID of post - most recent revision is always a diff of previous)
     odate = models.DateTimeField(editable=False, null=True)
@@ -156,6 +160,8 @@ class ForumUserData(models.Model):
 
     Real name, email, and date joined information are stored in the built-in
     auth module.
+
+    After logging in, save these values in a session variable.
     '''
     user = models.ForeignKey(User, unique=True, editable=False,
             core=True, edit_inline=models.STACKED, max_num_in_admin=1)
@@ -163,14 +169,18 @@ class ForumUserData(models.Model):
 
     ## views.profile(...) does not handle this properly:
     # http://code.djangoproject.com/ticket/3297
-    avatar = PhotoField(upload_to='img/snapboard/avatars/',
+    avatar = PhotoField(blank=True, upload_to='img/snapboard/avatars/',
             width=20, height=20)
     # signature (hrm... waste of space IMHO)
 
     # browsing options
-    ppp = models.IntegerField(null=True,
+    ppp = models.IntegerField(null=True, blank=True,
+            choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
             help_text = "Posts per page")
-    notify_email = models.BooleanField(default=False,
+    tpp = models.IntegerField(null=True, blank=True,
+            choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
+            help_text = "Threads per page")
+    notify_email = models.BooleanField(default=False, blank=True,
             help_text = "Email notifications for watched discussions")
     reverse_posts = models.BooleanField(
             default=False,
