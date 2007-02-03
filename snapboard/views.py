@@ -123,9 +123,6 @@ def thread(request, thread_id, page="1"):
     page = int(page)        # indexed starting at 1
     pindex = page - 1       # indexed starting at 0
 
-    from middleware import threadlocals
-    print threadlocals.get_current_ip(), type(threadlocals.get_current_ip())
-
     try:
         thr = Thread.objects.get(pk=thread_id)
     except Thread.DoesNotExist:
@@ -137,7 +134,6 @@ def thread(request, thread_id, page="1"):
     if user.is_authenticated():
         try:
             wl = WatchList.objects.get(user=user, thread=thr)
-            print 'watched is true for', user, thr, wl
             render_dict.update({"watched":True})
         except WatchList.DoesNotExist:
             render_dict.update({"watched":False})

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 
 from fields import PhotoField
+from middleware import threadlocals
 
 ## NOTES
 # TODO: banlist model
@@ -64,7 +65,7 @@ class Post(models.Model):
     """
 
     # blank=True to get admin to work when the user field is missing
-    user = models.ForeignKey(User, blank=True, default=None)
+    user = models.ForeignKey(User, editable=False, blank=True, default=None)
 
     thread = models.ForeignKey(Thread,
             core=True, edit_inline=models.STACKED, num_in_admin=1)
@@ -89,18 +90,16 @@ class Post(models.Model):
     freespeech = models.BooleanField(default=False) # superuser level access
 
     def save(self):
-        # # TODO this doesn't seem to integrate properly
-        # from middleware import threadlocals
+        print 'user =', threadlocals.get_current_user()
+        print threadlocals.get_current_ip(), type(threadlocals.get_current_ip())
 
-        # # hack to disallow setting arbitrary users to posts
-        # if getattr(self, 'user_id', None) is None:
-        #     self.user_id = threadlocals.get_current_user().id
+        # hack to disallow admin setting arbitrary users to posts
+        if getattr(self, 'user_id', None) is None:
+            self.user_id = threadlocals.get_current_user().id
 
-        # # disregard any modifications to ip address
-        # print 'user =', threadlocals.get_current_user()
-        # print threadlocals.get_current_ip(), type(threadlocals.get_current_ip())
-        # self.ip = threadlocals.get_current_ip()
-        self.ip = '127.0.0.1'
+        # disregard any modifications to ip address
+        self.ip = threadlocals.get_current_ip()
+        # self.ip = '127.0.0.1'
 
         if self.previous is not None:
             self.odate = self.previous.odate

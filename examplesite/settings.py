@@ -70,7 +70,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.doc.XViewMiddleware',
 
     # SNAPboard middleware
-    'snapboard.middleware.threadlocals.ThreadLocals',
+    'examplesite.snapboard.middleware.threadlocals.ThreadLocals',
 )
 
 ROOT_URLCONF = 'examplesite.urls'
