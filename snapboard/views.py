@@ -4,6 +4,7 @@ from django import newforms as forms
 from django.contrib.auth import decorators
 from django.contrib.auth import login, logout
 from django.core.paginator import ObjectPaginator, InvalidPage
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -122,31 +123,35 @@ def thread(request, thread_id, page="1"):
     page = int(page)        # indexed starting at 1
     pindex = page - 1       # indexed starting at 0
 
+    from middleware import threadlocals
+    print threadlocals.get_current_ip(), type(threadlocals.get_current_ip())
+
     try:
         thr = Thread.objects.get(pk=thread_id)
     except Thread.DoesNotExist:
         raise Http404
 
     render_dict = {}
+    user = request.user
 
-    if request.user.is_authenticated():
+    if user.is_authenticated():
         try:
-            wl = WatchList.objects.get(user=request.user, thread=thr)
-            print 'watched is true for', request.user, thr, wl
+            wl = WatchList.objects.get(user=user, thread=thr)
+            print 'watched is true for', user, thr, wl
             render_dict.update({"watched":True})
         except WatchList.DoesNotExist:
             render_dict.update({"watched":False})
 
-    if request.user.is_authenticated() and request.POST:
+    if user.is_authenticated() and request.POST:
         postform = PostForm(request.POST.copy())
 
         if postform.is_valid():
             # reset post object
             postobj = Post(thread = thr,
-                    user = request.user,
+                    user = user,
                     text = postform.clean_data['post'],
                     private = postform.clean_data['private'],
-                    ip = request.META.get('REMOTE_ADDR', ''))
+                    )
             postobj.save()
             postform = PostForm()
     else:
@@ -154,8 +159,21 @@ def thread(request, thread_id, page="1"):
 
     # this must come after the post so new messages show up
     try:
+        uid = str(user.id)
+        idstr = (uid + ',', ',' + uid + ',', ',' + uid)
         post_list = Post.objects.filter(thread=thr).order_by('odate').exclude(
                 revision__isnull=False)
+       
+        # filter out the private messages.  admin cannot see private messages
+        # (although they can use the Django admin interface to do so)
+        # TODO: there's gotta be a better way to filter out private messages
+        # Tested with postgresql only so far
+        post_list = post_list.filter(
+                Q(user__id__exact=user.id) |
+                Q(private__exact='') |
+                Q(private__endswith=idstr[2]) |
+                Q(private__startswith=idstr[0]) |
+                Q(private__contains=idstr[1]))
 
         # get any avatars
         extra_post_avatar = """
@@ -166,7 +184,7 @@ def thread(request, thread_id, page="1"):
             'avatar': extra_post_avatar
             })
 
-        if request.user.is_authenticated() and not request.user.is_staff:
+        if user.is_authenticated() and not user.is_staff:
             post_list = post_list.exclude(censor=True)
 
         paginator = ObjectPaginator(post_list, PPP)
@@ -212,7 +230,6 @@ def edit_post(request, original, next=None):
                 thread = orig_post.thread,
                 private = orig_post.private,
                 text = postform.clean_data['post'],
-                ip = request.META.get('REMOTE_ADDR', ''),
                 previous = orig_post,
                 )
         post.save()
@@ -225,7 +242,7 @@ def edit_post(request, original, next=None):
         div_id_num = orig_post.id
 
     try:
-        next = request.POST['next'] + '#post' + str(div_id_num)
+        next = request.POST['next'].split('#')[0] + '#snap_post' + str(div_id_num)
     except KeyError:
         next = '/snapboard/threads/id/' + str(orig_post.thread.id) + '/'
 
@@ -254,7 +271,6 @@ def new_thread(request):
                     user = request.user,
                     thread = thread,
                     text = threadform.clean_data['post'],
-                    ip = request.META.get('REMOTE_ADDR', ''),
                     )
             post.save()
 
@@ -281,6 +297,7 @@ def base_thread_queryset(qset=None):
 
     # number of posts in thread
     # censored threads don't count toward the total
+    # TODO: private threads DO count for total; fix it
     extra_post_count = """
         SELECT COUNT(*) FROM snapboard_post
             WHERE snapboard_post.thread_id = snapboard_thread.id
@@ -288,7 +305,7 @@ def base_thread_queryset(qset=None):
             AND NOT snapboard_post.censor
         """
 
-    # figure out who started the population
+    # figure out who started the discussion
     extra_starter = """
         SELECT username FROM auth_user
             WHERE auth_user.id = (SELECT user_id
@@ -469,10 +486,12 @@ def profile(request, next='/'):
     the model definition;  this is a bug:
 
         http://code.djangoproject.com/ticket/3247
+        # patch attached to ticket currently fixes problem
 
     ForumUserData.avatar does not render properly in newforms:
 
         http://code.djangoproject.com/ticket/3297
+        # patch does not apply cleanly
     '''
     user = request.user
 
@@ -502,3 +521,4 @@ def profile(request, next='/'):
             context_instance=RequestContext(request))
 profile = snapboard_require_signin(profile)
 
+# vim: ai ts=4 sts=4 et sw=4

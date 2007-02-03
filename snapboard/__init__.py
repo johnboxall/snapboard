@@ -34,3 +34,4 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 #__history__ = ""
+# vim: ai ts=4 sts=4 et sw=4

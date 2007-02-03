@@ -17,6 +17,7 @@ def rpc_post(request):
     orig_id = int(request.GET['orig'])
     post = Post.objects.get(pk=show_id)
 
+
     prev_id = ''
     rev_id = ''
     if post.revision is not None:
@@ -40,54 +41,41 @@ def rpc_lookup(request, queryset, field, limit=5):
     return HttpResponse(simplejson.dumps(object), mimetype='application/javascript')
 
 
+def _toggle_boolean_field(object, field):
+    '''
+    Switches the a boolean value and returns the new value.
+    object should be a Django Model
+    '''
+    setattr(object, field, (not getattr(object, field)))
+    object.save()
+    return getattr(object, field)
+
+
 def rpc_csticky(request, **kwargs):
     assert(request.user.is_staff)
     assert('thread' in kwargs, 'rpc_csticky() requires "thread"')
-    thr = kwargs['thread']
-
-    thr.csticky = (not thr.csticky)
-    thr.save()
-    if thr.csticky:
-        return {'link':'unset csticky',
-                'msg':'This thread is sticky in its category.',
-                }
+    if _toggle_boolean_field(kwargs['thread'], 'csticky'):
+        return {'link':'unset csticky', 'msg':'This thread is sticky in its category.'}
     else:
-        return {'link':'set csticky',
-                'msg':'Removed thread from category sticky list',
-                }
+        return {'link':'set csticky', 'msg':'Removed thread from category sticky list'}
 
 
 def rpc_gsticky(request, **kwargs):
     assert(request.user.is_staff)
     assert('thread' in kwargs, 'rpc_gsticky() requires "thread"')
-    thr = kwargs['thread']
-
-    thr.gsticky = (not thr.gsticky)
-    thr.save()
-    if thr.gsticky:
-        return {'link':'unset gsticky',
-                'msg':'This thread is now globally sticky.',
-                }
+    if _toggle_boolean_field(kwargs['thread'], 'gsticky'):
+        return {'link':'unset gsticky', 'msg':'This thread is now globally sticky.'}
     else:
-        return {'link':'set gsticky',
-                'msg':'Removed thread from global sticky list',
-                }
+        return {'link':'set gsticky', 'msg':'Removed thread from global sticky list'}
+
 
 def rpc_close(request, **kwargs):
     assert(request.user.is_staff)
     assert('thread' in kwargs, 'rpc_close() requires "thread"')
-    thr = kwargs['thread']
-
-    thr.closed = (not thr.closed)
-    thr.save()
-    if thr.closed:
-        return {'link':'open thread',
-                'msg':'This discussion is now CLOSED.',
-                }
+    if _toggle_boolean_field(kwargs['thread'], 'closed'):
+        return {'link':'open thread', 'msg':'This discussion is now CLOSED.'}
     else:
-        return {'link':'close thread',
-                'msg':'This discussion is now OPEN.',
-                }
+        return {'link':'close thread', 'msg':'This discussion is now OPEN.'}
 
 
 def rpc_watch(request, **kwargs):
@@ -121,15 +109,8 @@ def rpc_abuse(request, **kwargs):
 def rpc_censor(request, **kwargs):
     assert(request.user.is_staff)
     assert('post' in kwargs, 'rpc_gsticky() requires "post"')
-    post = kwargs['post']
-
-    post.censor = (not post.censor)
-    post.save()
-    if post.censor:
-        return {'link':'uncensor',
-                'msg':'This post is censored!',
-                }
+    if _toggle_boolean_field(kwargs['post'], 'censor'):
+        return {'link':'uncensor', 'msg':'This post is censored!'}
     else:
-        return {'link':'censor',
-                'msg':'This post is no longer censored.',
-                }
+        return {'link':'censor', 'msg':'This post is no longer censored.'}
+# vim: ai ts=4 sts=4 et sw=4

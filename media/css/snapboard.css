@@ -11,17 +11,6 @@ HR {
 }
 
 
-#navigation div {
-    text-align: center;
-}
-
-#navigation ul li {
-    list-style: none;
-    /* margin-left: auto; */
-    margin-right: 1em;
-    display: inline;
-}
-
 .errorlist {
     color: red;
 }
@@ -49,7 +38,7 @@ div.forummenu, .forummenu-first{
     /* background: #E6ECFF; */
     background: #CDD;
     border-bottom: 1px solid #999;
-    font-size: small;
+    font-size: 85%;
 }
 
 .forummenu-first {
@@ -65,37 +54,28 @@ div.forummenu ul{
     text-indent: -1em;
 }
 
-/* FORMS ***************************************/
-
-form {
-    border: 1px solid #ccc;
-    padding: 5px;
-    background: #e4efe2;
-}
-
-textarea, input, button, select {
-    border: 1px solid #ccc;
-    margin-bottom: 5px;
-    margin-top: 5px;
-    background: #fff;
-}
-
-textarea, input[type="text"], input[type="password"] {
-    width: 100%;
-}
-
-input[type="submit"] {
-    background-color: #ccc;
-    color: black;
-    border: 1px solid black;
-}
-
 #autocomplete_div .highlight {
     background: yellow;
     font-weight: bold;
 }
 
 /* POSTS & THREADS ***************************************/
+
+/* TEXTILE ***************************************/
+.post_text p {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.post_text blockquote {
+    margin-left: 1em;
+    margin-right: 1em;
+    background:#EEEEEE none repeat scroll 0%;
+    border-left:1px solid #336633;
+    margin-left:1em;
+    margin-right:1em;
+    padding:5px 10px
+}
 
 hr.postend {
     width: 80%;
@@ -111,10 +91,6 @@ hr.firstpost {
     border: 0px solid black;
 }
 
-.post p {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
 
 p.post_header {
     padding-left: 2em;
@@ -131,23 +107,23 @@ p.index_page_nav {
 }
 
 span.thread_menu {
-    font-size: small;
+    font-size: 85%;
     float: right;
 }
 
 span.post_menuright {
-    font-size: x-small;
+    font-size: 77%;
     padding-right: 10%;
     float: right;
 }
 
 span.post_menuleft {
-    font-size: x-small;
+    font-size: 77%;
     padding-left: 10%;
 }
 
 span.timesince {
-    font-size: small;
+    font-size: 85%;
     color:#999;
 }
 

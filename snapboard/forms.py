@@ -77,3 +77,4 @@ class LoginForm(forms.Form):
                 raise ValidationError('Your account has been disabled.')
         else:
             raise ValidationError('Your username or password were incorrect.')
+# vim: ai ts=4 sts=4 et sw=4

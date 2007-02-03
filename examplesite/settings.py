@@ -68,6 +68,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
+
+    # SNAPboard middleware
+    'snapboard.middleware.threadlocals.ThreadLocals',
 )
 
 ROOT_URLCONF = 'examplesite.urls'
@@ -86,4 +89,5 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'examplesite.snapboard',
+    'examplesite.sbreg',
 )

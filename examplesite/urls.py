@@ -4,6 +4,7 @@ from django.conf import settings
 urlpatterns = patterns('',
     # Example:
     (r'^snapboard/', include('snapboard.urls')),
+    (r'^accounts/', include('sbreg.urls')),
 
     # Uncomment this for admin:
     (r'^admin/', include('django.contrib.admin.urls')),

@@ -1,0 +1,17 @@
+{% extends "sbreg/base_sbreg.html" %}
+
+{% block sbreg_body_main %}
+    <div id="absolute_center">
+    <p style="text-align:center">
+        {% if has_account %}
+        <b>You already have an account!</b>
+        {% endif %}
+        {% if success %}
+        <b>You've successfully registered.  Please <a href="{{ next }}">log in now</a>.</b>
+        {% endif %}
+        {% if expired %}
+        <b>That account has expired.  Please reregister.</b>
+        {% endif %}
+    </p>
+    </div>
+{% endblock %}

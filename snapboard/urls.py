@@ -42,3 +42,4 @@ urlpatterns = patterns('',
     # feeds
     (r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),
 )
+# vim: ai ts=4 sts=4 et sw=4

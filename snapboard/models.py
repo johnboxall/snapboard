@@ -1,5 +1,3 @@
-# vim: ai ts=4 sts=4 et sw=4
-
 from datetime import datetime
 
 from django.db import models
@@ -58,40 +56,25 @@ class Thread(models.Model):
         list_filter = ('closed', 'csticky', 'gsticky', 'category')
 
 
-class CategoryAccessControlList(models.Model):
-    category = models.ForeignKey(Category)
-    user = models.ForeignKey(User)
-    group = models.ForeignKey(Group)
-
-    read = models.BooleanField(default = True)
-    write = models.BooleanField(default = True)
-    censor = models.BooleanField(default = False)
-    close = models.BooleanField(default = False)
-
-    # unique on category and user or category and group
-    class Admin:
-        list_display = ('category', 'user', 'group', 'read', 'write', 'censor')
-        list_filter = ('category', 'group', 'read', 'write', 'censor', 'close')
-
-    class Meta:
-        unique_together = (('category', 'user', 'group'),)
-
-
 class Post(models.Model):
     """
     Post objects store information about revisions.
 
     Both forward and backward revisions are stored as ForeignKeys.
     """
-    user = models.ForeignKey(User)
+
+    # blank=True to get admin to work when the user field is missing
+    user = models.ForeignKey(User, blank=True, default=None)
+
     thread = models.ForeignKey(Thread,
             core=True, edit_inline=models.STACKED, num_in_admin=1)
     text = models.TextField()
     date = models.DateTimeField(editable=False,auto_now_add=True)
-    ip = models.IPAddressField()
+    ip = models.IPAddressField(blank=True)
 
     ## Note: I can see the max_length coming back to bite me in the ass...
     # for now, 256 should be reasonable.
+    # TODO: make this a textfield (and set columns to 1)
     private = models.CommaSeparatedIntegerField(maxlength=256, blank=True, default='')
 
     # (null or ID of post - most recent revision is always a diff of previous)
@@ -106,6 +89,19 @@ class Post(models.Model):
     freespeech = models.BooleanField(default=False) # superuser level access
 
     def save(self):
+        # # TODO this doesn't seem to integrate properly
+        # from middleware import threadlocals
+
+        # # hack to disallow setting arbitrary users to posts
+        # if getattr(self, 'user_id', None) is None:
+        #     self.user_id = threadlocals.get_current_user().id
+
+        # # disregard any modifications to ip address
+        # print 'user =', threadlocals.get_current_user()
+        # print threadlocals.get_current_ip(), type(threadlocals.get_current_ip())
+        # self.ip = threadlocals.get_current_ip()
+        self.ip = '127.0.0.1'
+
         if self.previous is not None:
             self.odate = self.previous.odate
         elif not self.id:
@@ -114,7 +110,7 @@ class Post(models.Model):
         super(Post, self).save()
 
     def get_absolute_url(self):
-        return '/threads/id/' + str(self.thread.id)
+        return ''.join(('/threads/id/', str(self.thread.id), '/#post', str(self.id)))
 
     def get_edit_form(self):
         from forms import PostForm
@@ -127,6 +123,25 @@ class Post(models.Model):
         list_display = ('user', 'date', 'thread', 'ip')
         list_filter    = ('censor', 'freespeech', 'user',)
         search_fields  = ('text', 'user')
+
+
+# class PostAdminOptions(models.options.AdminOptions):
+#     '''
+#     Replaces AdminOptions for Post model
+#     '''
+#     def _fields(self):
+#         user = threadlocals.get_current_user()
+#         assert(not(user is None or user.is_anonymous()))
+# 
+#         if user.has_perm('moderator.superuser'):
+#             pass
+#         else:
+#             pass
+#     fields = property(_fields)
+# 
+# # register PostAdminOptions
+# #del Post._meta.admin.fields
+# #Post._meta.admin.__class__ = PostAdminOptions
 
 
 class AbuseList(models.Model):
@@ -200,3 +215,4 @@ class ForumUserData(models.Model):
     #                 ('ppp', 'notify_email', 'reverse_posts', 'frontpage_filters',)}),
     #     )
 
+# vim: ai ts=4 sts=4 et sw=4

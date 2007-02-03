@@ -1,0 +1,22 @@
+form {
+    border: 1px solid #ccc;
+    padding: 5px;
+    background: #e4efe2;
+}
+
+textarea, input, button, select {
+    border: 1px solid #ccc;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    background: #fff;
+}
+
+textarea, input[type="text"], input[type="password"] {
+    width: 100%;
+}
+
+input[type="submit"] {
+    background-color: #ccc;
+    color: black;
+    border: 1px solid black;
+}

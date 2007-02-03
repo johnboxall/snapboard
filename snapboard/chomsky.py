@@ -110,3 +110,4 @@ def chomsky(times=1, line_length=72):
         parts.append(phraselist)
     output = chain(*islice(izip(*parts), 0, times))
     return ' '.join(output)
+# vim: ai ts=4 sts=4 et sw=4

@@ -4,14 +4,20 @@
     <title>example.com</title>
     <link type="text/css" rel="stylesheet" href="/media/css/yui/reset-fonts-grids.css" />
     <link type="text/css" rel="stylesheet" href="/media/css/snapboard.css" />    
+    <link type="text/css" rel="stylesheet" href="/media/css/form.css" />    
+    <link type="text/css" rel="stylesheet" href="/media/css/nav.css" />    
+
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/snapboard/feeds/latest/" />
 
-    <script src="/media/js/thread.js" type="text/javascript"></script>
+    {# gotta come first #}
     <script src="/media/js/yui/yahoo-min.js" type="text/javascript"></script>
+
+    <script src="/media/js/thread.js" type="text/javascript"></script>
     <script src="/media/js/yui/connection-min.js" type="text/javascript"></script>
+    <script src="/media/js/yui/dom-min.js" type="text/javascript"></script>
 </head>
 
-<body id="yahoo-com">
+<body id="yahoo-com" onLoad="procAllTimeSince();">
 <div id="doc2" class="yui-t4"><!-- "doc" here for example only; use any page width -->
 
     <div id="hd">

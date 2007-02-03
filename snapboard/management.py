@@ -75,3 +75,4 @@ def test_setup():
             post.save()
 
 dispatcher.connect(test_setup, sender=snapboard_app, signal=signals.post_syncdb) 
+# vim: ai ts=4 sts=4 et sw=4

@@ -1,11 +1,12 @@
 function toggle_post(id) {
-    toggle('sum'+id, 'inline');
-    toggle('post'+id, 'block');
+    toggle('snap_post_sum'+id, 'inline');
+    toggle('snap_post_view'+id, 'block');
 }
 
 function toggle_edit(id) {
-    toggle('post_text'+id, 'block');
-    toggle('post_edit'+id, 'block');
+    //toggle('post_text'+id, 'block');
+    toggle('snap_post_text'+id, 'block');
+    toggle('snap_post_edit'+id, 'block');
 }
 
 function toggle(id, type) {
@@ -49,7 +50,7 @@ function revision(orig_id, show_id) {
     };
 
     var handleFailure = function(o) {
-        var errordiv = document.getElementById("thread_rpc_msg_div");
+        var errordiv = document.getElementById("thread_rpc_feedback");
         if(o.responseText !== undefined) {
             for (var n in o) {
                 if (o.hasOwnProperty(n)) {
@@ -88,7 +89,7 @@ function toggle_variable(action, oclass, oid, msgdivid) {
     };
 
     var handleFailure = function(o) {
-        var errordiv = document.getElementById("thread_rpc_msg_div");
+        var errordiv = document.getElementById("thread_rpc_feedback");
         if(o.responseText !== undefined) {
             div.innerHTML = "<b>ERROR</b>";
             for (var n in o) {
@@ -110,11 +111,83 @@ function toggle_variable(action, oclass, oid, msgdivid) {
 }
 
 // thread level functions
-function set_csticky(id) { toggle_variable('csticky', 'thread', id, 'thread_rpc_msg_div'); }
-function set_gsticky(id) { toggle_variable('gsticky', 'thread', id, 'thread_rpc_msg_div'); }
-function set_watch(id) { toggle_variable('watch', 'thread', id, 'thread_rpc_msg_div'); }
-function set_close(id) { toggle_variable('close', 'thread', id, 'thread_rpc_msg_div'); }
+function set_csticky(id) { toggle_variable('csticky', 'thread', id, 'thread_rpc_feedback'); }
+function set_gsticky(id) { toggle_variable('gsticky', 'thread', id, 'thread_rpc_feedback'); }
+function set_watch(id) { toggle_variable('watch', 'thread', id, 'thread_rpc_feedback'); }
+function set_close(id) { toggle_variable('close', 'thread', id, 'thread_rpc_feedback'); }
 
 // post level function
-function set_censor(id) { toggle_variable('censor', 'post', id, ('post_rpc_msg_div' + id));}
-function set_abuse(id) { toggle_variable('abuse', 'post', id, ('post_rpc_msg_div' + id));}
+function set_censor(id) { toggle_variable('censor', 'post', id, ('post_rpc_feedback' + id));}
+function set_abuse(id) { toggle_variable('abuse', 'post', id, ('post_rpc_feedback' + id));}
+
+
+
+
+/* =======================================================================
+* Time Since
+* January 16, 2004
+*
+* Time Since creates a string which friendly tells you the time since the
+* original date Based on the original time_since() function by
+* Natalie Downe - http://blog.natbat.co.uk/archive/2003/Jun/14/time_since
+*
+* Copyright (c) 2004 Mark Wubben - http://neo.dzygn.com/
+*
+* Usage: date.toTimeSinceString(number nLimit, string sBetween, string sLastBetween)
+* nLimit: limit the shown time units (year, month etc). default = 2
+* sBetween: string between two time units. default = ", "
+* sLastBetween: string between the second-last and last time unit.
+*               default = " and "
+=========================================================================*/
+Date.prototype.toTimeSinceString = function(nLimit, sBetween, sLastBetween){
+	if(!nLimit){ nLimit = 2; }
+	if(!sBetween){ sBetween = ", "; }
+	if(!sLastBetween){ sLastBetween = " and "; }
+	if(!Date.prototype.toTimeSinceString._collStructs){
+		Date.prototype.toTimeSinceString._collStructs = new Array(
+			{seconds: 60 * 60 * 24 * 365, name: "year"},
+			{seconds: 60 * 60 * 24 * 30, name: "month"},
+			{seconds: 60 * 60 * 24 * 7, name: "week"},
+			{seconds: 60 * 60 * 24, name: "day"},
+			{seconds: 60 * 60, name: "hour"},
+			{seconds: 60, name: "minute"}
+		);
+	}
+
+	var collStructs = Date.prototype.toTimeSinceString._collStructs;
+	var nSecondsRemain = ((new Date).valueOf() - this.valueOf()) / 1000;
+	var sReturn = "";
+	var nCount = 0;
+	var nFloored;
+
+	for(var i = 0; i < collStructs.length && nCount < nLimit; i++){
+		nFloored = Math.floor(nSecondsRemain / collStructs[i].seconds);
+		if(nFloored > 0){
+			if(sReturn.length > 0){
+				if(nCount == nLimit - 1 || i == collStructs.length - 1){
+					sReturn += sLastBetween;
+				} else if(nCount < nLimit && i < collStructs.length){
+					sReturn += sBetween;
+				}
+			}
+			sReturn += nFloored + " " + collStructs[i].name;
+			if(nFloored > 1){
+				sReturn += "s";
+			}
+			nSecondsRemain -= nFloored * collStructs[i].seconds;
+			nCount++;
+		}
+	}
+
+	return sReturn;
+}
+
+
+function procAllTimeSince() {
+    elst = YAHOO.util.Dom.getElementsByClassName('datetime', 'span');
+    for(var i=0; i < elst.length; i++){
+        el = elst[i];
+        datestr = new Date(el.innerHTML);
+        el.innerHTML = datestr.toTimeSinceString() + ' ago';
+    }
+}
