@@ -39,16 +39,16 @@
                 </a>
             </b>
 
+            {% if post.private %}
+                to {{ post.private|privatenames }}
+            {% endif %}
+
             <span class="timesince">
                 <span class="datetime">{{ post.date|date:"r T" }}</span>
             </span>
             <span class="post_summary" style="display:none;" id="snap_post_sum{{ post.id }}">:
                 {{ post.text|post_summary:"30" }}
             </span>
-            {% if post.private %}
-            <!-- TODO: filter out private posts -->
-            to {{ post.private }}
-            {% endif %}
         </p>
 
         <div style="display:block" id="snap_post_view{{ post.id }}">
