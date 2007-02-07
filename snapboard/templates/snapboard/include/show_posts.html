@@ -1,0 +1,81 @@
+{% load extras %}
+<div>
+<hr class="firstpost" />
+{% for post in post_page %}
+    <div id="snap_post{{ post.id }}">
+        <div id="post_rpc_feedback{{ post.id }}" class="rpc_message">
+            <!-- This DIV is for RPC feedback messages for individual posts -->
+        </div>
+        <p class="post_header">
+            <span class="post_menuright">
+                {% ifequal post.user_id user.id %}
+                <span title="Edit this post.  All revisions are saved!" class="popup">
+                    <b><a href="#snap_post{{ post.id }}" onclick="toggle_edit('{{ post.id }}')">edit post</a></b>
+                </span>
+                &#149;
+                {% endifequal %}
+                {% if user.is_staff %}
+                <span title="ADMIN: mark this post for censorship" class="popup">
+                    <a id="censor{{ post.id }}" href="#snap_post{{ post.id }}" onClick="set_censor('{{ post.id }}');">
+                        {{ post.censor|yesno:"uncensor,censor" }}
+                    </a>
+                </span>
+                
+                {% endif %}
+                {% if user.is_authenticated %}
+                <span title="Report this post for violation of forum policies." class="popup">
+                    <a id="abuse{{ post.id }}" href="#snap_post{{ post.id }}" onClick="set_abuse('{{ post.id }}');">&#149; report abuse</a>
+                </span>
+                {% endif %}
+            </span>
+
+            {% if post.avatar %}
+                {# [ICON] #}
+                <img src="/media/{{ post.avatar }}" />
+            {% endif %}
+            <b>
+                <a href="#snap_post{ post.id }}" onclick="toggle_post('{{ post.id }}');">
+                    <span title="POPUP" class="popup">{{ post.user }}</span>
+                </a>
+            </b>
+
+            <span class="timesince">
+                <span class="datetime">{{ post.date|date:"r T" }}</span>
+            </span>
+            <span class="post_summary" style="display:none;" id="snap_post_sum{{ post.id }}">:
+                {{ post.text|post_summary:"30" }}
+            </span>
+            {% if post.private %}
+            <!-- TODO: filter out private posts -->
+            to {{ post.private }}
+            {% endif %}
+        </p>
+
+        <div style="display:block" id="snap_post_view{{ post.id }}">
+            <div class="post_text" style="display:block" id="snap_post_text{{ post.id }}">
+                {{ post.text|striptags|markdown:"safe" }}
+            </div>
+            {% if post.previous %}
+            <span id="post_revision_links{{ post.id }}" class="post_menuleft">
+                <a href="#snap_post_view{{ post.id }}" onClick="revision('{{ post.id }}','{{ post.previous.id }}');">&#171; previous</a>
+                <b style="color: #c00">This message has been revised</b>
+            </span>
+            <br />
+            {% endif %}
+
+            {% ifequal post.user_id user.id %}
+            <div style="display:none" id="snap_post_edit{{ post.id }}">
+                <form action="/snapboard/edit_post/{{ post.id }}/" method="POST">
+                <b>All revisions of this post are stored and publicly viewable.</b>
+                <p>{{ post.get_edit_form.post }} {# TODO: what about errors? #}</p>
+                <input type="submit" value="Update">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                </form>
+            </div>
+            {% endifequal %}
+        </div>
+    </div>
+    <br />
+    <hr class="postend" />
+{% endfor %} {# iterate through posts #}
+</div>

@@ -108,6 +108,16 @@ class Post(models.Model):
             self.odate = datetime.now()
         super(Post, self).save()
 
+
+    def management_save(self):
+        if self.previous is not None:
+            self.odate = self.previous.odate
+        elif not self.id:
+            # only do the following on creation, not modification
+            self.odate = datetime.now()
+        super(Post, self).save()
+
+
     def get_absolute_url(self):
         return ''.join(('/threads/id/', str(self.thread.id), '/#post', str(self.id)))
 
@@ -195,12 +205,12 @@ class ForumUserData(models.Model):
             choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
             help_text = "Threads per page")
     notify_email = models.BooleanField(default=False, blank=True,
-            help_text = "Email notifications for watched discussions")
+            help_text = "Email notifications for watched discussions.")
     reverse_posts = models.BooleanField(
             default=False,
-            help_text = "Display Newest Posts First")
+            help_text = "Display newest posts first.")
     frontpage_filters = models.ManyToManyField(Category,
-            help_text = "Filter your front page on these categories")
+            help_text = "Filter your front page on these categories.")
 
     ## edit inline
     # class Admin:

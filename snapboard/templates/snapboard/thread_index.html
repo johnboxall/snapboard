@@ -6,7 +6,7 @@
     {{ title }}
     </h2>
         {% if thread_page %}
-            {% include "snapboard/page_navigation.html" %}
+            {% include "snapboard/include/page_navigation.html" %}
         {% endif %}
     </div>
 
@@ -44,6 +44,12 @@
             </span>
         </div>
         {% endfor %}
+        {% if thread_page %}
+        <div class="index_title">
+            {% include "snapboard/include/page_navigation.html" %}
+        </div>
+        {% endif %}
+
     {% else %}
         <p>No threads are available.</p>
     {% endif %}

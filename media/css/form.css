@@ -4,6 +4,12 @@ form {
     background: #e4efe2;
 }
 
+form th {
+    /* border-bottom: 1px solid #999999; */
+    text-align: right;
+    padding-right: 0.5em;
+}
+
 textarea, input, button, select {
     border: 1px solid #ccc;
     margin-bottom: 5px;

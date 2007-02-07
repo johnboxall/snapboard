@@ -11,6 +11,7 @@ from django.template import RequestContext
 from django.utils import simplejson
 from django.views.generic.simple import redirect_to
 
+
 #from models import Thread, Post, Category, WatchList
 from models import *
 from forms import PostForm, ThreadForm, LoginForm
@@ -180,7 +181,7 @@ def thread(request, thread_id, page="1"):
             'avatar': extra_post_avatar
             })
 
-        if user.is_authenticated() and not user.is_staff:
+        if not getattr(user, 'is_staff', False):
             post_list = post_list.exclude(censor=True)
 
         paginator = ObjectPaginator(post_list, PPP)

@@ -72,7 +72,8 @@ def test_setup():
                     text=text,
                     ip='.'.join([str(choice(range(1,255))) for x in (1,2,3,4)]),
                     )
-            post.save()
+            # allows setting of arbitrary ip
+            post.management_save()
 
 dispatcher.connect(test_setup, sender=snapboard_app, signal=signals.post_syncdb) 
 # vim: ai ts=4 sts=4 et sw=4
