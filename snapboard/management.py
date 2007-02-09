@@ -35,10 +35,9 @@ def test_setup():
     """
     populate = raw_input(msg).strip()
     while not (populate == "yes" or populate == "no"):
-        if populate == "no":
-            return
-        elif populate is not "yes":
-            populate = raw_input("\nPlease type 'yes' or 'no': ").strip()
+        populate = raw_input("\nPlease type 'yes' or 'no': ").strip()
+    if populate == "no":
+        return
 
     # create 10 random users
 

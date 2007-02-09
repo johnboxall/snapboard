@@ -23,9 +23,8 @@
     <div id="hd">
         <br />
         {% block site_title %}
-        example.com
+        <p style="font-size: 150%;">SNAPBOARD</p>
         {% endblock %}
-        <br />
         <br />
         <div id="navigation">
             <ul>
@@ -58,7 +57,7 @@
                     </p>
                     <br />
                     <p>
-                        You are signed in as <a href="#">{{ user.username }}</a>
+                        You are signed in as <a href="/snapboard/profile">{{ user.username }}</a>
                         {% if user.is_staff %}
                         <b>(STAFF)</b>
                         {% endif %}
