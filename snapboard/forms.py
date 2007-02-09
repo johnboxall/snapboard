@@ -41,9 +41,15 @@ class PostForm(forms.Form):
 
 
 class ThreadForm(forms.Form):
-    category = forms.CharField(widget=forms.Select(
-        choices = [(str(x.id), x.label) for x in Category.objects.all()]
-        ))
+    def __init__( self, *args, **kwargs ):
+        super( ThreadForm, self ).__init__( *args, **kwargs )
+        self.fields['category'] = forms.ChoiceField(
+                choices = [(str(x.id), x.label) for x in Category.objects.all()] 
+                )
+
+    # this is here to set the order
+    category = forms.CharField()
+
     subject = forms.CharField(max_length=80,
             widget=forms.TextInput(
                 attrs={
