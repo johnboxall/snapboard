@@ -61,6 +61,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.request",
+
+    # SNAPboard processors
+    "examplesite.snapboard.views.snapboard_default_context",
 )
 
 MIDDLEWARE_CLASSES = (
@@ -91,3 +94,10 @@ INSTALLED_APPS = (
     'examplesite.snapboard',
     'examplesite.sbreg',
 )
+
+# SNAPBoard specific OPTIONAL settings:
+# The following are the defaults, so you only need to set them if you want to
+# change them.  Note the lack of trailing '/'
+#
+#SNAP_PREFIX = '/snapboard'
+#SNAP_MEDIA_PREFIX = MEDIA_URL + '/media'

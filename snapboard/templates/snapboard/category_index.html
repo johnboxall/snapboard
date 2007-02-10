@@ -13,7 +13,7 @@
         {% for category in cat_list %}
         <div class="thread">
             <span style="font-size:medium;">
-                <b><a href="/snapboard/threads/category/{{ category.id }}">{{ category.label }}</a></b>
+                <b><a href="{{ SNAP_PREFIX }}/threads/category/{{ category.id }}">{{ category.label }}</a></b>
             </span>
             <span style="color: #999; font-size: small; float: right;">
                 {% if category.moderators %}

@@ -65,7 +65,7 @@
 
             {% ifequal post.user_id user.id %}
             <div style="display:none" id="snap_post_edit{{ post.id }}">
-                <form action="/snapboard/edit_post/{{ post.id }}/" method="POST">
+                <form action="{{ SNAP_PREFIX }}/edit_post/{{ post.id }}/" method="POST">
                 <b>All revisions of this post are stored and publicly viewable.</b>
                 <p>{{ post.get_edit_form.post }} {# TODO: what about errors? #}</p>
                 <input type="submit" value="Update">

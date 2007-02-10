@@ -1,6 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django import newforms as forms
+from django.conf import settings
 from django.contrib.auth import decorators
 from django.contrib.auth import login, logout
 from django.core.paginator import ObjectPaginator, InvalidPage
@@ -17,9 +18,14 @@ from models import *
 from forms import PostForm, ThreadForm, LoginForm
 from rpc import *
 
-SB_LOGIN_URL = '/snapboard/signin'
+
 TPP = 20                # (T)threads (P)er (P)age
 PPP = 20                # P(osts) P(er) P(age)
+
+SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
+SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
+        getattr(settings, 'MEDIA_URL', '') + '/media')
+SNAP_LOGIN_URL = SNAP_PREFIX + 'signin'
 
 RPC_OBJECT_MAP = {
         "thread": Thread,
@@ -36,12 +42,27 @@ RPC_ACTION_MAP = {
         }
 
 
+def snapboard_default_context(request):
+    """
+    Provides some default information for all templates.
+
+    This should be added to the settings variable TEMPLATE_CONTEXT_PROCESSORS
+    """
+    return {
+            'SNAP_PREFIX': SNAP_PREFIX,
+            'SNAP_MEDIA_PREFIX': SNAP_MEDIA_PREFIX,
+            }
+
+
 def snapboard_require_signin(f):
     '''
     Equivalent to @login_required decorator, except that it defines a custom
     template path for login.
     '''
-    return decorators.user_passes_test(lambda u: u.is_authenticated(), login_url=SB_LOGIN_URL)(f)
+    return decorators.user_passes_test(
+            lambda u: u.is_authenticated(),
+            login_url = SNAP_LOGIN_URL
+            )(f)
 
 
 def login_context(request):

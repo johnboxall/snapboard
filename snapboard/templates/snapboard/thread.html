@@ -37,7 +37,7 @@
             {% endif %}
         </span>
         <b style="font-size: large;">
-            <a href="/snapboard/threads/category/{{ thr.category.id }}">{{ thr.category }}</a>:
+            <a href="{{ SNAP_PREFIX }}/threads/category/{{ thr.category.id }}">{{ thr.category }}</a>:
             {{ thr.subject }}
         </b>
     </p>

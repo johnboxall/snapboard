@@ -23,7 +23,7 @@
             <p>{{ postform.private }}{{ postform.private.errors }}</p>
             <div id="autocomplete_div"></div>
             <script type="text/javascript">
-                dataSource = new YAHOO.widget.DS_XHR("/snapboard/rpc/user_lookup/", ["ResultSet.Result","name","id"]);
+                dataSource = new YAHOO.widget.DS_XHR("{{ SNAP_PREFIX }}/rpc/user_lookup/", ["ResultSet.Result","name","id"]);
                 autoComp = new YAHOO.widget.AutoComplete("id_private","autocomplete_div",dataSource);
                 autoComp.delimChar = ","; 
                 autoComp.typeAhead = true;
@@ -34,7 +34,7 @@
         <input type="submit" value="Post">
     </form>
     {% else %}
-    <p>You need to <a href="/snapboard/signin/?next={{ request.path|urlencode }}#add_post_div">sign in</a> to post messages.</p>
+    <p>You need to <a href="{{ SNAP_PREFIX }}/signin/?next={{ request.path|urlencode }}#add_post_div">sign in</a> to post messages.</p>
     {% endif %}
 {% endif %}
 {% if thr.closed %}

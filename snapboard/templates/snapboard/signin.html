@@ -7,7 +7,7 @@
 {% block snapboard_main %}
     {% if not user.is_authenticated %}
     <div style="left-margin: float; width: 300px;">
-        <form method="post" action="/snapboard/signin/">
+        <form method="post" action="{{ SNAP_PREFIX }}/signin/">
             <table style="margin: 5px;">
             {{ login_form.as_table }}
             </table>
