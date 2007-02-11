@@ -90,8 +90,8 @@ class Post(models.Model):
     freespeech = models.BooleanField(default=False) # superuser level access
 
     def save(self):
-        print 'user =', threadlocals.get_current_user()
-        print threadlocals.get_current_ip(), type(threadlocals.get_current_ip())
+        #print 'user =', threadlocals.get_current_user()
+        #print threadlocals.get_current_ip(), type(threadlocals.get_current_ip())
 
         # hack to disallow admin setting arbitrary users to posts
         if getattr(self, 'user_id', None) is None:

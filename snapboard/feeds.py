@@ -10,5 +10,6 @@ class LatestPosts(Feed):
     description_template = "snapboard/feeds/latest_description.html"
 
     def items(self):
-        return Post.objects.order_by('-date')[:10]
+        # we should only return the non-private messages
+        return Post.objects.filter(private__exact='').order_by('-date')[:10]
 # vim: ai ts=4 sts=4 et sw=4
