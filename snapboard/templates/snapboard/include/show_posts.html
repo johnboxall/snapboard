@@ -31,7 +31,7 @@
 
             {% if post.avatar %}
                 {# [ICON] #}
-                <img src="/media/{{ post.avatar }}" />
+                <img src="{{ SNAP_MEDIA_PREFIX }}/{{ post.avatar }}" />
             {% endif %}
             <b>
                 <a href="#snap_post{ post.id }}" onclick="toggle_post('{{ post.id }}');">
