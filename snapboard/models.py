@@ -7,6 +7,11 @@ from django.contrib.auth.models import User, Group
 from fields import PhotoField
 from middleware import threadlocals
 
+SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
+SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
+        getattr(settings, 'MEDIA_URL', '') + '/media')
+SNAP_LOGIN_URL = SNAP_PREFIX + '/signin'
+
 ## NOTES
 # TODO: banlist model
 #
@@ -51,6 +56,9 @@ class Thread(models.Model):
 
     def __str__(self):
         return self.subject
+
+    def get_url(self):
+        return SNAP_PREFIX + '/threads/id/' + self.id + '/'
 
     class Admin:
         list_display = ('subject', 'category')
@@ -177,7 +185,6 @@ class WatchList(models.Model):
     thread = models.ForeignKey(Thread)
     # no need to be in the admin
 
-## TODO: currently unused
 class SnapboardProfile(models.Model):
     '''
     User data tied to user accounts from the auth module.
@@ -221,5 +228,30 @@ class SnapboardProfile(models.Model):
                 {'fields': 
                     ('ppp', 'notify_email', 'reverse_posts', 'frontpage_filters',)}),
         )
+
+
+class BannedUser(models.Model):
+    '''
+    This is a login-level ban.  These users will be able to browse the board
+    but will not be able to log in.
+    '''
+    user = models.ForeignKey(User, unique=True)
+    class Admin:
+        pass
+
+
+class BannedIP(models.Model):
+    '''
+    IP addresses listed in
+    
+    The objects in this model are not allowed to log in or register new
+    accounts.
+    '''
+    iplist = models.TextField()
+    # TODO: need to add a validator to ensure that iplist is a list of ip
+    # addresses separated by whitespace
+
+    class Admin:
+        pass
 
 # vim: ai ts=4 sts=4 et sw=4

@@ -1,7 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django import newforms as forms
-from django.conf import settings
 from django.contrib.auth import decorators
 from django.contrib.auth import login, logout
 from django.core.paginator import ObjectPaginator, InvalidPage
@@ -21,11 +20,6 @@ from rpc import *
 
 TPP = 20                # (T)threads (P)er (P)age
 PPP = 20                # P(osts) P(er) P(age)
-
-SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
-SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
-        getattr(settings, 'MEDIA_URL', '') + '/media')
-SNAP_LOGIN_URL = SNAP_PREFIX + '/signin'
 
 RPC_OBJECT_MAP = {
         "thread": Thread,
