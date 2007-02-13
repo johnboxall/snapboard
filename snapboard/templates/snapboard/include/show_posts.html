@@ -3,6 +3,16 @@
 <hr class="firstpost" />
 {% for post in post_page %}
     <div id="snap_post{{ post.id }}">
+
+        {% if post.censor %}
+            <div class="post_censored">
+        {% else %}
+        {% ifnotequal post.abuse 0 %}
+            <p>thread abuse count {{ post.abuse }}</p>
+                <div class="post_reported">
+            {% endifnotequal %}
+        {% endif %}
+
         <div id="post_rpc_feedback{{ post.id }}" class="rpc_message">
             <!-- This DIV is for RPC feedback messages for individual posts -->
         </div>
@@ -74,6 +84,14 @@
             </div>
             {% endifequal %}
         </div>
+
+        {% if post.censor %}
+            </div>
+        {% else %}
+            {% ifnotequal post.abuse 0 %}
+                </div>
+            {% endifnotequal %}
+        {% endif %}
     </div>
     <br />
     <hr class="postend" />

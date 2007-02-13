@@ -71,6 +71,14 @@ div.forummenu ul{
 
 /* POSTS & THREADS ***************************************/
 
+div.post_censored {
+    border: 2px solid red;
+}
+
+div.post_reported {
+    border: 1px solid #ff6600;
+}
+
 /* TEXTILE ***************************************/
 .post_text p {
     margin-top: 10px;

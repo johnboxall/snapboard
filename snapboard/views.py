@@ -192,8 +192,13 @@ def thread(request, thread_id, page="1"):
             SELECT avatar FROM snapboard_snapboardprofile
                 WHERE snapboard_snapboardprofile.user_id = snapboard_post.user_id
             """
+        extra_abuse_count = """
+            SELECT COUNT(*) FROM snapboard_abuselist
+                WHERE snapboard_post.id = snapboard_abuselist.post_id
+            """
         post_list = post_list.extra( select = {
-            'avatar': extra_post_avatar
+            'avatar': extra_post_avatar,
+            'abuse': extra_abuse_count,
             })
 
         if not getattr(user, 'is_staff', False):
