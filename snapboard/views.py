@@ -499,44 +499,51 @@ def profile(request, next='/'):
     '''
     Allow user to edit his/her profile.  Requires login.
 
-    The form generated from ForumUserData class/object has a field allowing
-    the user to select a User from a dropdown list despite editable=False in
-    the model definition;  this is a bug:
+    There are several newforms bugs that affect this.  See
+        http://code.google.com/p/snapboard/issues/detail?id=7
 
-        http://code.djangoproject.com/ticket/3247
-        # patch attached to ticket currently fixes problem
-
-    ForumUserData.avatar does not render properly in newforms:
-
-        http://code.djangoproject.com/ticket/3297
-        # patch does not apply cleanly
+    We'll use generic views to get around this for now.
     '''
     user = request.user
-
-    # create ForumUserData on demand
     try:
         userdata = ForumUserData.objects.get(user=user)
-        ProfileForm = forms.models.form_for_model(ForumUserData)
     except:
         userdata = ForumUserData(user=user)
         userdata.save()
-        ProfileForm = forms.models.form_for_instance(userdata)
+    print dir(RequestContext(request).dicts)
+    from django.views.generic.create_update import update_object
+    return update_object(request,
+            model=ForumUserData, object_id=userdata.id,
+            template_name='snapboard/profile.html')
+            #extra_context=RequestContext(request))
+
+    #user = request.user
+
+    ## create ForumUserData on demand
+    #try:
+    #    userdata = ForumUserData.objects.get(user=user)
+    #    ProfileForm = forms.models.form_for_model(ForumUserData)
+    #except:
+    #    userdata = ForumUserData(user=user)
+    #    userdata.save()
+    #    ProfileForm = forms.models.form_for_instance(userdata)
 
 
-    if request.method == 'POST':
-        form = ProfileForm(request.POST)
-        if form.is_valid():
-            form.clean_data['user'] = user.id
-            form.save()
-            HttpResponseRedirect(next)
-    else:
-        form = ProfileForm()
+    #if request.method == 'POST':
+    #    form = ProfileForm(request.POST)
+    #    if form.is_valid():
+    #        print form.clean_data
+    #        form.clean_data['user'] = user.id
+    #        form.save()
+    #        HttpResponseRedirect(next)
+    #else:
+    #    form = ProfileForm()
 
-    return render_to_response('snapboard/profile.html',
-            {
-            'form': form,
-            },
-            context_instance=RequestContext(request))
+    #return render_to_response('snapboard/profile.html',
+    #        {
+    #        'form': form,
+    #        },
+    #        context_instance=RequestContext(request))
 profile = snapboard_require_signin(profile)
 
 # vim: ai ts=4 sts=4 et sw=4

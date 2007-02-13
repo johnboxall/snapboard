@@ -191,11 +191,8 @@ class ForumUserData(models.Model):
             core=True, edit_inline=models.STACKED, max_num_in_admin=1)
     profile = models.TextField(blank=True)
 
-    ## views.profile(...) does not handle this properly:
-    # http://code.djangoproject.com/ticket/3297
     avatar = PhotoField(blank=True, upload_to='img/snapboard/avatars/',
             width=20, height=20)
-    # signature (hrm... waste of space IMHO)
 
     # browsing options
     ppp = models.IntegerField(null=True, blank=True,
@@ -212,16 +209,18 @@ class ForumUserData(models.Model):
     frontpage_filters = models.ManyToManyField(Category,
             help_text = "Filter your front page on these categories.")
 
+    class Admin:
+        pass
     ## edit inline
-    # class Admin:
-    #     fields = (
-    #         (None, 
-    #             {'fields': ('user', 'avatar',)}),
-    #         ('Profile', 
-    #             {'fields': ('profile',)}),
-    #         ('Browsing Options', 
-    #             {'fields': 
-    #                 ('ppp', 'notify_email', 'reverse_posts', 'frontpage_filters',)}),
-    #     )
+    class Admin:
+        fields = (
+            (None, 
+                {'fields': ('user', 'avatar',)}),
+            ('Profile', 
+                {'fields': ('profile',)}),
+            ('Browsing Options', 
+                {'fields': 
+                    ('ppp', 'notify_email', 'reverse_posts', 'frontpage_filters',)}),
+        )
 
 # vim: ai ts=4 sts=4 et sw=4

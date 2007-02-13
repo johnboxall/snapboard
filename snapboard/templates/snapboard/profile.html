@@ -3,9 +3,14 @@
 {% block snapboard_main %}
     {% if user.is_authenticated %}
     <div>
-        <form method="post" action=".">
+        <form method="post" action="." enctype="multipart/form-data">
             <table style="margin: 5px;">
-            {{ form.as_table }}
+                <p>{{ form.profile }}</p>
+                <p>{{ form.ppp }}</p>
+                <p>{{ form.tpp }}</p>
+                <p>{{ form.avatar }} {{ form.avatar_file }}</p>
+                <p>{{ form.frontpage_filters }}</p>
+                <p>{{ form.reverse_posts }}</p>
             </table>
             <input type="submit" value="Update" />
         </form>

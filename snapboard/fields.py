@@ -39,16 +39,16 @@ class PhotoField(ImageField):
     def contribute_to_class(self, cls, name):
         super(PhotoField, self).contribute_to_class(cls, name)
         # Add get_FIELD_content_type method
-        setattr(cls, 'get_%s_content_type' % self.name, lambda instance: "image/jpeg")
+        setattr(cls, 'get_%s_content_type' % self.name, lambda instance: "image/png")
         dispatcher.connect(self._update_parent_pk, signals.post_save, sender=cls)
 
     def get_content_type(self):
-        return "image/jpeg"
+        return "image/png"
 
     def save_file(self, new_data, new_object, original_object, change, rel):
         field_names = self.get_manipulator_field_names('')
         upload_field_name = field_names[0]
-        filename = '%s-%s.jpg' % (self.parent_pk, self.get_attname())
+        filename = '%s-%s.png' % (self.parent_pk, self.get_attname())
         # If there is no DeleteCheckbox or the DeleteCheckbox was not checked
         if len(field_names) < 3 or not new_data.get(field_names[2], False):
             if new_data.get(upload_field_name, False):
@@ -113,9 +113,9 @@ class PhotoField(ImageField):
 
         out_file = cStringIO.StringIO()
         if quality:
-            pil_obj.save(out_file, 'JPEG', quality=quality)
+            pil_obj.save(out_file, 'PNG', quality=quality)
         else:
-            pil_obj.save(out_file, 'JPEG')
+            pil_obj.save(out_file, 'PNG')
         out_file.reset()
         return out_file.read()
 

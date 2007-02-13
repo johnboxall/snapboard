@@ -10,6 +10,12 @@ form th {
     padding-right: 0.5em;
 }
 
+form td {
+    /* border-bottom: 1px solid #999999; */
+    font-size: 87%;
+    color: #999999;
+}
+
 textarea, input, button, select {
     border: 1px solid #ccc;
     margin-bottom: 5px;
