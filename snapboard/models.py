@@ -209,8 +209,6 @@ class ForumUserData(models.Model):
     frontpage_filters = models.ManyToManyField(Category,
             help_text = "Filter your front page on these categories.")
 
-    class Admin:
-        pass
     ## edit inline
     class Admin:
         fields = (
