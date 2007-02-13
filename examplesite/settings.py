@@ -9,10 +9,10 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE = 'postgresql_psycopg2'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-DATABASE_NAME = 'bshi' # Or path to database file if using sqlite3.
-#DATABASE_ENGINE = 'sqlite3'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-#DATABASE_NAME = '/tmp/examplesite.db' # Or path to database file if using sqlite3.
+#DATABASE_ENGINE = 'postgresql_psycopg2'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+#DATABASE_NAME = 'bshi' # Or path to database file if using sqlite3.
+DATABASE_ENGINE = 'sqlite3'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+DATABASE_NAME = '/tmp/examplesite.db' # Or path to database file if using sqlite3.
 DATABASE_USER = 'bshi'             # Not used with sqlite3.
 DATABASE_PASSWORD = 'bshi'         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
