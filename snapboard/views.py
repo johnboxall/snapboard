@@ -25,7 +25,7 @@ PPP = 20                # P(osts) P(er) P(age)
 SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
 SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
         getattr(settings, 'MEDIA_URL', '') + '/media')
-SNAP_LOGIN_URL = SNAP_PREFIX + 'signin'
+SNAP_LOGIN_URL = SNAP_PREFIX + '/signin'
 
 RPC_OBJECT_MAP = {
         "thread": Thread,
@@ -185,7 +185,7 @@ def thread(request, thread_id, page="1"):
         # filter out the private messages.  admin cannot see private messages
         # (although they can use the Django admin interface to do so)
         # TODO: there's gotta be a better way to filter out private messages
-        # Tested with postgresql only so far
+        # Tested with postgresql and sqlite
         post_list = post_list.filter(
                 Q(user__id__exact=user.id) |
                 Q(private__exact='') |
@@ -195,8 +195,8 @@ def thread(request, thread_id, page="1"):
 
         # get any avatars
         extra_post_avatar = """
-            SELECT avatar FROM snapboard_forumuserdata
-                WHERE snapboard_forumuserdata.user_id = snapboard_post.user_id
+            SELECT avatar FROM snapboard_snapboardprofile
+                WHERE snapboard_snapboardprofile.user_id = snapboard_post.user_id
             """
         post_list = post_list.extra( select = {
             'avatar': extra_post_avatar
@@ -262,7 +262,7 @@ def edit_post(request, original, next=None):
     try:
         next = request.POST['next'].split('#')[0] + '#snap_post' + str(div_id_num)
     except KeyError:
-        next = '/snapboard/threads/id/' + str(orig_post.thread.id) + '/'
+        next = SNAP_PREFIX + '/threads/id/' + str(orig_post.thread.id) + '/'
 
     return HttpResponseRedirect(next)
 
@@ -474,7 +474,7 @@ def signin(request):
         try:
             next = request.GET['next']
         except KeyError:
-            next = '/'
+            next = SNAP_PREFIX
 
     if request.POST:
         form_data = request.POST.copy()
@@ -492,10 +492,11 @@ def signin(request):
         {
         'login_form': form,
         'login_next': next,
-        })
+        },
+        context_instance=RequestContext(request))
 
 
-def profile(request, next='/'):
+def profile(request, next=SNAP_PREFIX):
     '''
     Allow user to edit his/her profile.  Requires login.
 
@@ -506,44 +507,17 @@ def profile(request, next='/'):
     '''
     user = request.user
     try:
-        userdata = ForumUserData.objects.get(user=user)
+        userdata = SnapboardProfile.objects.get(user=user)
     except:
-        userdata = ForumUserData(user=user)
+        userdata = SnapboardProfile(user=user)
         userdata.save()
     print dir(RequestContext(request).dicts)
     from django.views.generic.create_update import update_object
     return update_object(request,
-            model=ForumUserData, object_id=userdata.id,
-            template_name='snapboard/profile.html')
-            #extra_context=RequestContext(request))
-
-    #user = request.user
-
-    ## create ForumUserData on demand
-    #try:
-    #    userdata = ForumUserData.objects.get(user=user)
-    #    ProfileForm = forms.models.form_for_model(ForumUserData)
-    #except:
-    #    userdata = ForumUserData(user=user)
-    #    userdata.save()
-    #    ProfileForm = forms.models.form_for_instance(userdata)
-
-
-    #if request.method == 'POST':
-    #    form = ProfileForm(request.POST)
-    #    if form.is_valid():
-    #        print form.clean_data
-    #        form.clean_data['user'] = user.id
-    #        form.save()
-    #        HttpResponseRedirect(next)
-    #else:
-    #    form = ProfileForm()
-
-    #return render_to_response('snapboard/profile.html',
-    #        {
-    #        'form': form,
-    #        },
-    #        context_instance=RequestContext(request))
+            model=SnapboardProfile, object_id=userdata.id,
+            template_name='snapboard/profile.html',
+            post_save_redirect=next
+            )
 profile = snapboard_require_signin(profile)
 
 # vim: ai ts=4 sts=4 et sw=4

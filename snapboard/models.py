@@ -178,7 +178,7 @@ class WatchList(models.Model):
     # no need to be in the admin
 
 ## TODO: currently unused
-class ForumUserData(models.Model):
+class SnapboardProfile(models.Model):
     '''
     User data tied to user accounts from the auth module.
 
@@ -207,6 +207,7 @@ class ForumUserData(models.Model):
             default=False,
             help_text = "Display newest posts first.")
     frontpage_filters = models.ManyToManyField(Category,
+            null=True, blank=True,
             help_text = "Filter your front page on these categories.")
 
     ## edit inline
