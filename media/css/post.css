@@ -5,59 +5,50 @@
     margin-bottom: 10px;
 }
 
+.post_text h1, h2, h3, strong {
+    font-weight: bold;
+}
+
 .post_text h1 {
     font-size: 130%;
-    font-weight: bold;
 }
 .post_text h2 {
     font-size: 120%;
-    font-weight: bold;
 }
 
 .post_text h3 {
     font-size: 110%;
-    font-weight: bold;
 }
 
 .post_text em {
     font-style: italic;
 }
 
-.post_text strong {
-    font-style: bold;
-}
-
 .post_text i {
     font-style: italic;
 }
 
-.post_text table {
+.post_text table, td {
     border: 1px solid #cccccc;
 }
 
-.post_text td {
-    border: 1px solid #cccccc;
+.post_text ol, ul {
+    margin-left: 2em;
+    margin-right: 2em;
 }
 
 .post_text ol {
     list-style-type: decimal;
-    margin-left: 2em;
-    margin-right: 2em;
 }
 
 .post_text ul {
     list-style-type: square;
-    margin-left: 2em;
-    margin-right: 2em;
 }
 
-.post_text blockquote pre {
-    margin-left: 0.5em;
-    margin-right: 0.5em;
+.post_text blockquote, pre {
     background:#EEEEEE none repeat scroll 0%;
-    margin-left:0.5em;
-    margin-right:0.5em;
-    padding:5px 10px
+    margin-left:1em;
+    padding-left: 0.5em;
 }
 
 .post_text pre {

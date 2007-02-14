@@ -4,12 +4,11 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import simplejson
 
-#from django.contrib.markup.templatetags.markup import textile
 from django.template.defaultfilters import striptags
 
 from forms import PostForm, ThreadForm
 from models import Thread, Post, Category, WatchList, AbuseList
-from templatetags.textile import textile
+from templatetags.extras import markdown_filter
 
 
 def rpc_post(request):
@@ -25,7 +24,7 @@ def rpc_post(request):
     if post.previous is not None:
         prev_id = str(post.previous.id)
 
-    resp = {'text': textile(striptags(post.text)),
+    resp = {'text': markdown_filter(striptags(post.text), "safe"),
             'prev_id': prev_id,
             'rev_id': rev_id,
             }

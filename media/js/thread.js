@@ -21,7 +21,7 @@ function toggle(id, type) {
 function revision(orig_id, show_id) {
     urlq = '/snapboard/rpc/postrev/?orig=' + orig_id + '&show=' + show_id
 
-    div_text = document.getElementById('post_text' + orig_id)
+    div_text = document.getElementById('snap_post_text' + orig_id)
     div_links = document.getElementById('post_revision_links' + orig_id)
 
     var handleSuccess = function(o) {
