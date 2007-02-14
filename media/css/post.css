@@ -1,0 +1,113 @@
+
+/* TEXTILE ***************************************/
+.post_text p {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.post_text h1 {
+    font-size: 130%;
+    font-weight: bold;
+}
+.post_text h2 {
+    font-size: 120%;
+    font-weight: bold;
+}
+
+.post_text h3 {
+    font-size: 110%;
+    font-weight: bold;
+}
+
+.post_text em {
+    font-style: italic;
+}
+
+.post_text strong {
+    font-style: bold;
+}
+
+.post_text i {
+    font-style: italic;
+}
+
+.post_text table {
+    border: 1px solid #cccccc;
+}
+
+.post_text td {
+    border: 1px solid #cccccc;
+}
+
+.post_text ol {
+    list-style-type: decimal;
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+.post_text ul {
+    list-style-type: square;
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+.post_text blockquote pre {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    background:#EEEEEE none repeat scroll 0%;
+    margin-left:0.5em;
+    margin-right:0.5em;
+    padding:5px 10px
+}
+
+.post_text pre {
+    border-left:1px solid #336633;
+}
+
+.post_text code {
+    font-family: courier;
+}
+
+span.post_menuright {
+    font-size: 77%;
+    padding-right: 10%;
+    float: right;
+}
+
+span.post_menuleft {
+    font-size: 77%;
+    padding-left: 10%;
+}
+
+span.post_summary {
+    color: #B0BFAC;
+}
+
+div.post_reported {
+    border: 1px solid #ff6600;
+}
+
+hr.postend {
+    width: 80%;
+    height: 1px;
+    background-color: #CCC;
+    border: 0px solid #CCC;
+}
+
+hr.firstpost {
+    width: 80%;
+    height: 1px;
+    background-color: black;
+    border: 0px solid black;
+}
+
+div.post_censored {
+    border: 2px solid red;
+}
+
+p.post_header {
+    padding-left: 2em;
+}
+
+
+

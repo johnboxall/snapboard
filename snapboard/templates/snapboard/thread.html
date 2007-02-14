@@ -1,5 +1,9 @@
 {% extends "snapboard/base_forum.html" %}
 
+{% block snap_extra_head %}
+    <link type="text/css" rel="stylesheet" href="{{ SNAP_MEDIA_PREFIX }}/css/post.css" />    
+{% endblock %}
+
 {% load extras %}
 
 {% block snapboard_main %}

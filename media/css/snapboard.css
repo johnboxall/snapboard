@@ -71,49 +71,6 @@ div.forummenu ul{
 
 /* POSTS & THREADS ***************************************/
 
-div.post_censored {
-    border: 2px solid red;
-}
-
-div.post_reported {
-    border: 1px solid #ff6600;
-}
-
-/* TEXTILE ***************************************/
-.post_text p {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.post_text blockquote {
-    margin-left: 1em;
-    margin-right: 1em;
-    background:#EEEEEE none repeat scroll 0%;
-    border-left:1px solid #336633;
-    margin-left:1em;
-    margin-right:1em;
-    padding:5px 10px
-}
-
-hr.postend {
-    width: 80%;
-    height: 1px;
-    background-color: #CCC;
-    border: 0px solid #CCC;
-}
-
-hr.firstpost {
-    width: 80%;
-    height: 1px;
-    background-color: black;
-    border: 0px solid black;
-}
-
-
-p.post_header {
-    padding-left: 2em;
-}
-
 p.thread_page_nav {
     font-size: 77%;
     margin-left: 10%;
@@ -129,24 +86,9 @@ span.thread_menu {
     float: right;
 }
 
-span.post_menuright {
-    font-size: 77%;
-    padding-right: 10%;
-    float: right;
-}
-
-span.post_menuleft {
-    font-size: 77%;
-    padding-left: 10%;
-}
-
 span.timesince {
     font-size: 85%;
     color:#999;
-}
-
-span.post_summary {
-    color: #B0BFAC;
 }
 
 div.rpc_message {
