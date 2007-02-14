@@ -7,8 +7,7 @@
         {% if post.censor %}
             <div class="post_censored">
         {% else %}
-        {% ifnotequal post.abuse 0 %}
-            <p>thread abuse count {{ post.abuse }}</p>
+            {% ifnotequal post.abuse 0 %}
                 <div class="post_reported">
             {% endifnotequal %}
         {% endif %}

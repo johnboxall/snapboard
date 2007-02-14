@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 from views import thread, thread_index, new_thread, category_index
 from views import edit_post, rpc, signout, signin
-from views import favorite_index, profile
+from views import favorite_index, private_index, profile
 
 from rpc import rpc_post, rpc_lookup
 from feeds import LatestPosts
@@ -15,6 +15,7 @@ feeds = {
 
 urlpatterns = patterns('',
     (r'^$', thread_index),
+    (r'^private/$', private_index),
     (r'^profile/$', profile),
     (r'^signout/$', signout),
     (r'^signin/$', signin),

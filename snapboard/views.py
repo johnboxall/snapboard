@@ -425,6 +425,44 @@ def favorite_index(request, page=1):
 favorite_index = snapboard_require_signin(favorite_index)
 
 
+def private_index(request, page=1):
+    page = int(page)
+    pindex = page - 1
+
+    idstr = str(request.user.id)
+    post_list = Post.objects.filter(
+            Q(private__endswith=idstr) |
+            Q(private__startswith=idstr) |
+            Q(private__contains=idstr)).select_related()
+    thread_list = [p.thread.id for p in post_list]
+
+    thread_list = base_thread_queryset(
+            Thread.objects.filter(pk__in=thread_list)
+            ).order_by('-date')
+
+    render_dict = {'title': "Discussions with private messages to you"}
+
+    page_nav_urlbase = SNAP_PREFIX + "/private/"
+
+    paginator = ObjectPaginator(thread_list, _userdata(request, 'tpp'))
+    try:
+        thread_page = paginator.get_page(pindex)
+    except InvalidPage:
+        return HttpResponseRedirect(SNAP_PREFIX + '/categories')
+    render_dict.update(paginate_context(paginator, page))
+
+    render_dict.update({
+            'thread_page': thread_page,
+            'page_nav_urlbase': page_nav_urlbase,
+            'page_nav_cssclass': 'index_page_nav',
+            })
+
+    return render_to_response('snapboard/thread_index.html',
+            render_dict,
+            context_instance=RequestContext(request))
+private_index = snapboard_require_signin(private_index)
+
+
 def thread_index(request, cat_id=None, page=1):
     page = int(page)
     pindex = page - 1

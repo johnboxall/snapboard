@@ -32,7 +32,7 @@
                 <li><a href="{{ SNAP_PREFIX }}/categories/"><span>Categories</span></a></li>
                 {% if user.is_authenticated %}
                 <li><a href="{{ SNAP_PREFIX }}/favorites/"><span>Favorites</span></a></li>
-                <li><a href="#"><span>Private Posts</span></a></li>
+                <li><a href="{{ SNAP_PREFIX }}/private/"><span>Private Posts</span></a></li>
                 {% endif %}
             </ul>
         </div>
