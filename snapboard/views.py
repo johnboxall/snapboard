@@ -217,7 +217,7 @@ def thread(request, thread_id, page="1"):
             'thr': thr,
             'postform': postform,
             'post_page': post_page,
-            'page_nav_urlbase': '/snapboard/threads/id/' + thread_id + '/',
+            'page_nav_urlbase': SNAP_PREFIX + '/threads/id/' + thread_id + '/',
             'page_nav_cssclass': 'thread_page_nav',
             })
 
@@ -292,7 +292,7 @@ def new_thread(request):
             post.save()
 
             # redirect to new thread
-            return HttpResponseRedirect('/snapboard/threads/id/' + str(thread.id) + '/')
+            return HttpResponseRedirect(SNAP_PREFIX + '/threads/id/' + str(thread.id) + '/')
     else:
         threadform = ThreadForm()
 
@@ -373,7 +373,7 @@ def favorite_index(request, page=1):
     title = request.user.username + "'s Watched Discussions"
 
     render_dict = {'title': title}
-    page_nav_urlbase = "/snapboard/favorites/"
+    page_nav_urlbase = SNAP_PREFIX + "/favorites/"
 
     try:
         paginator = ObjectPaginator(thread_list, TPP)
@@ -429,9 +429,9 @@ def thread_index(request, cat_id=None, page=1):
         raise Http404
 
     if cat_id:
-        page_nav_urlbase = "/snapboard/threads/category/" + str(cat_id) + '/'
+        page_nav_urlbase = SNAP_PREFIX + "/threads/category/" + str(cat_id) + '/'
     else:
-        page_nav_urlbase = "/snapboard/threads/"
+        page_nav_urlbase = SNAP_PREFIX + "/threads/"
 
     render_dict.update({
             'thread_page': thread_page,
