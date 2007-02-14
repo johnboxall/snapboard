@@ -18,8 +18,8 @@ from forms import PostForm, ThreadForm, LoginForm
 from rpc import *
 
 
-TPP = 20                # (T)threads (P)er (P)age
-PPP = 20                # P(osts) P(er) P(age)
+COOKIE_SNAP_PROFILE_KEY = 'SnapboardProfile'
+DEFAULT_SNAPBOARD_PROFILE  = SnapboardProfile()
 
 RPC_OBJECT_MAP = {
         "thread": Thread,
@@ -34,6 +34,36 @@ RPC_ACTION_MAP = {
         "abuse": rpc_abuse,
         "watch": rpc_watch,
         }
+
+
+def _userdata(request, var):
+    '''
+    Try to get an attribute of the SnapboardProfile for a certain user.
+    This function should not be called from outside snapboard views.
+
+    If the setting was found, this function returns
+
+    If 'var' is not the name of a field of SnapboardProfile, a KeyError
+    will be raised.
+    '''
+    if not request.user.is_authenticated():
+        return getattr(DEFAULT_SNAPBOARD_PROFILE, var)
+
+    # profile dictionary
+    pdict = request.session.get(COOKIE_SNAP_PROFILE_KEY, {})
+
+    if var in pdict:
+        return pdict[var]
+    else:
+        try:
+            sp = SnapboardProfile.objects.get(user=request.user)
+        except SnapboardProfile.DoesNotExist:
+            sp = DEFAULT_SNAPBOARD_PROFILE
+        pdict[var] = getattr(sp, var)
+        request.session[COOKIE_SNAP_PROFILE_KEY] = pdict
+
+    return pdict[var]
+
 
 
 def snapboard_default_context(request):
@@ -170,44 +200,44 @@ def thread(request, thread_id, page="1"):
         postform = PostForm()
 
     # this must come after the post so new messages show up
+    uid = str(user.id)
+    idstr = (uid + ',', ',' + uid + ',', ',' + uid)
+    post_list = Post.objects.filter(thread=thr).order_by('odate').exclude(
+            revision__isnull=False)
+   
+    # filter out the private messages.  admin cannot see private messages
+    # (although they can use the Django admin interface to do so)
+    # TODO: there's gotta be a better way to filter out private messages
+    # Tested with postgresql and sqlite
+    post_list = post_list.filter(
+            Q(user__id__exact=user.id) |
+            Q(private__exact='') |
+            Q(private__endswith=idstr[2]) |
+            Q(private__startswith=idstr[0]) |
+            Q(private__contains=idstr[1]))
+
+    # get any avatars
+    extra_post_avatar = """
+        SELECT avatar FROM snapboard_snapboardprofile
+            WHERE snapboard_snapboardprofile.user_id = snapboard_post.user_id
+        """
+    extra_abuse_count = """
+        SELECT COUNT(*) FROM snapboard_abuselist
+            WHERE snapboard_post.id = snapboard_abuselist.post_id
+        """
+    post_list = post_list.extra( select = {
+        'avatar': extra_post_avatar,
+        'abuse': extra_abuse_count,
+        })
+
+    if not getattr(user, 'is_staff', False):
+        post_list = post_list.exclude(censor=True)
+
+    paginator = ObjectPaginator(post_list, _userdata(request, 'ppp'))
     try:
-        uid = str(user.id)
-        idstr = (uid + ',', ',' + uid + ',', ',' + uid)
-        post_list = Post.objects.filter(thread=thr).order_by('odate').exclude(
-                revision__isnull=False)
-       
-        # filter out the private messages.  admin cannot see private messages
-        # (although they can use the Django admin interface to do so)
-        # TODO: there's gotta be a better way to filter out private messages
-        # Tested with postgresql and sqlite
-        post_list = post_list.filter(
-                Q(user__id__exact=user.id) |
-                Q(private__exact='') |
-                Q(private__endswith=idstr[2]) |
-                Q(private__startswith=idstr[0]) |
-                Q(private__contains=idstr[1]))
-
-        # get any avatars
-        extra_post_avatar = """
-            SELECT avatar FROM snapboard_snapboardprofile
-                WHERE snapboard_snapboardprofile.user_id = snapboard_post.user_id
-            """
-        extra_abuse_count = """
-            SELECT COUNT(*) FROM snapboard_abuselist
-                WHERE snapboard_post.id = snapboard_abuselist.post_id
-            """
-        post_list = post_list.extra( select = {
-            'avatar': extra_post_avatar,
-            'abuse': extra_abuse_count,
-            })
-
-        if not getattr(user, 'is_staff', False):
-            post_list = post_list.exclude(censor=True)
-
-        paginator = ObjectPaginator(post_list, PPP)
         post_page = paginator.get_page(pindex)
     except InvalidPage:
-        raise Http404
+        return HttpResponseRedirect(SNAP_PREFIX + '/threads/id/' + str(thread_id) + '/')
 
     # general info to render the page navigation (back/forward/etc)
     render_dict.update(paginate_context(paginator, page))
@@ -375,12 +405,12 @@ def favorite_index(request, page=1):
     render_dict = {'title': title}
     page_nav_urlbase = SNAP_PREFIX + "/favorites/"
 
+    paginator = ObjectPaginator(thread_list, _userdata(request, 'tpp'))
     try:
-        paginator = ObjectPaginator(thread_list, TPP)
         thread_page = paginator.get_page(pindex)
-        render_dict.update(paginate_context(paginator, page))
     except InvalidPage:
-        raise Http404
+        return HttpResponseRedirect(SNAP_PREFIX + '/categories')
+    render_dict.update(paginate_context(paginator, page))
 
 
     render_dict.update({
@@ -421,12 +451,12 @@ def thread_index(request, cat_id=None, page=1):
         thread_list = thread_list.order_by('-csticky', '-date')
 
 
+    paginator = ObjectPaginator(thread_list, _userdata(request, 'tpp'))
     try:
-        paginator = ObjectPaginator(thread_list, TPP)
         thread_page = paginator.get_page(pindex)
-        render_dict.update(paginate_context(paginator, page))
     except InvalidPage:
-        raise Http404
+        return HttpResponseRedirect(SNAP_PREFIX + '/threads/')
+    render_dict.update(paginate_context(paginator, page))
 
     if cat_id:
         page_nav_urlbase = SNAP_PREFIX + "/threads/category/" + str(cat_id) + '/'
@@ -505,6 +535,11 @@ def profile(request, next=SNAP_PREFIX):
     We'll use generic views to get around this for now.
     '''
     user = request.user
+
+    if COOKIE_SNAP_PROFILE_KEY in request.session:
+        # reset any cookie variables
+        request.session[COOKIE_SNAP_PROFILE_KEY] = {}
+    
     try:
         userdata = SnapboardProfile.objects.get(user=user)
     except:

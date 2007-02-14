@@ -204,9 +204,11 @@ class SnapboardProfile(models.Model):
     # browsing options
     ppp = models.IntegerField(null=True, blank=True,
             choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
+            default = 20,
             help_text = "Posts per page")
     tpp = models.IntegerField(null=True, blank=True,
             choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
+            default = 20,
             help_text = "Threads per page")
     notify_email = models.BooleanField(default=False, blank=True,
             help_text = "Email notifications for watched discussions.")
