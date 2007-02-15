@@ -11,8 +11,10 @@
             <table style="margin: 5px;">
             {{ login_form.as_table }}
             </table>
+            <p>
             <input type="submit" value="Sign In" />
             <input type="hidden" name="next" value="{{ login_next }}" />
+            </p>
         </form>
     </div>
     {% else %}
