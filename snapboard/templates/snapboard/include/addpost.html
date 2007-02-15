@@ -1,19 +1,14 @@
 {% if not thr.closed and not page_next %}
     {% if user.is_authenticated %}
     <!-- div style="border: 1px solid #ccc; padding: 5px; background: #efe" -->
+    <p>
+    <span style="float:right;"><a href="#snap_markdown_guide" onClick="toggle('snap_markdown_guide', 'block');">Pretty-print guide</a></span>
+    <b>Got something to say?</b>
+    </p>
+    {% include "snapboard/include/markdown_guide.html" %}
     <form id="add_post_div" action="" method="POST">
         <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/yui/event-min.js"></script>
         <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/yui/autocomplete-min.js"></script>
-
-        <p><span style="float:right;"><b>Pretty-print guide</b></span> <b>Got something to say?</b></p>
-        
-        <div style="display:none; background:#dddddd; border: 1px solid #333333; padding: 3px;">
-            <p><b>**bold**</b> <i>__italic__</i></p>
-            <p>An [example](http://url.com/ "Title")</p>
-        </div>
-
-        <br />
-
         <p>{{ postform.post }} {{ postform.post.errors }}</p>
         <p id="autocomplete_p">
             <!-- span style="float:right;"><b>I need more space!</b></span -->

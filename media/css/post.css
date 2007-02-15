@@ -20,28 +20,24 @@
     font-size: 110%;
 }
 
-.post_text em {
+.post_text em, i {
     font-style: italic;
 }
 
-.post_text i {
-    font-style: italic;
-}
-
-.post_text table, td {
+.post_text table {
     border: 1px solid #cccccc;
 }
 
-.post_text ol, ul {
+ol, ul {
     margin-left: 2em;
     margin-right: 2em;
 }
 
-.post_text ol {
+ol {
     list-style-type: decimal;
 }
 
-.post_text ul {
+ul {
     list-style-type: square;
 }
 
@@ -100,5 +96,30 @@ p.post_header {
     padding-left: 2em;
 }
 
+#snap_markdown_guide p, table, code, tr{
+    border: none;
+    color: black;
+    font-size: 100%;
+}
 
+#snap_markdown_guide code {
+    background-color: #eee;
+}
 
+#snap_markdown_guide {
+     background:#eeffee;
+     border: 1px solid #666666;
+     padding: 1em;
+}
+
+#snap_markdown_guide p {
+    margin-bottom: 0.5em;
+}
+
+#snap_markdown_guide em {
+    font-style: italic;
+}
+
+#snap_markdown_guide table {
+    width: 100%;
+}

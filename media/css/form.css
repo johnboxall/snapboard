@@ -11,8 +11,6 @@ form th {
 }
 
 form td {
-    /* border-bottom: 1px solid #999999; */
-    font-size: 87%;
     color: #999999;
 }
 
@@ -32,3 +30,4 @@ input[type="submit"] {
     color: black;
     border: 1px solid black;
 }
+
