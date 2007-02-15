@@ -15,19 +15,19 @@
         <span class="thread_menu">
             {% if user.is_staff %}
                 <span>
-                    <a id="csticky{{ thr.id }}" href="#" onClick="set_csticky('{{ thr.id }}');">
+                    <a id="csticky{{ thr.id }}" href="#" onclick="set_csticky('{{ thr.id }}');">
                         {{ thr.csticky|yesno:"unset,set" }} csticky
                     </a> 
                 </span>
                 &#149;
                 <span>
-                    <a id="gsticky{{ thr.id }}" href="#" onClick="set_gsticky('{{ thr.id }}');">
+                    <a id="gsticky{{ thr.id }}" href="#" onclick="set_gsticky('{{ thr.id }}');">
                         {{ thr.gsticky|yesno:"unset,set" }} gsticky
                     </a> 
                 </span>
                 &#149;
                 <span>
-                    <a id="close{{ thr.id }}" href="#" onClick="set_close('{{ thr.id }}');">
+                    <a id="close{{ thr.id }}" href="#" onclick="set_close('{{ thr.id }}');">
                         {{ thr.closed|yesno:"open,close" }} thread
                     </a> 
                 </span>
@@ -35,7 +35,7 @@
             {% if user.is_authenticated %}
                 &#149;
                 <span>
-                    <a id="watch{{ thr.id }}" href="#" onClick="set_watch('{{ thr.id }}');">
+                    <a id="watch{{ thr.id }}" href="#" onclick="set_watch('{{ thr.id }}');">
                         {{ watched|yesno:"don't," }} watch
                     </a> 
                 </span>

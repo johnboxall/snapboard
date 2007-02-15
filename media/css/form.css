@@ -1,33 +1,31 @@
 form {
-    border: 1px solid #ccc;
-    padding: 5px;
-    background: #e4efe2;
+background:#e4efe2;
+border:1px solid #ccc;
+padding:5px;
 }
 
 form th {
-    /* border-bottom: 1px solid #999999; */
-    text-align: right;
-    padding-right: 0.5em;
+padding-right:0.5em;
+text-align:right;
 }
 
 form td {
-    color: #999999;
+color:#999;
 }
 
-textarea, input, button, select {
-    border: 1px solid #ccc;
-    margin-bottom: 5px;
-    margin-top: 5px;
-    background: #fff;
+textarea,input,button,select {
+background:#fff;
+border:1px solid #ccc;
+margin-bottom:5px;
+margin-top:5px;
 }
 
-textarea, input[type="text"], input[type="password"] {
-    width: 100%;
+textarea,input[type="text"],input[type="password"] {
+width:100%;
 }
 
 input[type="submit"] {
-    background-color: #ccc;
-    color: black;
-    border: 1px solid black;
+background-color:#ccc;
+border:1px solid #000;
+color:#000;
 }
-

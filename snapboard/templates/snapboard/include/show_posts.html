@@ -19,7 +19,7 @@
             <span class="post_menuright">
                 {% ifequal post.user_id user.id %}
                 <span title="Edit this post.  All revisions are saved!" class="popup">
-                    <b><a href="#snap_post{{ post.id }}" onclick="toggle_edit('{{ post.id }}')">edit post</a></b>
+                    <a href="#snap_post{{ post.id }}" onclick="toggle_edit('{{ post.id }}')">edit post</a>
                 </span>
                 &#149;
                 {% endifequal %}
@@ -74,11 +74,13 @@
 
             {% ifequal post.user_id user.id %}
             <div style="display:none" id="snap_post_edit{{ post.id }}">
-                <form action="{{ SNAP_PREFIX }}/edit_post/{{ post.id }}/" method="POST">
-                <b>All revisions of this post are stored and publicly viewable.</b>
+                <form action="{{ SNAP_PREFIX }}/edit_post/{{ post.id }}/" method="post">
+                <p><b>All revisions of this post are stored and publicly viewable.</b></p>
                 <p>{{ post.get_edit_form.post }} {# TODO: what about errors? #}</p>
-                <input type="submit" value="Update">
-                <input type="hidden" name="next" value="{{ request.path }}">
+                <p>
+                <input type="submit" value="Update" />
+                <input type="hidden" name="next" value="{{ request.path }}" />
+                </p>
                 </form>
             </div>
             {% endifequal %}

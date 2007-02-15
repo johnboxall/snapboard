@@ -13,6 +13,7 @@ class PostForm(forms.Form):
             label = '',
             widget=forms.Textarea(attrs={
                 'rows':'5',
+                'cols':'10',
             }),
         )
     private = forms.CharField(

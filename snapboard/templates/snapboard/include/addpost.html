@@ -2,7 +2,7 @@
     {% if user.is_authenticated %}
     <!-- div style="border: 1px solid #ccc; padding: 5px; background: #efe" -->
     <p>
-    <span style="float:right;"><a href="#snap_markdown_guide" onClick="toggle('snap_markdown_guide', 'block');">Pretty-print guide</a></span>
+    <span style="float:right;"><a href="#snap_markdown_guide" onclick="toggle('snap_markdown_guide', 'block');">Pretty-print guide</a></span>
     <b>Got something to say?</b>
     </p>
     {% include "snapboard/include/markdown_guide.html" %}
@@ -12,7 +12,7 @@
         <p>{{ postform.post }} {{ postform.post.errors }}</p>
         <p id="autocomplete_p">
             <!-- span style="float:right;"><b>I need more space!</b></span -->
-            <a href="#add_post_div" onClick="toggle('autocomplete_input', 'block'); toggle('autocomplete_p', 'inline');">set private recipients (optional)</a>
+            <a href="#add_post_div" onclick="toggle('autocomplete_input', 'block'); toggle('autocomplete_p', 'inline');">set private recipients (optional)</a>
         </p>
         <div id="autocomplete_input" style="display:none">
             <p>{{ postform.private }}</p>
