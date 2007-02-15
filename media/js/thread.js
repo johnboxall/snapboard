@@ -1,3 +1,4 @@
+
 function toggle_post(id) {
     toggle('snap_post_sum'+id, 'inline');
     toggle('snap_post_view'+id, 'block');
@@ -19,7 +20,7 @@ function toggle(id, type) {
 
 
 function revision(orig_id, show_id) {
-    urlq = '/snapboard/rpc/postrev/?orig=' + orig_id + '&show=' + show_id
+    urlq = SNAP_PREFIX + '/rpc/postrev/?orig=' + orig_id + '&show=' + show_id
 
     div_text = document.getElementById('snap_post_text' + orig_id)
     div_links = document.getElementById('post_revision_links' + orig_id)
@@ -107,7 +108,7 @@ function toggle_variable(action, oclass, oid, msgdivid) {
       argument:[]
     };
 
-    var request = YAHOO.util.Connect.asyncRequest('POST', '/snapboard/rpc/action/', callback, postData);
+    var request = YAHOO.util.Connect.asyncRequest('POST', SNAP_PREFIX + '/rpc/action/', callback, postData);
 }
 
 // thread level functions
