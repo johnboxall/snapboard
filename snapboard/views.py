@@ -222,8 +222,8 @@ def thread(request, thread_id, page="1"):
             WHERE snapboard_snapboardprofile.user_id = snapboard_post.user_id
         """
     extra_abuse_count = """
-        SELECT COUNT(*) FROM snapboard_abuselist
-            WHERE snapboard_post.id = snapboard_abuselist.post_id
+        SELECT COUNT(*) FROM snapboard_abusereport
+            WHERE snapboard_post.id = snapboard_abusereport.post_id
         """
     post_list = post_list.extra( select = {
         'avatar': extra_post_avatar,

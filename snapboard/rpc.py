@@ -7,7 +7,7 @@ from django.utils import simplejson
 from django.template.defaultfilters import striptags
 
 from forms import PostForm, ThreadForm
-from models import Thread, Post, Category, WatchList, AbuseList
+from models import Thread, Post, Category, WatchList, AbuseReport
 from templatetags.extras import markdown_filter
 
 
@@ -97,7 +97,7 @@ def rpc_watch(request, **kwargs):
 def rpc_abuse(request, **kwargs):
     # TODO: test this
     assert('post' in kwargs, 'rpc_gsticky() requires "post"')
-    abuse = AbuseList.objects.get_or_create(
+    abuse = AbuseReport.objects.get_or_create(
             submitter = request.user,
             post = kwargs['post'],
             )

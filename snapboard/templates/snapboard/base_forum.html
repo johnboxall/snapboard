@@ -10,6 +10,7 @@
 
     <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ SNAP_PREFIX }}/feeds/latest/" />
 
+    {# this is required for some javascript rpc functions #}
     <script type="text/javascript">
         <!--
         var SNAP_PREFIX = '{{ SNAP_PREFIX }}';
@@ -31,7 +32,7 @@
     <div id="hd">
         <br />
         {% block site_title %}
-        <p style="font-size: 150%;">SNAPBOARD</p>
+        <p style="font-size: 150%;"><a href="http://code.google.com/p/snapboard/">SNAPBOARD</a></p>
         {% endblock %}
         <br />
         <div id="navigation">
@@ -130,6 +131,7 @@
     <div id="ft">
         <br />
         <div style="text-align:center; font-size: 85%;">
+            <p>This community is powered by <a href="http://code.google.com/p/snapboard/">Snapboard</a></p> <br />
             <a href="http://validator.w3.org/check/referer" title="Check the validity of this site&#8217;s XHTML">xhtml</a> &nbsp; 
             <a href="http://jigsaw.w3.org/css-validator/check/referer" title="Check the validity of this site&#8217;s CSS">css</a> &nbsp; 
         </div>

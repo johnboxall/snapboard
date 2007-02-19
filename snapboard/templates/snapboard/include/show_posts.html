@@ -31,7 +31,7 @@
                 </span>
                 
                 {% endif %}
-                {% if user.is_authenticated %}
+                {% if user.is_authenticated and not post.freespeech %}
                 <span title="Report this post for violation of forum policies." class="popup">
                     <a id="abuse{{ post.id }}" href="#snap_post{{ post.id }}" onclick="set_abuse('{{ post.id }}');">&#149; report abuse</a>
                 </span>

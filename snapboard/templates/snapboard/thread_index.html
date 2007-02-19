@@ -25,6 +25,9 @@
                         {% if category and thread.csticky %}
                         STICKY
                         {% endif %}
+                        {% if thread.closed %}
+                        CLOSED
+                        {% endif %}
                         <a href="{{ SNAP_PREFIX }}/threads/id/{{ thread.id }}">{{ thread.subject }}</a>
                     </b>
                 </span>

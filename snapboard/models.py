@@ -1,8 +1,12 @@
+import sets
 from datetime import datetime
 
-from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User, Group
+from django.core import validators
+from django.db import models
+from django.db.models import signals
+from django.dispatch import dispatcher
 
 from fields import PhotoField
 from middleware import threadlocals
@@ -12,13 +16,18 @@ SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX',
         getattr(settings, 'MEDIA_URL', '') + '/media')
 SNAP_LOGIN_URL = SNAP_PREFIX + '/signin'
 
-## NOTES
-# TODO: banlist model
-#
-# Field option editable=False works as advertised in the Admin pages but
-# does not hide form fields when used with newforms and the functions
-# form_from_model() and form_from_instance():
-#   http://code.djangoproject.com/ticket/3247
+
+def isIPAddressList(field_data, all_data):
+    l = str(field_data).splitlines()
+    line = 1
+    for ip in l:
+        try:
+            validators.isValidIPAddress4(ip, all_data)
+            line = line + 1
+        except validators.ValidationError:
+            raise validators.ValidationError(
+                    "Line " + str(line) + " has an invalid IP address")
+
 
 class Category(models.Model):
     label = models.CharField(maxlength=32)
@@ -161,7 +170,7 @@ class Post(models.Model):
 # #Post._meta.admin.__class__ = PostAdminOptions
 
 
-class AbuseList(models.Model):
+class AbuseReport(models.Model):
     '''
     When an abuse report is filed by a registered User, the post is listed
     in this table.
@@ -177,6 +186,7 @@ class AbuseList(models.Model):
     class Meta:
         unique_together = (('post', 'submitter'),)
 
+
 class WatchList(models.Model):
     """
     Keep track of who is watching what thread.  Notify on change (sidebar).
@@ -184,6 +194,7 @@ class WatchList(models.Model):
     user = models.ForeignKey(User)
     thread = models.ForeignKey(Thread)
     # no need to be in the admin
+
 
 class SnapboardProfile(models.Model):
     '''
@@ -238,22 +249,47 @@ class BannedUser(models.Model):
     but will not be able to log in.
     '''
     user = models.ForeignKey(User, unique=True)
+    reason = models.TextField()
+    def __str__(self):
+        return str(self.user)
+
     class Admin:
         pass
 
 
 class BannedIP(models.Model):
     '''
-    IP addresses listed in
+    Each line should have an IP address.
     
     The objects in this model are not allowed to log in or register new
     accounts.
     '''
-    iplist = models.TextField()
-    # TODO: need to add a validator to ensure that iplist is a list of ip
-    # addresses separated by whitespace
+
+    iplist = models.TextField(validator_list=[isIPAddressList])
+    reason = models.TextField()
+
+    def get_ips(self):
+        return [i.strip() for i in str(self.iplist).splitlines()]
+
+    def __str__(self):
+        return ','.join(self.get_ips())
 
     class Admin:
         pass
+
+def update_ban_cache():
+    ips = []
+    users = [int(u.id) for u in BannedUser.objects.all()]
+
+    for ip in BannedIP.objects.all():
+        ips.extend(ip.get_ips())
+
+    settings.SNAP_BANNED_IPS = sets.Set(ips)
+    settings.SNAP_BANNED_USERS = sets.Set(users)
+
+dispatcher.connect(update_ban_cache, sender=BannedIP, signal=signals.post_save)
+dispatcher.connect(update_ban_cache, sender=BannedIP, signal=signals.post_delete)
+dispatcher.connect(update_ban_cache, sender=BannedUser, signal=signals.post_save)
+dispatcher.connect(update_ban_cache, sender=BannedUser, signal=signals.post_delete)
 
 # vim: ai ts=4 sts=4 et sw=4
