@@ -24,7 +24,6 @@ register.filter('post_summary', post_summary)
 
 
 def privatenames(value):
-    print 'privatenames: private', value
     ids = [int(x) for x in value.split(',')]
     users = User.objects.filter(id__in=ids)
     return ', '.join([u.username for u in users])

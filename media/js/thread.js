@@ -189,6 +189,12 @@ function procAllTimeSince() {
     for(var i=0; i < elst.length; i++){
         el = elst[i];
         datestr = new Date(el.innerHTML);
-        el.innerHTML = datestr.toTimeSinceString() + ' ago';
+        tdisp = datestr.toTimeSinceString();
+        if(tdisp == '') {
+            /* blank values indicate a future time... */
+            el.innerHTML = 'just now';
+        } else {
+            el.innerHTML = datestr.toTimeSinceString() + ' ago';
+        }
     }
 }
