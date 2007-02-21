@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-    <title>example.com</title>
+    <title>{% block title %}Snapboard{% endblock %}</title>
     <link type="text/css" rel="stylesheet" href="{{ SNAP_MEDIA_PREFIX }}/css/yui/reset-fonts-grids.css" />
     <link type="text/css" rel="stylesheet" href="{{ SNAP_MEDIA_PREFIX }}/css/form.css" />    
     <link type="text/css" rel="stylesheet" href="{{ SNAP_MEDIA_PREFIX }}/css/snapboard.css" />    
@@ -84,14 +84,14 @@
                         {{ login_form.as_p }}
                         <div>
                             <input type="submit" value="Sign In" />
-                            <input type="hidden" name="next" value="{{ login_next }}" />
+                            <input type="hidden" name="next" value="{{ request.path }}" />
                         </div>
                     </form>
                     <br />
 
                     <p>You need to have a user account in order to contribute
                     to discussions on this forum.</p>
-                    <p style="font-size:small"><a href="/accounts/register/">Register for the Forums</a></p>
+                    <p style="font-size:small"><a href="/accounts/register/">Create an account</a></p>
                 {% endif %}
             </div>
             

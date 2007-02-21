@@ -98,7 +98,6 @@ def login_context(request):
     if not request.user.is_authenticated():
         response_dict.update({
                 'login_form': LoginForm(),
-                'login_next': request.META['PATH_INFO'],
                 })
 
     return response_dict
