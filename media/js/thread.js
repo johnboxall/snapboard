@@ -19,8 +19,35 @@ function toggle(id, type) {
 }
 
 
+function preview(form_id) {
+    urlq = SNAP_PREFIX + '/rpc/preview/';
+    form = document.getElementById(form_id);
+    text = form.post.value;
+    div_preview = document.getElementById('snap_preview_addpost');
+    var handleSuccess = function(o) {
+        if(o.responseText !== undefined) {
+            res = eval('(' + o.responseText + ')');
+            div_preview.innerHTML = res['preview'];
+            div_preview.parentNode.style.display = 'block';
+        }
+    };
+
+    var handleFailure = function(o) {
+        var errordiv = document.getElementById("thread_rpc_feedback");
+        if(o.responseText !== undefined) {
+            div_preview.innerHTML = "There was an error previewing your post.";
+            div_preview.parentNode.style.display = 'block';
+        }
+    };
+    var callback = {success:handleSuccess, failure:handleFailure, argument: []};
+    YAHOO.util.Connect.setDefaultPostHeader(false);
+    YAHOO.util.Connect.initHeader('Content-Type', 'text/plain', true);
+    var request = YAHOO.util.Connect.asyncRequest('POST', urlq, callback, 'text=' + text);
+}
+
+
 function revision(orig_id, show_id) {
-    urlq = SNAP_PREFIX + '/rpc/postrev/?orig=' + orig_id + '&show=' + show_id
+    urlq = SNAP_PREFIX + '/rpc/postrev/?orig=' + orig_id + '&show=' + show_id;
 
     div_text = document.getElementById('snap_post_text' + orig_id)
     div_links = document.getElementById('post_revision_links' + orig_id)
