@@ -41,7 +41,7 @@ def _userdata(request, var):
     Try to get an attribute of the SnapboardProfile for a certain user.
     This function should not be called from outside snapboard views.
 
-    If the setting was found, this function returns
+    If the setting was found, this function returns the default value.
 
     If 'var' is not the name of a field of SnapboardProfile, a KeyError
     will be raised.
@@ -486,6 +486,17 @@ def thread_index(request, cat_id=None, page=1):
 
     if cat_id:
         thread_list = thread_list.order_by('-csticky', '-date')
+    else:
+        # main page
+        user = request.user
+
+        # filter on user prefs
+        if user.is_authenticated() and SnapboardProfile.objects.filter(user=user).count() > 0:
+            profile = SnapboardProfile.objects.get(user=user)
+            if profile.frontpage_filters.all().count() > 0:
+                thread_list = thread_list.filter(category__in=profile.frontpage_filters.all())
+        thread_list = thread_list.order_by('-gsticky', '-date')
+
 
 
     paginator = ObjectPaginator(thread_list, _userdata(request, 'tpp'))
