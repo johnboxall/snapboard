@@ -11,6 +11,10 @@ from models import Thread, Post, Category, WatchList, AbuseReport
 from templatetags.extras import markdown_filter
 
 
+def _sanitize(text):
+    return markdown_filter(striptags(text), "safe")
+
+
 def rpc_post(request):
     show_id = int(request.GET['show'])
     orig_id = int(request.GET['orig'])
@@ -24,11 +28,17 @@ def rpc_post(request):
     if post.previous is not None:
         prev_id = str(post.previous.id)
 
-    resp = {'text': markdown_filter(striptags(post.text), "safe"),
+    resp = {'text': _sanitize(post.text),
             'prev_id': prev_id,
             'rev_id': rev_id,
             }
     return HttpResponse(simplejson.dumps(resp), mimetype='application/javascript')
+
+
+def rpc_preview(request):
+    text = request.raw_post_data 
+    return HttpResponse(simplejson.dumps({'preview': _sanitize(text)}),
+            mimetype='application/javascript')
 
 
 def rpc_lookup(request, queryset, field, limit=5):

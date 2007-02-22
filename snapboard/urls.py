@@ -5,7 +5,7 @@ from views import thread, thread_index, new_thread, category_index
 from views import edit_post, rpc, signout, signin
 from views import favorite_index, private_index, profile
 
-from rpc import rpc_post, rpc_lookup
+from rpc import rpc_post, rpc_lookup, rpc_preview
 from feeds import LatestPosts
 
 feeds = {
@@ -33,6 +33,7 @@ urlpatterns = patterns('',
     # RPC
     (r'^rpc/action/$', rpc),
     (r'^rpc/postrev/$', rpc_post),
+    (r'^rpc/preview/$', rpc_preview),
     (r'^rpc/user_lookup/$', rpc_lookup,
             {
                 'queryset':User.objects.all(),

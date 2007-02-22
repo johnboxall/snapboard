@@ -6,7 +6,7 @@
     <b>Got something to say?</b>
     </p>
     {% include "snapboard/include/markdown_guide.html" %}
-    <form id="add_post_div" action="" method="POST">
+    <form id="add_post_div" action="" method="POST" enctype="text/plain">
         <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/yui/event-min.js"></script>
         <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/yui/autocomplete-min.js"></script>
         <p>{{ postform.post }} {{ postform.post.errors }}</p>
@@ -17,20 +17,29 @@
         <div id="autocomplete_input" style="display:none">
             <p>{{ postform.private }}</p>
             <div id="autocomplete_div"></div>
-            <script type="text/javascript">
+            <script type="text/javascript"><!--
                 dataSource = new YAHOO.widget.DS_XHR("{{ SNAP_PREFIX }}/rpc/user_lookup/", ["ResultSet.Result","name","id"]);
                 autoComp = new YAHOO.widget.AutoComplete("id_private","autocomplete_div",dataSource);
                 autoComp.delimChar = ","; 
                 autoComp.typeAhead = true;
                 autoComp.highlightClassName = "highlight";
+                // -->
             </script>
         </div>
         {% if postform.private.errors %}
         {{ postform.private.errors }}
         {% endif %}
 
-        <input type="submit" value="Post">
+        <p>
+        <input type="submit" value="Post" />
+        <input type="button" value="Preview" onclick="preview('add_post_div')" />
+        </p>
     </form>
+    <div style="border: 1px solid #ccc; display: none;">
+        <p><b>Post Preview:</b></p>
+        <div id="snap_preview_addpost" class="post_text">
+        </div>
+    </div>
     {% else %}
     <p>You need to <a href="{{ SNAP_PREFIX }}/signin/?next={{ request.path|urlencode }}#add_post_div">sign in</a> to post messages.</p>
     {% endif %}
