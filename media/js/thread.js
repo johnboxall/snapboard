@@ -42,7 +42,7 @@ function preview(form_id) {
     var callback = {success:handleSuccess, failure:handleFailure, argument: []};
     YAHOO.util.Connect.setDefaultPostHeader(false);
     YAHOO.util.Connect.initHeader('Content-Type', 'text/plain', true);
-    var request = YAHOO.util.Connect.asyncRequest('POST', urlq, callback, 'text=' + text);
+    var request = YAHOO.util.Connect.asyncRequest('POST', urlq, callback, text);
 }
 
 
