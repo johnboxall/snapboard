@@ -19,20 +19,20 @@ font-size:120%;
 font-size:110%;
 }
 
-.post_text table {
+table.post_text {
 border:1px solid #ccc;
 }
 
-ol,ul {
+ol.post_text,ul.post_text {
 margin-left:2em;
 margin-right:2em;
 }
 
-ol {
+.post_text ol {
 list-style-type:decimal;
 }
 
-ul {
+.post_text ul {
 list-style-type:square;
 }
 
