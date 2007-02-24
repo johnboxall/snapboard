@@ -210,7 +210,7 @@ class SnapboardProfile(models.Model):
     profile = models.TextField(blank=True)
 
     avatar = PhotoField(blank=True, upload_to='img/snapboard/avatars/',
-            width=20, height=20)
+            width=24, height=24)
 
     # browsing options
     ppp = models.IntegerField(null=True, blank=True,
