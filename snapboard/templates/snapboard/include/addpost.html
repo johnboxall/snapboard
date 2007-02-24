@@ -6,7 +6,7 @@
     <b>Got something to say?</b>
     </p>
     {% include "snapboard/include/markdown_guide.html" %}
-    <form id="add_post_div" action="" method="POST" enctype="text/plain">
+    <form id="add_post_div" action="" method="POST">
         <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/yui/event-min.js"></script>
         <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/yui/autocomplete-min.js"></script>
         <p>{{ postform.post }} {{ postform.post.errors }}</p>
