@@ -213,11 +213,11 @@ class SnapboardProfile(models.Model):
             width=24, height=24)
 
     # browsing options
-    ppp = models.IntegerField(null=True, blank=True,
+    ppp = models.IntegerField(
             choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
             default = 20,
             help_text = "Posts per page")
-    tpp = models.IntegerField(null=True, blank=True,
+    tpp = models.IntegerField(
             choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
             default = 20,
             help_text = "Threads per page")
@@ -232,14 +232,15 @@ class SnapboardProfile(models.Model):
 
     ## edit inline
     class Admin:
+        list_display = ('user', 'ppp', 'tpp', 'notify_email')
         fields = (
             (None, 
-                {'fields': ('user', 'avatar',)}),
+                {'fields': ('avatar',)}),
             ('Profile', 
                 {'fields': ('profile',)}),
             ('Browsing Options', 
                 {'fields': 
-                    ('ppp', 'notify_email', 'reverse_posts', 'frontpage_filters',)}),
+                    ('ppp', 'tpp', 'notify_email', 'reverse_posts', 'frontpage_filters',)}),
         )
 
 
