@@ -58,72 +58,8 @@
             </div>
         </div>
         <div class="yui-b">
-            {% block side_panel %}
-            <div class="forummenu-first">
-                {% if user.is_authenticated %}
-                    <p style="font-size: 122%;">
-                        <b><a href="{{ SNAP_PREFIX }}/newtopic/">New Topic</a></b>
-                    </p>
-                    <br />
-                    <p>
-                        You are signed in as <a href="{{ SNAP_PREFIX }}/profile">{{ user.username }}</a>
-                        {% if user.is_staff %}
-                        <b>(STAFF)</b>
-                        {% endif %}
-                    </p>
-                    <br />
-                    <p><a href="{{ SNAP_PREFIX }}/signout">Sign out</a></p>
-                {% else %}
-                    <p>You are not logged in.</p>
-                    <br />
-                    {% if form.has_errors %}
-                    <p>Your username and password didn't match.</p>
-                    {% endif %}
-
-                    <form method="post" action="{{ SNAP_PREFIX }}/signin/">
-                        {{ login_form.as_p }}
-                        <div>
-                            <input type="submit" value="Sign In" />
-                            <input type="hidden" name="next" value="{{ request.path }}" />
-                        </div>
-                    </form>
-                    <br />
-
-                    <p>You need to have a user account in order to contribute
-                    to discussions on this forum.</p>
-                    <p style="font-size:small"><a href="/accounts/register/">Create an account</a></p>
-                {% endif %}
-            </div>
-            
-            {% if user.is_staff %}
-                <br />
-                <div class="forummenu">
-                <p><b>Admin Shortcuts</b></p>
-                <br />
-                <ul>
-                    <li>&#187; <b><a href="/admin/">Admin Site</a></b></li>
-                    <li>&#187; <a href="/admin/snapboard/post/?censor__exact=1">Censored posts</a></li>
-                    <li>&#187; <a href="/admin/snapboard/abuselist/">Abuse Reports</a></li>
-                    <li>&#187; <a href="/admin/snapboard/thread/?csticky__exact=1">Category Sticky</a></li>
-                    <li>&#187; <a href="/admin/snapboard/thread/?gsticky__exact=1">Global Sticky</a></li>
-                </ul>
-                </div>
-            {% endif %}
-            
-            {% if user.is_authenticated %}
-                <!-- br />
-                <div class="forummenu">
-                <ul>
-                    <li>&#187; <a href="#">Watched Topics<b></a> <br /> <a href="#">(2 new!)</b></a></li>
-                    <li>&#187; <a href="#">Private Posts<b></a> <br /> <a href="#">(4 new!)</b></a></li>
-                </ul>
-                </div -->
-                
-                <br />
-                <div class="forummenu">
-                    <p><b><a href="{{ SNAP_PREFIX }}/profile/">Forum Preferences</a></b></p>
-                </div>
-            {% endif %}
+            {% block snapboard_panel %}
+                {% include "snapboard/include/side_panel.html" %}
             {% endblock %}
         </div>
 
