@@ -65,7 +65,6 @@ def _userdata(request, var):
     return pdict[var]
 
 
-
 def snapboard_default_context(request):
     """
     Provides some default information for all templates.
@@ -103,15 +102,23 @@ def login_context(request):
     return response_dict
 
 
-def paginate_context(paginator, page):
+def paginate_context(request, model, urlbase, object_list, page, **kwargs):
     '''
     Helper function to make standard pagination available for the template
     "snapboard/page_navigation.html"
     '''
+    page = int(page)
     pindex = page - 1
     page_next = None
     page_prev = None
     page_range = None
+
+    paginator = ObjectPaginator(object_list, _userdata(request, 'tpp'))
+    try:
+        object_page = paginator.get_page(pindex)
+    except InvalidPage:
+        raise InvalidPage
+
     if paginator.has_next_page(pindex):
         page_next = page + 1
     if paginator.has_previous_page(pindex):
@@ -125,6 +132,8 @@ def paginate_context(paginator, page):
             'page_next': page_next,
             'page_prev': page_prev,
             'page_range': page_range,
+            model.__name__.lower() + '_page': object_page,
+            'page_nav_urlbase': urlbase,
         }
 
 
@@ -163,11 +172,7 @@ def rpc(request):
         return HttpResponseServerError
 
 
-def thread(request, thread_id, page="1"):
-    # split results into pages
-    page = int(page)        # indexed starting at 1
-    pindex = page - 1       # indexed starting at 0
-
+def thread(request, thread_id, page=1):
     try:
         thr = Thread.objects.get(pk=thread_id)
     except Thread.DoesNotExist:
@@ -232,22 +237,18 @@ def thread(request, thread_id, page="1"):
     if not getattr(user, 'is_staff', False):
         post_list = post_list.exclude(censor=True)
 
-    paginator = ObjectPaginator(post_list, _userdata(request, 'ppp'))
     try:
-        post_page = paginator.get_page(pindex)
+        render_dict.update(paginate_context(request, Post,
+            SNAP_PREFIX + '/threads/id/' + thread_id + '/',
+            post_list,
+            page,
+            ))
     except InvalidPage:
         return HttpResponseRedirect(SNAP_PREFIX + '/threads/id/' + str(thread_id) + '/')
-
-    # general info to render the page navigation (back/forward/etc)
-    render_dict.update(paginate_context(paginator, page))
-
 
     render_dict.update({
             'thr': thr,
             'postform': postform,
-            'post_page': post_page,
-            'page_nav_urlbase': SNAP_PREFIX + '/threads/id/' + thread_id + '/',
-            'page_nav_cssclass': 'thread_page_nav',
             })
 
     return render_to_response('snapboard/thread.html',
@@ -257,7 +258,7 @@ def thread(request, thread_id, page="1"):
 
 def edit_post(request, original, next=None):
     '''
-    Edit an existing post.
+    Edit an existing post.decorators in python
     '''
     if not request.user.is_authenticated() or not request.POST:
         raise Http404
@@ -336,7 +337,7 @@ def base_thread_queryset(qset=None):
     '''
     This generates a QuerySet containing Threads and additional data used in
     generating a web page with a listing of discussions.
-
+http://code.django.com/
     qset allows the caller to specify an initial queryset to work with.  If this
     is not set, all Threads will be returned.
     '''
@@ -392,31 +393,21 @@ def favorite_index(request, page=1):
     This page shows the threads/discussions that have been marked as 'watched'
     by the user.
     '''
-    page = int(page)
-    pindex = page - 1
-
     wl = WatchList.objects.filter(user=request.user)
     thread_list = base_thread_queryset(
             Thread.objects.filter(pk__in=[x.id for x in wl])
             ).order_by('-date')
-    title = request.user.username + "'s Watched Discussions"
 
-    render_dict = {'title': title}
-    page_nav_urlbase = SNAP_PREFIX + "/favorites/"
+    render_dict = {'title': request.user.username + "'s Watched Discussions"}
 
-    paginator = ObjectPaginator(thread_list, _userdata(request, 'tpp'))
     try:
-        thread_page = paginator.get_page(pindex)
+        render_dict.update(paginate_context(request, Thread,
+            SNAP_PREFIX + "/favorites/",
+            thread_list,
+            page,
+            ))
     except InvalidPage:
         return HttpResponseRedirect(SNAP_PREFIX + '/categories')
-    render_dict.update(paginate_context(paginator, page))
-
-
-    render_dict.update({
-            'thread_page': thread_page,
-            'page_nav_urlbase': page_nav_urlbase,
-            'page_nav_cssclass': 'index_page_nav',
-            })
 
     return render_to_response('snapboard/thread_index.html',
             render_dict,
@@ -425,9 +416,6 @@ favorite_index = snapboard_require_signin(favorite_index)
 
 
 def private_index(request, page=1):
-    page = int(page)
-    pindex = page - 1
-
     idstr = str(request.user.id)
     post_list = Post.objects.filter(
             Q(private__endswith=idstr) |
@@ -441,20 +429,14 @@ def private_index(request, page=1):
 
     render_dict = {'title': "Discussions with private messages to you"}
 
-    page_nav_urlbase = SNAP_PREFIX + "/private/"
-
-    paginator = ObjectPaginator(thread_list, _userdata(request, 'tpp'))
     try:
-        thread_page = paginator.get_page(pindex)
+        render_dict.update(paginate_context(request, Thread,
+            SNAP_PREFIX + "/private/", # urlbase
+            thread_list,
+            page,
+            ))
     except InvalidPage:
         return HttpResponseRedirect(SNAP_PREFIX + '/categories')
-    render_dict.update(paginate_context(paginator, page))
-
-    render_dict.update({
-            'thread_page': thread_page,
-            'page_nav_urlbase': page_nav_urlbase,
-            'page_nav_cssclass': 'index_page_nav',
-            })
 
     return render_to_response('snapboard/thread_index.html',
             render_dict,
@@ -463,9 +445,6 @@ private_index = snapboard_require_signin(private_index)
 
 
 def thread_index(request, cat_id=None, page=1):
-    page = int(page)
-    pindex = page - 1
-
     render_dict = {}
     try:
         if cat_id is None:
@@ -497,25 +476,19 @@ def thread_index(request, cat_id=None, page=1):
                 thread_list = thread_list.filter(category__in=profile.frontpage_filters.all())
         thread_list = thread_list.order_by('-gsticky', '-date')
 
-
-
-    paginator = ObjectPaginator(thread_list, _userdata(request, 'tpp'))
-    try:
-        thread_page = paginator.get_page(pindex)
-    except InvalidPage:
-        return HttpResponseRedirect(SNAP_PREFIX + '/threads/')
-    render_dict.update(paginate_context(paginator, page))
-
     if cat_id:
         page_nav_urlbase = SNAP_PREFIX + "/threads/category/" + str(cat_id) + '/'
     else:
         page_nav_urlbase = SNAP_PREFIX + "/threads/"
 
-    render_dict.update({
-            'thread_page': thread_page,
-            'page_nav_urlbase': page_nav_urlbase,
-            'page_nav_cssclass': 'index_page_nav',
-            })
+    try:
+        render_dict.update(paginate_context(request, Thread,
+            page_nav_urlbase,
+            thread_list,
+            page,
+            ))
+    except InvalidPage:
+        return HttpResponseRedirect(SNAP_PREFIX + '/threads/')
 
     return render_to_response('snapboard/thread_index.html',
             render_dict,
