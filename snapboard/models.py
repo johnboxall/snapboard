@@ -42,6 +42,9 @@ class Category(models.Model):
         else:
             return None
 
+    class Meta:
+        verbose_name_plural = 'categories'
+
     class Admin:
         pass
 
@@ -244,6 +247,7 @@ class SnapboardProfile(models.Model):
         )
 
 
+# TODO: perhaps this should be placed in another application
 class BannedUser(models.Model):
     '''
     This is a login-level ban.  These users will be able to browse the board
@@ -292,5 +296,25 @@ dispatcher.connect(update_ban_cache, sender=BannedIP, signal=signals.post_save)
 dispatcher.connect(update_ban_cache, sender=BannedIP, signal=signals.post_delete)
 dispatcher.connect(update_ban_cache, sender=BannedUser, signal=signals.post_save)
 dispatcher.connect(update_ban_cache, sender=BannedUser, signal=signals.post_delete)
+
+
+# from django.contrib.site.models import Site
+# def watched_thread_notify(instance):
+#     thread_id = instance.thread.id
+#     watchlist = WatchList.objects.select_related().filter(thread__id=thread_id)
+# 
+#     site = Site.objects.get(pk=settings.SITE_ID)
+# 
+#     people = [w.user.email for w in watchlist]
+#     subject_tmp = loader.get_template("tracker/watched_thread_notify_subject.txt")
+#     body_tmp = loader.get_template("tracker/watched_thread_notify_body.txt")
+# 
+#     ctx = Context({'post':instance, 'site':site})
+#     subject = subject_tmp.render(ctx).strip()
+#     body = body_tmp.render(ctx)
+# 
+#     send_mail(subject, body, 'snapboard@'+site.domain, people)
+# connect this handler
+#dispatcher.connect(watched_thread_notify, sender=Post, signal=signals.post_save)
 
 # vim: ai ts=4 sts=4 et sw=4
