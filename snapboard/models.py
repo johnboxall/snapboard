@@ -11,6 +11,8 @@ from django.dispatch import dispatcher
 from fields import PhotoField
 from middleware import threadlocals
 
+import managers
+
 SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
 SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
         getattr(settings, 'MEDIA_URL', '') + '/media')
@@ -66,6 +68,9 @@ class Thread(models.Model):
     # Global sticky - will show up at the top of home listing.
     gsticky = models.BooleanField(default=False)
 
+
+    view_manager = managers.ThreadManager
+
     def __str__(self):
         return self.subject
 
@@ -83,7 +88,6 @@ class Post(models.Model):
 
     Both forward and backward revisions are stored as ForeignKeys.
     """
-
     # blank=True to get admin to work when the user field is missing
     user = models.ForeignKey(User, editable=False, blank=True, default=None)
 
@@ -108,6 +112,9 @@ class Post(models.Model):
     # (boolean set by mod.; true if abuse report deemed false)
     censor = models.BooleanField(default=False) # moderator level access
     freespeech = models.BooleanField(default=False) # superuser level access
+
+
+    view_manager = managers.PostManager()
 
     def save(self):
         #print 'user =', threadlocals.get_current_user()

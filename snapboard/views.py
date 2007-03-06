@@ -204,38 +204,7 @@ def thread(request, thread_id, page=1):
         postform = PostForm()
 
     # this must come after the post so new messages show up
-    uid = str(user.id)
-    idstr = (uid + ',', ',' + uid + ',', ',' + uid)
-    post_list = Post.objects.filter(thread=thr).order_by('odate').exclude(
-            revision__isnull=False)
-   
-    # filter out the private messages.  admin cannot see private messages
-    # (although they can use the Django admin interface to do so)
-    # TODO: there's gotta be a better way to filter out private messages
-    # Tested with postgresql and sqlite
-    post_list = post_list.filter(
-            Q(user__id__exact=user.id) |
-            Q(private__exact='') |
-            Q(private__endswith=idstr[2]) |
-            Q(private__startswith=idstr[0]) |
-            Q(private__contains=idstr[1]))
-
-    # get any avatars
-    extra_post_avatar = """
-        SELECT avatar FROM snapboard_snapboardprofile
-            WHERE snapboard_snapboardprofile.user_id = snapboard_post.user_id
-        """
-    extra_abuse_count = """
-        SELECT COUNT(*) FROM snapboard_abusereport
-            WHERE snapboard_post.id = snapboard_abusereport.post_id
-        """
-    post_list = post_list.extra( select = {
-        'avatar': extra_post_avatar,
-        'abuse': extra_abuse_count,
-        })
-
-    if not getattr(user, 'is_staff', False):
-        post_list = post_list.exclude(censor=True)
+    post_list = Post.view_manager.posts_for_thread(thread_id, user)
 
     try:
         render_dict.update(paginate_context(request, Post,
@@ -331,61 +300,7 @@ def new_thread(request):
             'form': threadform,
             },
             context_instance=RequestContext(request, processors=[login_context,]))
-
-
-def base_thread_queryset(qset=None):
-    '''
-    This generates a QuerySet containing Threads and additional data used in
-    generating a web page with a listing of discussions.
-http://code.django.com/
-    qset allows the caller to specify an initial queryset to work with.  If this
-    is not set, all Threads will be returned.
-    '''
-
-    # number of posts in thread
-    # censored threads don't count toward the total
-    # TODO: private threads DO count for total; fix it
-    extra_post_count = """
-        SELECT COUNT(*) FROM snapboard_post
-            WHERE snapboard_post.thread_id = snapboard_thread.id
-            AND snapboard_post.revision_id IS NULL
-            AND NOT snapboard_post.censor
-        """
-
-    # figure out who started the discussion
-    extra_starter = """
-        SELECT username FROM auth_user
-            WHERE auth_user.id = (SELECT user_id
-                FROM snapboard_post WHERE snapboard_post.thread_id = snapboard_thread.id
-                ORDER BY snapboard_post.date ASC
-                LIMIT 1)
-        """
-    extra_last_poster = """
-        SELECT username FROM auth_user
-            WHERE auth_user.id = (SELECT user_id
-                FROM snapboard_post WHERE snapboard_post.thread_id = snapboard_thread.id
-                ORDER BY snapboard_post.date DESC
-                LIMIT 1)
-        """
-    extra_last_updated = """
-        SELECT date FROM snapboard_post 
-            WHERE snapboard_post.thread_id = snapboard_thread.id
-            ORDER BY date DESC LIMIT 1
-        """
-
-    if qset == None:
-        qset = Thread.objects
-
-    return qset.extra(
-        select = {
-            'post_count': extra_post_count,
-            'starter': extra_starter,
-            #'last_updated': extra_last_updated,  # bug: http://code.djangoproject.com/ticket/2210
-            # the bug is that any extra columns must match their names
-            # TODO: sorting on boolean fields is undefined in SQL theory
-            'date': extra_last_updated,
-            'last_poster': extra_last_poster,
-        },).order_by('-gsticky', '-date')
+new_thread = snapboard_require_signin(new_thread)
 
 
 def favorite_index(request, page=1):
@@ -393,10 +308,7 @@ def favorite_index(request, page=1):
     This page shows the threads/discussions that have been marked as 'watched'
     by the user.
     '''
-    wl = WatchList.objects.filter(user=request.user)
-    thread_list = base_thread_queryset(
-            Thread.objects.filter(pk__in=[x.id for x in wl])
-            ).order_by('-date')
+    thread_list = Thread.view_manager.get_favorites(request.user)
 
     render_dict = {'title': request.user.username + "'s Watched Discussions"}
 
@@ -416,16 +328,7 @@ favorite_index = snapboard_require_signin(favorite_index)
 
 
 def private_index(request, page=1):
-    idstr = str(request.user.id)
-    post_list = Post.objects.filter(
-            Q(private__endswith=idstr) |
-            Q(private__startswith=idstr) |
-            Q(private__contains=idstr)).select_related()
-    thread_list = [p.thread.id for p in post_list]
-
-    thread_list = base_thread_queryset(
-            Thread.objects.filter(pk__in=thread_list)
-            ).order_by('-date')
+    thread_list = Thread.view_manager.get_private(request.user)
 
     render_dict = {'title': "Discussions with private messages to you"}
 
@@ -444,49 +347,38 @@ def private_index(request, page=1):
 private_index = snapboard_require_signin(private_index)
 
 
-def thread_index(request, cat_id=None, page=1):
-    render_dict = {}
+def category_index(request, cat_id, page=1):
     try:
-        if cat_id is None:
-            #thread_list = Thread.objects.all()
-            thread_list = base_thread_queryset()
-            title = "Recent Discussions"
-        else:
-            cat = Category.objects.get(pk=cat_id)
-            thread_list = base_thread_queryset().filter(category=cat)
-            title = ''.join(("Category: ", cat.label))
+        cat = Category.objects.get(pk=cat_id)
+        thread_list = Thread.view_manager.get_category(cat_id)
+        render_dict = paginate_context(request, Thread,
+            SNAP_PREFIX + "/threads/category/" + str(cat_id) + '/',
+            thread_list,
+            page)
+        render_dict.update({'title': ''.join(("Category: ", cat.label))})
     except Category.DoesNotExist:
         raise Http404
+    except InvalidPage:
+        return HttpResponseRedirect(SNAP_PREFIX + '/threads/')
+    return render_to_response('snapboard/thread_index.html',
+            render_dict,
+            context_instance=RequestContext(request, processors=[login_context,]))
 
-    render_dict.update({
-        'category': cat_id,
-        'title': title
-        })
 
-    if cat_id:
-        thread_list = thread_list.order_by('-csticky', '-date')
-    else:
-        # main page
-        user = request.user
 
+def thread_index(request, cat_id=None, page=1):
+    render_dict = {'title': "Recent Discussions"}
+    if user.is_authenticated():
         # filter on user prefs
-        if user.is_authenticated() and SnapboardProfile.objects.filter(user=user).count() > 0:
-            profile = SnapboardProfile.objects.get(user=user)
-            if profile.frontpage_filters.all().count() > 0:
-                thread_list = thread_list.filter(category__in=profile.frontpage_filters.all())
-        thread_list = thread_list.order_by('-gsticky', '-date')
-
-    if cat_id:
-        page_nav_urlbase = SNAP_PREFIX + "/threads/category/" + str(cat_id) + '/'
+        thread_list = Thread.view_manager.get_user_query_set(request.user)
     else:
-        page_nav_urlbase = SNAP_PREFIX + "/threads/"
+        thread_list = Thread.view_manager.get_query_set()
 
     try:
         render_dict.update(paginate_context(request, Thread,
-            page_nav_urlbase,
+            SNAP_PREFIX + "/threads/",
             thread_list,
-            page,
-            ))
+            page))
     except InvalidPage:
         return HttpResponseRedirect(SNAP_PREFIX + '/threads/')
 
@@ -495,7 +387,6 @@ def thread_index(request, cat_id=None, page=1):
             context_instance=RequestContext(request, processors=[login_context,]))
 
 def category_index(request):
-
     extra_post_count = """
         SELECT COUNT(*) FROM snapboard_thread
             WHERE snapboard_thread.category_id = snapboard_category.id

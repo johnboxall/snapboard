@@ -17,82 +17,40 @@ from models import *
 
 class PostManager(models.Manager):
     def get_query_set(self):
+        # get any avatars
+        extra_post_avatar = """
+            SELECT avatar FROM snapboard_snapboardprofile
+                WHERE snapboard_snapboardprofile.user_id = snapboard_post.user_id
+            """
+        extra_abuse_count = """
+            SELECT COUNT(*) FROM snapboard_abusereport
+                WHERE snapboard_post.id = snapboard_abusereport.post_id
+            """
+
         return super(PostManager, self).get_query_set().extra(
             select = {
-                'post_count': extra_post_count,
-                'starter': extra_starter,
-            },).order_by('-gsticky', '-date')
+                'avatar': extra_post_avatar,
+                'abuse': extra_abuse_count,
+            }).exclude(revision__isnull=False).order_by('-odate')
 
+    def posts_for_thread(self, thread_id, user):
+        uid = str(user.id)
+        idstr = (uid + ',', ',' + uid + ',', ',' + uid)
+        # filter out the private messages.  admin cannot see private messages
+        # (although they can use the Django admin interface to do so)
+        # TODO: there's gotta be a better way to filter out private messages
+        # Tested with postgresql and sqlite
+        qs = self.get_query_set().filter(thread__id=thread_id,
+                Q(user__id__exact=user.id) |
+                Q(private__exact='') |
+                Q(private__endswith=idstr[2]) |
+                Q(private__startswith=idstr[0]) |
+                Q(private__contains=idstr[1]))
 
-# def thread(request, thread_id, page=1):
-#     try:
-#         thr = Thread.objects.get(pk=thread_id)
-#     except Thread.DoesNotExist:
-#         raise Http404
-# 
-#     render_dict = {}
-#     user = request.user
-# 
-#     if user.is_authenticated():
-#         try:
-#             wl = WatchList.objects.get(user=user, thread=thr)
-#             render_dict.update({"watched":True})
-#         except WatchList.DoesNotExist:
-#             render_dict.update({"watched":False})
-# 
-# 
-#     # this must come after the post so new messages show up
-#     uid = str(user.id)
-#     idstr = (uid + ',', ',' + uid + ',', ',' + uid)
-#     post_list = Post.objects.filter(thread=thr).order_by('odate').exclude(
-#             revision__isnull=False)
-#    
-#     # filter out the private messages.  admin cannot see private messages
-#     # (although they can use the Django admin interface to do so)
-#     # TODO: there's gotta be a better way to filter out private messages
-#     # Tested with postgresql and sqlite
-#     post_list = post_list.filter(
-#             Q(user__id__exact=user.id) |
-#             Q(private__exact='') |
-#             Q(private__endswith=idstr[2]) |
-#             Q(private__startswith=idstr[0]) |
-#             Q(private__contains=idstr[1]))
-# 
-#     # get any avatars
-#     extra_post_avatar = """
-#         SELECT avatar FROM snapboard_snapboardprofile
-#             WHERE snapboard_snapboardprofile.user_id = snapboard_post.user_id
-#         """
-#     extra_abuse_count = """
-#         SELECT COUNT(*) FROM snapboard_abusereport
-#             WHERE snapboard_post.id = snapboard_abusereport.post_id
-#         """
-#     post_list = post_list.extra( select = {
-#         'avatar': extra_post_avatar,
-#         'abuse': extra_abuse_count,
-#         })
-# 
-#     if not getattr(user, 'is_staff', False):
-#         post_list = post_list.exclude(censor=True)
-# 
-#     try:
-#         render_dict.update(paginate_context(request, Post,
-#             SNAP_PREFIX + '/threads/id/' + thread_id + '/',
-#             post_list,
-#             page,
-#             ))
-#     except InvalidPage:
-#         return HttpResponseRedirect(SNAP_PREFIX + '/threads/id/' + str(thread_id) + '/')
-# 
-#     render_dict.update({
-#             'thr': thr,
-#             'postform': postform,
-#             })
-# 
-#     return render_to_response('snapboard/thread.html',
-#             render_dict,
-#             context_instance=RequestContext(request, processors=[login_context,]))
-# 
+        if not getattr(user, 'is_staff', False):
+            qs = qs.exclude(censor=True)
+
+        return qs
 
 
 class ThreadManager(models.Manager):
