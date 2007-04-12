@@ -9,10 +9,10 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-#DATABASE_ENGINE = 'postgresql_psycopg2'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-#DATABASE_NAME = 'bshi' # Or path to database file if using sqlite3.
-DATABASE_ENGINE = 'sqlite3'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-DATABASE_NAME = '/tmp/examplesite.db' # Or path to database file if using sqlite3.
+DATABASE_ENGINE = 'postgresql_psycopg2'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+DATABASE_NAME = 'bshi' # Or path to database file if using sqlite3.
+#DATABASE_ENGINE = 'sqlite3'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+#DATABASE_NAME = '/tmp/examplesite.db' # Or path to database file if using sqlite3.
 DATABASE_USER = 'bshi'             # Not used with sqlite3.
 DATABASE_PASSWORD = 'bshi'         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -35,7 +35,7 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/bshi/sandbox/snapboard/trunk/media'
+MEDIA_ROOT = '/home/bshi/sandbox/snapboard/media'
 
 # URL that handles the media served from MEDIA_ROOT.
 # Example: "http://media.lawrence.com"

@@ -4,6 +4,7 @@ from django import newforms as forms
 from django.contrib.auth import decorators
 from django.contrib.auth import login, logout
 from django.core.paginator import ObjectPaginator, InvalidPage
+from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
 from django.shortcuts import render_to_response
@@ -11,9 +12,6 @@ from django.template import RequestContext
 from django.utils import simplejson
 from django.views.generic.simple import redirect_to
 
-
-#from models import Thread, Post, Category, WatchList
-from models import *
 
 class PostManager(models.Manager):
     def get_query_set(self):
@@ -104,17 +102,16 @@ class ThreadManager(models.Manager):
 
 
     def get_user_query_set(self, user):
-        if SnapboardProfile.objects.filter(user=user).count() > 0:
-            profile = SnapboardProfile.objects.get(user=user)
-            if profile.frontpage_filters.all().count() > 0:
-                return self.get_query_set().filter(
-                        category__in=profile.frontpage_filters.all())
+        pq = user.snapboardprofile_set.all()
+        if pq.count() > 0 and pq[0].frontpage_filters.all().count() > 0:
+            return self.get_query_set().filter(
+                category__in=pq[0].frontpage_filters.all())
         else:
             return self.get_query_set()
 
 
     def get_favorites(self, user):
-        wl = WatchList.objects.filter(user=user)
+        wl = user.watchlist_set.all()
         return self.get_query_set().filter(pk__in=[x.id for x in wl])
 
 

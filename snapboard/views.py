@@ -174,7 +174,7 @@ def rpc(request):
 
 def thread(request, thread_id, page=1):
     try:
-        thr = Thread.objects.get(pk=thread_id)
+        thr = Thread.view_manager.get(pk=thread_id)
     except Thread.DoesNotExist:
         raise Http404
 
@@ -232,7 +232,7 @@ def edit_post(request, original, next=None):
         raise Http404
 
     try:
-        orig_post = Post.objects.get(pk=int(original))
+        orig_post = Post.view_manager.get(pk=int(original))
     except Post.DoesNotExist:
         raise Http404
 
@@ -346,7 +346,7 @@ def private_index(request, page=1):
 private_index = snapboard_require_signin(private_index)
 
 
-def category_index(request, cat_id, page=1):
+def thread_category_index(request, cat_id, page=1):
     try:
         cat = Category.objects.get(pk=cat_id)
         thread_list = Thread.view_manager.get_category(cat_id)

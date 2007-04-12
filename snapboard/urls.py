@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.contrib.auth.models import User
 
-from views import thread, thread_index, new_thread, category_index
+from views import thread, thread_index, new_thread, category_index, thread_category_index
 from views import edit_post, rpc, signout, signin
 from views import favorite_index, private_index, profile
 
@@ -27,8 +27,8 @@ urlpatterns = patterns('',
     (r'^threads/page(?P<page>\d+)/$', thread_index),
     (r'^threads/id/(?P<thread_id>\d+)/$', thread),
     (r'^threads/id/(?P<thread_id>\d+)/page(?P<page>\d+)/$', thread),
-    (r'^threads/category/(?P<cat_id>\d+)/$', thread_index),
-    (r'^threads/category/(?P<cat_id>\d+)/page(?P<page>\d+)/$', thread_index),
+    (r'^threads/category/(?P<cat_id>\d+)/$', thread_category_index),
+    (r'^threads/category/(?P<cat_id>\d+)/page(?P<page>\d+)/$', thread_category_index),
 
     # RPC
     (r'^rpc/action/$', rpc),

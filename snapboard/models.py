@@ -68,7 +68,7 @@ class Thread(models.Model):
     # Global sticky - will show up at the top of home listing.
     gsticky = models.BooleanField(default=False)
 
-
+    objects = models.Manager() # needs to be explicit due to below
     view_manager = managers.ThreadManager()
 
     def __str__(self):
@@ -114,6 +114,7 @@ class Post(models.Model):
     freespeech = models.BooleanField(default=False) # superuser level access
 
 
+    objects = models.Manager() # needs to be explicit due to below
     view_manager = managers.PostManager()
 
     def save(self):
