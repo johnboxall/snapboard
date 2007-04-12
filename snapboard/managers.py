@@ -40,12 +40,12 @@ class PostManager(models.Manager):
         # (although they can use the Django admin interface to do so)
         # TODO: there's gotta be a better way to filter out private messages
         # Tested with postgresql and sqlite
-        qs = self.get_query_set().filter(thread__id=thread_id,
-                Q(user__id__exact=user.id) |
+        qs = self.get_query_set().filter(Q(user__id__exact=user.id) |
                 Q(private__exact='') |
                 Q(private__endswith=idstr[2]) |
                 Q(private__startswith=idstr[0]) |
-                Q(private__contains=idstr[1]))
+                Q(private__contains=idstr[1]),
+		thread__id=thread_id)
 
         if not getattr(user, 'is_staff', False):
             qs = qs.exclude(censor=True)

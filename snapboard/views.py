@@ -179,22 +179,21 @@ def thread(request, thread_id, page=1):
         raise Http404
 
     render_dict = {}
-    user = request.user
 
-    if user.is_authenticated():
+    if request.user.is_authenticated():
         try:
-            wl = WatchList.objects.get(user=user, thread=thr)
+            wl = WatchList.objects.get(user=request.user, thread=thr)
             render_dict.update({"watched":True})
         except WatchList.DoesNotExist:
             render_dict.update({"watched":False})
 
-    if user.is_authenticated() and request.POST:
+    if request.user.is_authenticated() and request.POST:
         postform = PostForm(request.POST.copy())
 
         if postform.is_valid():
             # reset post object
             postobj = Post(thread = thr,
-                    user = user,
+                    user = request.user,
                     text = postform.clean_data['post'],
                     private = postform.clean_data['private'],
                     )
@@ -204,7 +203,7 @@ def thread(request, thread_id, page=1):
         postform = PostForm()
 
     # this must come after the post so new messages show up
-    post_list = Post.view_manager.posts_for_thread(thread_id, user)
+    post_list = Post.view_manager.posts_for_thread(thread_id, request.user)
 
     try:
         render_dict.update(paginate_context(request, Post,
@@ -368,7 +367,7 @@ def category_index(request, cat_id, page=1):
 
 def thread_index(request, cat_id=None, page=1):
     render_dict = {'title': "Recent Discussions"}
-    if user.is_authenticated():
+    if request.user.is_authenticated():
         # filter on user prefs
         thread_list = Thread.view_manager.get_user_query_set(request.user)
     else:
@@ -446,16 +445,14 @@ def profile(request, next=SNAP_PREFIX):
 
     We'll use generic views to get around this for now.
     '''
-    user = request.user
-
     if COOKIE_SNAP_PROFILE_KEY in request.session:
         # reset any cookie variables
         request.session[COOKIE_SNAP_PROFILE_KEY] = {}
     
     try:
-        userdata = SnapboardProfile.objects.get(user=user)
+        userdata = SnapboardProfile.objects.get(user=request.user)
     except:
-        userdata = SnapboardProfile(user=user)
+        userdata = SnapboardProfile(user=request.user)
         userdata.save()
     print dir(RequestContext(request).dicts)
     from django.views.generic.create_update import update_object

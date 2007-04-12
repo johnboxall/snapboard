@@ -69,7 +69,7 @@ class Thread(models.Model):
     gsticky = models.BooleanField(default=False)
 
 
-    view_manager = managers.ThreadManager
+    view_manager = managers.ThreadManager()
 
     def __str__(self):
         return self.subject
