@@ -32,19 +32,16 @@ class PostManager(models.Manager):
             }).exclude(revision__isnull=False).order_by('-odate')
 
     def posts_for_thread(self, thread_id, user):
-        uid = str(user.id)
-        idstr = (uid + ',', ',' + uid + ',', ',' + uid)
         # filter out the private messages.  admin cannot see private messages
         # (although they can use the Django admin interface to do so)
         # TODO: there's gotta be a better way to filter out private messages
         # Tested with postgresql and sqlite
-        qs = self.get_query_set().filter(Q(user__id__exact=user.id) |
-                Q(private__exact='') |
-                Q(private__endswith=idstr[2]) |
-                Q(private__startswith=idstr[0]) |
-                Q(private__contains=idstr[1]),
-		thread__id=thread_id)
+        qs = self.get_query_set().filter(thread__id=thread_id)
 
+        if user.is_authenticated():
+            qs = qs.filter((Q(user=user) | Q(private__isnull=True) | Q(private__exact=user)))
+        else:
+            qs = qs.exclude(private__isnull=False)
         if not getattr(user, 'is_staff', False):
             qs = qs.exclude(censor=True)
 
@@ -116,13 +113,10 @@ class ThreadManager(models.Manager):
 
 
     def get_private(self, user):
-        idstr = str(user.id)
-        post_list = Post.objects.filter(
-                Q(private__endswith=idstr) |
-                Q(private__startswith=idstr) |
-                Q(private__contains=idstr)).select_related()
-
-        thread_ids = [p.thread.id for p in post_list]
+        from models import Post
+        import sets
+        post_list = Post.objects.filter(private__exact=user).select_related()
+        thread_ids = sets.Set([p.thread.id for p in post_list])
         return self.get_query_set().filter(pk__in=thread_ids)
 
 
@@ -130,20 +124,13 @@ class ThreadManager(models.Manager):
         return self.get_query_set().filter(category__id=cat_id)
 
 
-# def category_index(request):
-# 
-#     extra_post_count = """
-#         SELECT COUNT(*) FROM snapboard_thread
-#             WHERE snapboard_thread.category_id = snapboard_category.id
-#         """
-#     cat_list = Category.objects.all().extra(
-#         select = {'thread_count': extra_post_count},)
-# 
-#     return render_to_response('snapboard/category_index.html',
-#             {
-#             'cat_list': cat_list,
-#             },
-#             context_instance=RequestContext(request, processors=[login_context,]))
-
-
+class CategoryManager(models.Manager):
+    def get_query_set(self):
+        thread_count = """
+            SELECT COUNT(*) FROM snapboard_thread
+            WHERE snapboard_thread.category_id = snapboard_category.id
+            """
+        return super(CategoryManager, self).get_query_set().extra(
+            select = {'thread_count': thread_count})
+                
 # vim: ai ts=4 sts=4 et sw=4

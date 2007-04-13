@@ -195,15 +195,20 @@ def thread(request, thread_id, page=1):
             postobj = Post(thread = thr,
                     user = request.user,
                     text = postform.clean_data['post'],
-                    private = postform.clean_data['private'],
+                    #
                     )
+            postobj.save() # this needs to happen before many-to-many private is assigned
+
+            postobj.private = postform.clean_data['private']
             postobj.save()
+            print postobj.private
             postform = PostForm()
     else:
         postform = PostForm()
 
     # this must come after the post so new messages show up
     post_list = Post.view_manager.posts_for_thread(thread_id, request.user)
+
 
     try:
         render_dict.update(paginate_context(request, Post,
@@ -218,7 +223,7 @@ def thread(request, thread_id, page=1):
             'thr': thr,
             'postform': postform,
             })
-
+    
     return render_to_response('snapboard/thread.html',
             render_dict,
             context_instance=RequestContext(request, processors=[login_context,]))
@@ -386,16 +391,9 @@ def thread_index(request, cat_id=None, page=1):
             context_instance=RequestContext(request, processors=[login_context,]))
 
 def category_index(request):
-    extra_post_count = """
-        SELECT COUNT(*) FROM snapboard_thread
-            WHERE snapboard_thread.category_id = snapboard_category.id
-        """
-    cat_list = Category.objects.all().extra(
-        select = {'thread_count': extra_post_count},)
-
     return render_to_response('snapboard/category_index.html',
             {
-            'cat_list': cat_list,
+            'cat_list': Category.objects.all(),
             },
             context_instance=RequestContext(request, processors=[login_context,]))
 

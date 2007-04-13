@@ -1,3 +1,5 @@
+from sets import Set
+
 from django import newforms as forms
 from django.newforms import widgets, ValidationError
 from django.newforms.forms import SortedDictFromList
@@ -26,19 +28,17 @@ class PostForm(forms.Form):
     def clean_private(self):
         recipients = self.clean_data['private']
         if len(recipients.strip()) < 1:
-            return ''
-        recipients = recipients.split(',')
-        recipients = [x.strip() for x in recipients]
-        cleandata = []
-        for r in recipients:
-            # make sure recipients exist
-            try:
-                if len(r) > 0:
-                    cleandata.append(str(User.objects.get(username=r).id))
-            except User.DoesNotExist:
-                raise ValidationError(r + " is not a valid user.")
+            return []
+        recipients = filter(lambda x: len(x.strip()) > 0, recipients.split(','))
+        recipients = Set([x.strip() for x in recipients]) # string of usernames
 
-        return ','.join(cleandata)
+        u = User.objects.filter(username__in=recipients).order_by('username')
+        if len(u) != len(recipients):
+            u_set = Set([str(x.username) for x in u])
+            u_diff = recipients.difference(u_set)
+            raise ValidationError("The following are not valid user(s): " + ' '.join(u_diff))
+        return u
+
 
 
 class ThreadForm(forms.Form):

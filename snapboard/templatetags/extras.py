@@ -23,13 +23,6 @@ def post_summary(value, arg):
 register.filter('post_summary', post_summary)
 
 
-def privatenames(value):
-    ids = [int(x) for x in value.split(',')]
-    users = User.objects.filter(id__in=ids)
-    return ', '.join([u.username for u in users])
-register.filter('privatenames', privatenames)
-
-
 def markdown_filter(value, arg=''):
     extensions=arg.split(",")
     if len(extensions) == 1 and extensions[0] == '':

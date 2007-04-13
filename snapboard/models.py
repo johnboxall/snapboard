@@ -34,6 +34,8 @@ def isIPAddressList(field_data, all_data):
 class Category(models.Model):
     label = models.CharField(maxlength=32)
 
+    objects = managers.CategoryManager()    # adds thread_count
+
     def __str__(self):
         return self.label
 
@@ -97,10 +99,8 @@ class Post(models.Model):
     date = models.DateTimeField(editable=False,auto_now_add=True)
     ip = models.IPAddressField(blank=True)
 
-    ## Note: I can see the max_length coming back to bite me in the ass...
-    # for now, 256 should be reasonable.
-    # TODO: make this a textfield (and set columns to 1)
-    private = models.CommaSeparatedIntegerField(maxlength=256, blank=True, default='')
+    private = models.ManyToManyField(User,
+            related_name="private_recipients", null=True)
 
     # (null or ID of post - most recent revision is always a diff of previous)
     odate = models.DateTimeField(editable=False, null=True)

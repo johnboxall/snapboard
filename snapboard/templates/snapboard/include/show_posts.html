@@ -47,8 +47,10 @@
                 </a>
             </b>
 
-            {% if post.private %}
-                to {{ post.private|privatenames }}
+            {% if post.private.all %}
+                to {% for rec in post.private.all %}
+                {{ rec }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
             {% endif %}
 
             <span class="timesince">
