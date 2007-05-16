@@ -26,7 +26,7 @@ class PostForm(forms.Form):
             )
 
     def clean_private(self):
-        recipients = self.clean_data['private']
+        recipients = self.cleaned_data['private']
         if len(recipients.strip()) < 1:
             return []
         recipients = filter(lambda x: len(x.strip()) > 0, recipients.split(','))
@@ -65,7 +65,7 @@ class ThreadForm(forms.Form):
         )
 
     def clean_category(self):
-        id = int(self.clean_data['category'])
+        id = int(self.cleaned_data['category'])
         return id
 
 
@@ -74,12 +74,12 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=widgets.PasswordInput)
 
     def clean_password(self):
-        scd = self.clean_data
+        scd = self.cleaned_data
         self.user = authenticate(username=scd['username'], password=scd['password'])
 
         if self.user is not None:
             if self.user.is_active:
-                return self.clean_data['password']
+                return self.cleaned_data['password']
             else:
                 raise ValidationError('Your account has been disabled.')
         else:

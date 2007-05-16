@@ -194,12 +194,12 @@ def thread(request, thread_id, page=1):
             # reset post object
             postobj = Post(thread = thr,
                     user = request.user,
-                    text = postform.clean_data['post'],
+                    text = postform.cleaned_data['post'],
                     #
                     )
             postobj.save() # this needs to happen before many-to-many private is assigned
 
-            postobj.private = postform.clean_data['private']
+            postobj.private = postform.cleaned_data['private']
             postobj.save()
             print postobj.private
             postform = PostForm()
@@ -249,7 +249,7 @@ def edit_post(request, original, next=None):
                 user = request.user,
                 thread = orig_post.thread,
                 private = orig_post.private,
-                text = postform.clean_data['post'],
+                text = postform.cleaned_data['post'],
                 previous = orig_post,
                 )
         post.save()
@@ -280,9 +280,9 @@ def new_thread(request):
         if threadform.is_valid():
             # create the thread
             thread = Thread(
-                    subject = threadform.clean_data['subject'],
+                    subject = threadform.cleaned_data['subject'],
                     category = Category.objects.get(pk=
-                        threadform.clean_data['category']),
+                        threadform.cleaned_data['category']),
                     )
             thread.save()
 
@@ -290,7 +290,7 @@ def new_thread(request):
             post = Post(
                     user = request.user,
                     thread = thread,
-                    text = threadform.clean_data['post'],
+                    text = threadform.cleaned_data['post'],
                     )
             post.save()
 
