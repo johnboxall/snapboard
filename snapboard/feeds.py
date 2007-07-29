@@ -3,14 +3,10 @@ from django.contrib.syndication.feeds import Feed
 from models import Post
 
 
-__all__ = ('LatestPosts',)
-
-__site = Site.objects.get_current()
-__title = str(__site) + ' Latest Discussions'
-
+SITE = Site.objects.get_current()
 
 class LatestPosts(Feed):
-    title = __title
+    title = str(SITE) + ' Latest Discussions'
     link = "/snapboard/"
     description = "The latest contributions to discussions."
 
