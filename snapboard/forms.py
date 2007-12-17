@@ -2,7 +2,7 @@ from sets import Set
 
 from django import newforms as forms
 from django.newforms import widgets, ValidationError
-from django.newforms.forms import SortedDictFromList
+#from django.newforms.forms import SortedDictFromList
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
