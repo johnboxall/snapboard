@@ -148,7 +148,10 @@ def rpc(request):
     response_dict = {}
 
     try:
-        oclass_str =  request.POST['oclass'].lower()
+        # oclass_str will be used as a keyword in a function call, so it must
+        # be a string, not a unicode object (changed since Django went
+        # unicode). Thanks to Peter Sheats for catching this.
+        oclass_str =  str(request.POST['oclass'].lower())
         oclass = RPC_OBJECT_MAP[oclass_str]
     except KeyError:
         return HttpResponseServerError
