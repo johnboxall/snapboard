@@ -45,7 +45,7 @@ class PhotoField(ImageField):
     def get_content_type(self):
         return "image/png"
 
-    def save_file(self, new_data, new_object, original_object, change, rel):
+    def save_file(self, new_data, new_object, original_object, change, rel, save=True):
         field_names = self.get_manipulator_field_names('')
         upload_field_name = field_names[0]
         filename = '%s-%s.png' % (self.parent_pk, self.get_attname())
