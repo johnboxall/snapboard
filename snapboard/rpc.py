@@ -18,8 +18,7 @@ def _sanitize(text):
 def rpc_post(request):
     show_id = int(request.GET['show'])
     orig_id = int(request.GET['orig'])
-    post = Post.view_manager.get(pk=show_id)
-
+    post = Post.objects.get(pk=show_id)
 
     prev_id = ''
     rev_id = ''

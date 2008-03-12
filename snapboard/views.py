@@ -244,17 +244,17 @@ def edit_post(request, original, next=None):
     except Post.DoesNotExist:
         raise Http404
 
-
     postform = PostForm(request.POST.copy())
     if postform.is_valid():
         # create the post
         post = Post(
                 user = request.user,
                 thread = orig_post.thread,
-                private = orig_post.private,
                 text = postform.cleaned_data['post'],
                 previous = orig_post,
                 )
+        post.save()
+        post.private = orig_post.private.all()
         post.save()
 
         orig_post.revision = post
