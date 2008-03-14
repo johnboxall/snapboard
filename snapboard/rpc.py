@@ -94,13 +94,13 @@ def rpc_watch(request, **kwargs):
         wl = WatchList.objects.get(user=request.user, thread=thr)
         wl.delete()
         return {'link':'watch',
-                'msg':'This thread has been added to your favorites.'}
+                'msg':'This thread has been removed from your favorites.'}
     except WatchList.DoesNotExist:
         # create it
         wl = WatchList(user=request.user, thread=thr)
         wl.save()
         return {'link':'dont watch',
-                'msg':'This thread has been removed from your favorites.'}
+                'msg':'This thread has been added to your favorites.'}
 
 
 def rpc_abuse(request, **kwargs):
