@@ -1,21 +1,22 @@
 from django.contrib.sites.models import Site
 from django.contrib.syndication.feeds import Feed
-from models import Post
+from django.utils.translation import ugettext_lazy as _
+
+from snapboard.models import Post
 
 
 SITE = Site.objects.get_current()
 
 class LatestPosts(Feed):
-    title = str(SITE) + ' Latest Discussions'
+    title = _('%s Latest Discussions') % str(SITE)
     link = "/snapboard/"
-    description = "The latest contributions to discussions."
+    description = _("The latest contributions to discussions.")
 
     title_template = "snapboard/feeds/latest_title.html"
     description_template = "snapboard/feeds/latest_description.html"
 
     def items(self):
         # we should only return the non-private messages
-        return Post.objects.filter(private__exact='').order_by('-date')[:10]
-
+        return Post.objects.exclude(private__isnull=False).order_by('-date')[:10]
 
 # vim: ai ts=4 sts=4 et sw=4

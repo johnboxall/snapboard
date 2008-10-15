@@ -1,7 +1,8 @@
+{% load i18n %}
 {% load extras %}
 <div>
 <hr class="firstpost" />
-{% for post in post_page %}
+{% for post in posts %}
     <div id="snap_post{{ post.id }}">
 
         {% if post.censor %}
@@ -17,23 +18,29 @@
         </div>
         <p class="post_header">
             <span class="post_menuright">
-                {% ifequal post.user_id user.id %}
-                <span title="Edit this post.  All revisions are saved!" class="popup">
-                    <a href="#snap_post{{ post.id }}" onclick="toggle_edit('{{ post.id }}')">edit post</a>
+                {% if user.is_authenticated  %}
+                <span class="popup">
+                    <a href="#post_form" onclick="return do_quote('{{ post.id }}');">{% trans "quote" %}</a>
                 </span>
+                {% endif %}
+                {% ifequal post.user_id user.id %}
                 &#149;
+                <span title="{% trans "Edit this post.  All revisions are saved!" %}" class="popup">
+                    <a href="#snap_post{{ post.id }}" onclick="toggle_edit('{{ post.id }}')">{% trans "edit post" %}</a>
+                </span>
                 {% endifequal %}
                 {% if user.is_staff %}
-                <span title="ADMIN: mark this post for censorship" class="popup">
+                &#149;
+                <span title="{% trans "ADMIN: mark this post for censorship" %}" class="popup">
                     <a id="censor{{ post.id }}" href="#snap_post{{ post.id }}" onclick="set_censor('{{ post.id }}');">
-                        {{ post.censor|yesno:"uncensor,censor" }}
+                        {{ post.censor|yesno:_("uncensor,censor") }}
                     </a>
                 </span>
-                &#149;
                 {% endif %}
                 {% if user.is_authenticated and not post.freespeech %}
-                <span title="Report this post for violation of forum policies." class="popup">
-                    <a id="abuse{{ post.id }}" href="#snap_post{{ post.id }}" onclick="set_abuse('{{ post.id }}');">report abuse</a>
+                &#149;
+                <span title="{% trans "Report this post for violation of forum policies." %}" class="popup">
+                    <a id="abuse{{ post.id }}" href="#snap_post{{ post.id }}" onclick="set_abuse('{{ post.id }}');">{% trans "report abuse" %}</a>
                 </span>
                 {% endif %}
             </span>
@@ -42,19 +49,19 @@
                 <img src="{{ SNAP_MEDIA_PREFIX }}/{{ post.avatar }}" />
             {% endif %}
             <b>
-                <a href="#snap_post{ post.id }}" onclick="toggle_post('{{ post.id }}');">
-                    <span title="POPUP" class="popup">{{ post.user }}</span>
+                <a href="#snap_post{{ post.id }}" onclick="toggle_post('{{ post.id }}');">
+                    <span class="popup" title="Author">{{ post.user }}</span>
                 </a>
             </b>
 
             {% if post.private.all %}
-                to {% for rec in post.private.all %}
+                {% trans "to" %} {% for rec in post.private.all %}
                 {{ rec }}{% if not forloop.last %},{% endif %}
                 {% endfor %}
             {% endif %}
 
             <span class="timesince">
-                <span class="datetime">{{ post.date|date:"r T" }}</span>
+                <span class="datetime">{{ post.date|date:"r T" }}<span class="timestamp">{{ post.date|timestamp }}</span></span>
             </span>
             <span class="post_summary" style="display:none;" id="snap_post_sum{{ post.id }}">:
                 {{ post.text|post_summary:"30"|safe }}
@@ -63,23 +70,25 @@
 
         <div style="display:block" id="snap_post_view{{ post.id }}">
             <div class="post_text" style="display:block" id="snap_post_text{{ post.id }}">
-                {{ post.text|striptags|markdown:"safe"|safe }}
+                {{ post.text|striptags|render_post|safe }}
             </div>
             {% if post.previous %}
             <span id="post_revision_links{{ post.id }}" class="post_menuleft">
-                <a href="#snap_post_view{{ post.id }}" onclick="revision('{{ post.id }}','{{ post.previous.id }}');">&#171; previous</a>
-                <b style="color: #c00">This message has been revised</b>
+                <a href="#snap_post_view{{ post.id }}" onclick="revision('{{ post.id }}','{{ post.previous.id }}');">&#171; {% trans "previous" %}</a>
+                <b style="color: #c00">{% trans "This message has been revised" %}</b>
             </span>
+
+
             <br />
             {% endif %}
 
             {% ifequal post.user_id user.id %}
             <div style="display:none" id="snap_post_edit{{ post.id }}">
-                <form action="{{ SNAP_PREFIX }}/edit_post/{{ post.id }}/" method="post">
-                <p><b>All revisions of this post are stored and publicly viewable.</b></p>
+                <form action="{% url snapboard_edit_post post.id %}" method="post">
+                <p><b>{% trans "All revisions of this post are stored and publicly viewable." %}</b></p>
                 <p>{{ post.get_edit_form.post }} {# TODO: what about errors? #}</p>
                 <p>
-                <input type="submit" value="Update" />
+                <input type="submit" value="{% trans "Update" %}" />
                 <input type="hidden" name="next" value="{{ request.path }}" />
                 </p>
                 </form>

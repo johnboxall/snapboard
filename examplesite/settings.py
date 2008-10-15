@@ -1,22 +1,21 @@
+# -*- coding: utf-8 -*-
 # Django settings for examplesite project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
+	# ('Your Name', 'your_email@domain.com'),
 )
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE = 'postgresql_psycopg2'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-DATABASE_NAME = 'bshi' # Or path to database file if using sqlite3.
-#DATABASE_ENGINE = 'sqlite3'    # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-#DATABASE_NAME = '/tmp/examplesite.db' # Or path to database file if using sqlite3.
-DATABASE_USER = 'bshi'             # Not used with sqlite3.
-DATABASE_PASSWORD = 'bshi'         # Not used with sqlite3.
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+DATABASE_ENGINE = 'sqlite3'
+DATABASE_NAME = 'dev.db'
+DATABASE_USER = ''
+DATABASE_PASSWORD = ''
+DATABASE_HOST = ''
+DATABASE_PORT = ''
 
 # Local time zone for this installation. All choices can be found here:
 # http://www.postgresql.org/docs/8.1/static/datetime-keywords.html#DATETIME-TIMEZONE-SET-TABLE
@@ -33,9 +32,16 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = True
 
+LANGUAGES = (
+	('en', 'English'),
+	('fr', 'Français'),
+)
+
+#LANGUAGE_CODE = 'fr'
+
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/bshi/sandbox/snapboard/media'
+MEDIA_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT.
 # Example: "http://media.lawrence.com"
@@ -47,59 +53,75 @@ MEDIA_URL = ''
 ADMIN_MEDIA_PREFIX = '/media/admin/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '1iahz%=l!4!%3p25%%n&@jjvp0g_&#)idxt$)$2%0@%+$at7#@'
+SECRET_KEY = '1gzez%G"e42%r(25%%n&@jjvp0g_&#)idxt$)$2%0@%+$at7#@'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
-#     'django.template.loaders.eggs.load_template_source',
+	'django.template.loaders.filesystem.load_template_source',
+	'django.template.loaders.app_directories.load_template_source',
+#	 'django.template.loaders.eggs.load_template_source',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.core.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.request",
-
-    # SNAPboard processors
-    "examplesite.snapboard.views.snapboard_default_context",
+	"django.core.context_processors.auth",
+	"django.core.context_processors.debug",
+	"django.core.context_processors.i18n",
+	"django.core.context_processors.request",
+	"snapboard.views.snapboard_default_context",
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.middleware.doc.XViewMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.middleware.doc.XViewMiddleware',
 
-    # SNAPboard middleware
-    'examplesite.snapboard.middleware.threadlocals.ThreadLocals',
-    # this slows things down slightly, and you rarely ever need it...
-    # 'examplesite.snapboard.middleware.BanMiddleware',
+	# django-pagination is used by the default templates
+	'pagination.middleware.PaginationMiddleware',
+
+	# SNAPBoard middleware
+	'snapboard.middleware.threadlocals.ThreadLocals',
+
+	# These are optional
+	'snapboard.middleware.ban.IPBanMiddleware',
+	'snapboard.middleware.ban.UserBanMiddleware',
 )
 
 ROOT_URLCONF = 'examplesite.urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+	# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+	# Always use forward slashes, even on Windows.
+	# Don't forget to use absolute paths, not relative paths.
 )
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.markup',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'examplesite.snapboard',
-    'examplesite.sbreg',
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.markup',
+	'django.contrib.sessions',
+	'django.contrib.sites',
+	'snapboard',
+	'pagination',
 )
 
 # SNAPBoard specific OPTIONAL settings:
-# The following are the defaults, so you only need to set them if you want to
-# change them.  Note the lack of trailing '/'
-#
-#SNAP_PREFIX = '/snapboard'
-#SNAP_MEDIA_PREFIX = MEDIA_URL + '/media'
+
+# Defaults to MEDIA_URL + 'snapboard/'
+SNAP_MEDIA_PREFIX = '/media'
+
+# Set to False to use the default login_required decorator
+USE_SNAPBOARD_SIGNIN = True
+
+# Set to False if your templates include the Snapboard login form
+USE_SNAPBOARD_LOGIN_FORM = True
+
+# Select your filter, the default is Markdown
+# Possible values: 'bbcode', 'markdown', 'textile'
+SNAP_POST_FILTER = 'bbcode'
+
+try:
+	from settings_local import *
+except ImportError:
+	pass

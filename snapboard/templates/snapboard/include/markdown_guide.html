@@ -1,23 +1,24 @@
+{% load i18n %}
 <div id="snap_markdown_guide" style="display:none;">
 
-<p><em>*italic*</em> or <em>_italic_</em>, <strong>**bold**</strong> or <strong>__bold__</strong></p>
-<p><code>[example](http://www.google.com/ "Title")</code> shows up as <a href="http://www.google.com/" title="Title">example</a></p>
+<p><em>*{% trans "italic" %}*</em> {% trans "or" %} <em>_{% trans "italic" %}_</em>, <strong>**{% trans "bold" %}**</strong> {% trans "or" %} <strong>__{% trans "bold" %}__</strong></p>
+<p><code>[{% trans "example" %}](http://www.google.com/ "Title")</code> {% trans "shows up as" %} <a href="http://www.google.com/" title="Title">example</a></p>
 <p>Images - <code>![alt text](/path/img.jpg "Title")</code></p>
 
 <table><tr>
         <td style="width: 50%;">
-<p>Indent lines of code blocks by 4 or more spaces</p>
-<pre><code>This is a normal paragraph.
+<p>{% trans "Indent lines of code blocks by 4 or more spaces" %}</p>
+<pre><code>{% trans "This is a normal paragraph." %}
 
-    This is a preformatted
-    code block.</code></pre>
+{% blocktrans %}    This is a preformatted
+    code block.{% endblocktrans %}</code></pre>
 </td>
 <td>
-<p>Blockquotes use e-mail style quoting</p>
-<pre><code>> Email-style angle brackets
-> are used for blockquotes.
+<p>{% trans "Blockquotes use e-mail style quoting" %}</p>
+<pre><code>&gt; {% trans "Email-style angle brackets" %}
+&gt; {% trans "are used for blockquotes." %}
 
-> > And, they can be nested.</code></pre>
+&gt; &gt; {% trans "And, they can be nested." %}</code></pre>
 </td>
 </tr></table>
 
@@ -25,7 +26,8 @@
 
 <table>
     <td style="width: 50%;">
-    <p>Lists and unordered lists are nestable and mixable.</p>
+    <p>{% trans "Lists and unordered lists are nestable and mixable." %}</p>
+{% blocktrans %}
 <pre><code>*   Abacus
     * answer
 *   Bubbles
@@ -41,9 +43,9 @@
             <ol><li>bunk</li>
                 <li>bupkis</li></ol></li>
         </ul>
+{% endblocktrans %}
     </td>
 </tr></table>
-
 <br />
-<p>For details on the markdown syntax, see <a href="http://daringfireball.net/projects/markdown/dingus">Dingus</a>.</p>
+<p>{% blocktrans %}For details on the markdown syntax, see <a href="http://daringfireball.net/projects/markdown/dingus">Dingus</a>.{% endblocktrans %}</p>
 </div>

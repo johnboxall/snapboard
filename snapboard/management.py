@@ -1,24 +1,20 @@
 import os
 
-from django.dispatch import dispatcher 
 from django.db.models import signals 
 from django.conf import settings
 
-import models as snapboard_app
+from snapboard import models as snapboard_app
 
-def sync_hook(): 
+def sync_hook(**kwargs): 
     pass
 
-dispatcher.connect(sync_hook, sender=snapboard_app, signal=signals.post_syncdb) 
+signals.post_syncdb.connect(sync_hook, sender=snapboard_app) 
 
-
-
-
-def test_setup():
+def test_setup(**kwargs):
     from django.contrib.auth.models import User
     from models import Thread, Post, Category
     from random import choice
-    import chomsky
+    from snapboard import sampledata
 
     if not settings.DEBUG:
         return 
@@ -58,12 +54,12 @@ def test_setup():
     for i in range(0, 35):
         print 'thread ', i, 'created'
         cat= choice(Category.objects.all())
-        subj = choice(chomsky.objects.split('\n'))
+        subj = choice(sampledata.objects.split('\n'))
         thread = Thread(subject=subj, category=cat)
         thread.save()
 
         for j in range(0, choice(tc)):
-            text = '\n\n'.join([chomsky.chomsky() for x in range(0, choice(range(2, 5)))])
+            text = '\n\n'.join([sampledata.sample_data() for x in range(0, choice(range(2, 5)))])
             # create a post
             post = Post(
                     user=choice(User.objects.all()),
@@ -74,5 +70,5 @@ def test_setup():
             # allows setting of arbitrary ip
             post.management_save()
 
-dispatcher.connect(test_setup, sender=snapboard_app, signal=signals.post_syncdb) 
+signals.post_syncdb.connect(test_setup, sender=snapboard_app) 
 # vim: ai ts=4 sts=4 et sw=4

@@ -1,34 +1,39 @@
-{% spaceless %}
+{% load i18n %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>{% block title %}Snapboard{% endblock %}</title>
+    <title>{% block title %}SNAPBoard{% endblock %}</title>
     <link type="text/css" rel="stylesheet" href="{{ SNAP_MEDIA_PREFIX }}/css/yui/reset-fonts-grids.css" />
     <link type="text/css" rel="stylesheet" href="{{ SNAP_MEDIA_PREFIX }}/css/form.css" />    
     <link type="text/css" rel="stylesheet" href="{{ SNAP_MEDIA_PREFIX }}/css/snapboard.css" />    
     <link type="text/css" rel="stylesheet" href="{{ SNAP_MEDIA_PREFIX }}/css/nav.css" />    
 
-    <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ SNAP_PREFIX }}/feeds/latest/" />
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="{% url snapboard_feeds "latest" %}" />
 
     {# this is required for some javascript rpc functions #}
     <script type="text/javascript">
-        <!--
-        var SNAP_PREFIX = '{{ SNAP_PREFIX }}';
-        // -->
+        var SNAPBOARD_URLS = {
+            'rpc_preview': '{% url snapboard_rpc_preview %}',
+            'rpc_action': '{% url snapboard_rpc_action %}',
+            'rpc_postrev': '{% url snapboard_rpc_postrev %}'
+        };
+        var SNAP_POST_FILTER = '{{ SNAP_POST_FILTER }}';
     </script>
 
     {# gotta come first #}
-    <script src="{{ SNAP_MEDIA_PREFIX }}/js/yui/yahoo-min.js" type="text/javascript"></script>
-
-    <script src="{{ SNAP_MEDIA_PREFIX }}/js/thread.js" type="text/javascript"></script>
+    <script type="text/javascript" src="{% url snapboard_js_i18n %}"></script>
+    <script src="{{ SNAP_MEDIA_PREFIX }}/js/yui/yahoo-dom-event.js" type="text/javascript"></script>
     <script src="{{ SNAP_MEDIA_PREFIX }}/js/yui/connection-min.js" type="text/javascript"></script>
-    <script src="{{ SNAP_MEDIA_PREFIX }}/js/yui/dom-min.js" type="text/javascript"></script>
+    <script src="{{ SNAP_MEDIA_PREFIX }}/js/thread.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        YAHOO.util.Event.onDOMReady(procAllTimeSince);
+    </script>
     {% block snap_extra_head %}{% endblock %}
 </head>
 
-<body id="yahoo-com" onload="procAllTimeSince();">
+<body id="yahoo-com" class="snapboard">
 <div id="doc2" class="yui-t4"><!-- "doc" here for example only; use any page width -->
-
+<div class="snapboard">
     <div id="hd">
         <br />
         {% block site_title %}
@@ -37,12 +42,12 @@
         <br />
         <div id="navigation">
             <ul>
-                <li><a href="{{ SNAP_PREFIX }}/threads/"><span>All Discussions</span></a></li>
-                <li><a href="{{ SNAP_PREFIX }}/categories/"><span>Categories</span></a></li>
+                <li><a href="{% url snapboard_thread_index %}"><span>{% trans "All Discussions" %}</span></a></li>
+                <li><a href="{% url snapboard_category_index %}"><span>{% trans "Categories" %}</span></a></li>
                 {% if user.is_authenticated %}
-                <li><a href="{{ SNAP_PREFIX }}/favorites/"><span>Favorites</span></a></li>
-                <li><a href="{{ SNAP_PREFIX }}/private/"><span>Private Posts</span></a></li>
-                <li><a href="{{ SNAP_PREFIX }}/newtopic/"><span style="color: red;">Start Thread</span></a></li>
+                <li><a href="{% url snapboard_favorite_index %}"><span>{% trans "Favorites" %}</span></a></li>
+                <li><a href="{% url snapboard_private_index %}"><span>{% trans "Private Posts" %}</span></a></li>
+                <li><a href="{% url snapboard_new_thread %}"><span style="color: red;">{% trans "Start Thread" %}</span></a></li>
                 {% endif %}
             </ul>
         </div>
@@ -68,12 +73,13 @@
     <div id="ft">
         <br />
         <div style="text-align:center; font-size: 85%;">
-            <p>This community is powered by <a href="http://code.google.com/p/snapboard/">Snapboard</a></p> <br />
+            <p>{% trans "This community is powered by" %} <a href="http://code.google.com/p/snapboard/">Snapboard</a></p> <br />
             <a href="http://validator.w3.org/check/referer" title="Check the validity of this site&#8217;s XHTML">xhtml</a> &nbsp; 
             <a href="http://jigsaw.w3.org/css-validator/check/referer" title="Check the validity of this site&#8217;s CSS">css</a> &nbsp; 
         </div>
         <br />
     </div>
+</div>
 </div>
 </body>
 </html>
@@ -81,4 +87,3 @@
 <!--
 vim: ai ts=4 sts=4 et sw=4 
 -->
-{% endspaceless %}

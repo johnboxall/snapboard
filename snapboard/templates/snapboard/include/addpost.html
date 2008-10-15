@@ -1,24 +1,53 @@
-{% if not thr.closed and not page_next %}
+{% load i18n %}
+{% if not thr.closed %}{# and not page_next #}
     {% if user.is_authenticated %}
     <!-- div style="border: 1px solid #ccc; padding: 5px; background: #efe" -->
     <p>
-    <span style="float:right;"><a href="#snap_markdown_guide" onclick="toggle('snap_markdown_guide', 'block');">Pretty-print guide</a></span>
-    <b>Got something to say?</b>
+    {% ifequal SNAP_POST_FILTER "markdown" %}
+        <span style="float:right;"><a href="#snap_markdown_guide" onclick="toggle('snap_markdown_guide', 'block');">{% trans "Pretty-print guide" %}</a></span>
+    {% endifequal %}
+    <b>{% trans "Got something to say?" %}</b>
     </p>
-    {% include "snapboard/include/markdown_guide.html" %}
+    {% ifequal SNAP_POST_FILTER "markdown" %}
+        {% include "snapboard/include/markdown_guide.html" %}
+    {% endifequal %}
     <form id="add_post_div" action="" method="POST">
-        <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/yui/event-min.js"></script>
+        <a name="post_form"></a>
         <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/yui/autocomplete-min.js"></script>
+        <div id="toolbar" style="">
+            {% ifequal SNAP_POST_FILTER "markdown" %}
+                <button onclick="return surround('**');"><b>{% trans "B" %}</b></button>
+                <button onclick="return surround('_');"><i>{% trans "I" %}</i></button>
+                <button onclick="return do_prefix('> ');">{% trans "quote" %}</a></button>
+                <button onclick="return do_prefix('    ');">{% trans "code" %}</button>
+                <button onclick="return do_prefix('* ');">{% trans "list" %}</button>
+                <button onclick="return insert_img();">{% trans "img" %}</button>
+                <button onclick="return insert_link();"><u>{% trans "link" %}</u></button>
+                <button onclick="return do_insert('&#x263a;');">☺</button>
+                <!--<button onclick="return do_insert('&#x2639;');">☹</button> not in Arial wtf‽‽ --> 
+                <button onclick="return do_insert('&#x263b;');">☻</button>
+            {% else %}{% ifequal SNAP_POST_FILTER "bbcode" %}
+                <button onclick="return surround('[b]','[/b]');"><b>{% trans "B" %}</b></button>
+                <button onclick="return surround('[i]','[/i]');"><i>{% trans "I" %}</i></button>
+                <button onclick="return surround('[quote]','[/quote]');">{% trans "quote" %}</a></button>
+                <button onclick="return surround('[code]','[/code]');">{% trans "code" %}</button>
+                <button onclick="return do_prefix('[*]');">{% trans "list" %}</button>
+                <button onclick="return insert_img();">{% trans "img" %}</button>
+                <button onclick="return insert_link();"><u>{% trans "link" %}</u></button>
+                <button onclick="return do_insert('&#x263a;');">☺</button>
+                <button onclick="return do_insert('&#x263b;');">☻</button>
+            {% endifequal %}{% endifequal %}
+        </div>
         <p>{{ postform.post }} {{ postform.post.errors }}</p>
         <p id="autocomplete_p">
             <!-- span style="float:right;"><b>I need more space!</b></span -->
-            <a href="#add_post_div" onclick="toggle('autocomplete_input', 'block'); toggle('autocomplete_p', 'inline');">set private recipients (optional)</a>
+            <a href="#add_post_div" onclick="toggle('autocomplete_input', 'block'); toggle('autocomplete_p', 'inline');">{% trans "set private recipients (optional)" %}</a>
         </p>
         <div id="autocomplete_input" style="display:none">
             <p>{{ postform.private }}</p>
             <div id="autocomplete_div"></div>
             <script type="text/javascript"><!--
-                dataSource = new YAHOO.widget.DS_XHR("{{ SNAP_PREFIX }}/rpc/user_lookup/", ["ResultSet.Result","name","id"]);
+                dataSource = new YAHOO.widget.DS_XHR("{% url snapboard_rpc_user_lookup %}", ["ResultSet.Result","name","id"]);
                 autoComp = new YAHOO.widget.AutoComplete("id_private","autocomplete_div",dataSource);
                 autoComp.delimChar = ","; 
                 autoComp.typeAhead = true;
@@ -31,21 +60,23 @@
         {% endif %}
 
         <p>
-        <input type="submit" value="Post" />
-        <input type="button" value="Preview" onclick="preview('add_post_div')" />
+        <input type="submit" value="{% trans "Post" %}" />
+        <input type="button" value="{% trans "Preview" %}" onclick="preview('add_post_div')" />
         </p>
     </form>
     <div style="border: 1px solid #ccc; display: none;">
-        <p><b>Post Preview:</b></p>
+        <p><b>{% trans "Post Preview:" %}</b></p>
         <div id="snap_preview_addpost" class="post_text">
         </div>
     </div>
     {% else %}
-    <p>You need to <a href="{{ SNAP_PREFIX }}/signin/?next={{ request.path|urlencode }}#add_post_div">sign in</a> to post messages.</p>
+    <p>{% blocktrans with request.path|urlencode as reqpath %}
+        You need to <a href="{{ LOGIN_URL }}?next={{ reqpath }}#add_post_div">sign in</a> to post messages.
+    {% endblocktrans %}</p>
     {% endif %}
 {% endif %}
 {% if thr.closed %}
-    <p>This discussion has been closed by the staff.  You can no longer add posts.</p>
+    <p>{% trans "This discussion has been closed by the staff.  You can no longer add posts." %}</p>
 {% endif %}
 
 <!--

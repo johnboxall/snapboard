@@ -1,35 +1,29 @@
 # vim: ai ts=4 sts=4 et sw=4
 
-from django import newforms as forms
+from django import forms
 from django.contrib.auth import decorators
 from django.contrib.auth import login, logout
-from django.core.paginator import ObjectPaginator, InvalidPage
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import simplejson
 from django.views.generic.simple import redirect_to
-
+from django.conf import settings
 
 class PostManager(models.Manager):
     def get_query_set(self):
-        # get any avatars
-        extra_post_avatar = """
-            SELECT avatar FROM snapboard_snapboardprofile
-                WHERE snapboard_snapboardprofile.user_id = snapboard_post.user_id
-            """
+        select = {}
         extra_abuse_count = """
             SELECT COUNT(*) FROM snapboard_abusereport
                 WHERE snapboard_post.id = snapboard_abusereport.post_id
             """
+        select['abuse'] = extra_abuse_count
 
         return super(PostManager, self).get_query_set().extra(
-            select = {
-                'avatar': extra_post_avatar,
-                'abuse': extra_abuse_count,
-            }).exclude(revision__isnull=False).order_by('-odate')
+            select = select).exclude(revision__isnull=False).order_by('odate')
 
     def posts_for_thread(self, thread_id, user):
         # filter out the private messages.  admin cannot see private messages
@@ -99,18 +93,19 @@ class ThreadManager(models.Manager):
 
 
     def get_user_query_set(self, user):
-        pq = user.snapboardprofile_set.all()
-        if pq.count() > 0 and pq[0].frontpage_filters.all().count() > 0:
-            return self.get_query_set().filter(
-                category__in=pq[0].frontpage_filters.all())
+        try:
+            us = user.snapboard_usersettings
+        except ObjectDoesNotExist:
+            pass
         else:
-            return self.get_query_set()
-
+            if us.frontpage_filters.all().count() > 0:
+                return self.get_query_set().filter(
+                    category__in=us.frontpage_filters.all())
+        return self.get_query_set()
 
     def get_favorites(self, user):
         wl = user.watchlist_set.all()
         return self.get_query_set().filter(pk__in=[x.id for x in wl])
-
 
     def get_private(self, user):
         from models import Post

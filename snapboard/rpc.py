@@ -3,16 +3,19 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpRespons
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import simplejson
+from django.utils.translation import ugettext as _
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 
 from django.template.defaultfilters import striptags
 
-from forms import PostForm, ThreadForm
-from models import Thread, Post, Category, WatchList, AbuseReport
-from templatetags.extras import markdown_filter
+from snapboard.forms import PostForm, ThreadForm
+from snapboard.models import Thread, Post, Category, WatchList, AbuseReport
+from snapboard.templatetags.extras import render_filter
 
 
 def _sanitize(text):
-    return markdown_filter(striptags(text), "safe")
+    return render_filter(striptags(text), "safe")
 
 
 def rpc_post(request):
@@ -60,66 +63,70 @@ def _toggle_boolean_field(object, field):
 
 
 def rpc_csticky(request, **kwargs):
-    assert(request.user.is_staff)
-    assert('thread' in kwargs, 'rpc_csticky() requires "thread"')
+    if not request.user.is_staff:
+        raise PermissionDenied
     if _toggle_boolean_field(kwargs['thread'], 'csticky'):
-        return {'link':'unset csticky', 'msg':'This thread is sticky in its category.'}
+        return {'link':_('unset csticky'), 'msg':_('This thread is sticky in its category.')}
     else:
-        return {'link':'set csticky', 'msg':'Removed thread from category sticky list'}
+        return {'link':_('set csticky'), 'msg':_('Removed thread from category sticky list')}
 
 
 def rpc_gsticky(request, **kwargs):
-    assert(request.user.is_staff)
-    assert('thread' in kwargs, 'rpc_gsticky() requires "thread"')
+    if not request.user.is_staff:
+        raise PermissionDenied
     if _toggle_boolean_field(kwargs['thread'], 'gsticky'):
-        return {'link':'unset gsticky', 'msg':'This thread is now globally sticky.'}
+        return {'link':_('unset gsticky'), 'msg':_('This thread is now globally sticky.')}
     else:
-        return {'link':'set gsticky', 'msg':'Removed thread from global sticky list'}
+        return {'link':_('set gsticky'), 'msg':_('Removed thread from global sticky list')}
 
 
 def rpc_close(request, **kwargs):
-    assert(request.user.is_staff)
-    assert('thread' in kwargs, 'rpc_close() requires "thread"')
+    if not request.user.is_staff:
+        raise PermissionDenied
     if _toggle_boolean_field(kwargs['thread'], 'closed'):
-        return {'link':'open thread', 'msg':'This discussion is now CLOSED.'}
+        return {'link':_('open thread'), 'msg':_('This discussion is now CLOSED.')}
     else:
-        return {'link':'close thread', 'msg':'This discussion is now OPEN.'}
+        return {'link':_('close thread'), 'msg':_('This discussion is now OPEN.')}
 
 
 def rpc_watch(request, **kwargs):
-    assert('thread' in kwargs, 'rpc_gsticky() requires "thread"')
     thr = kwargs['thread']
     try:
         # it exists, stop watching it
         wl = WatchList.objects.get(user=request.user, thread=thr)
         wl.delete()
-        return {'link':'watch',
-                'msg':'This thread has been removed from your favorites.'}
+        return {'link':_('watch'),
+                'msg':_('This thread has been removed from your favorites.')}
     except WatchList.DoesNotExist:
         # create it
         wl = WatchList(user=request.user, thread=thr)
         wl.save()
-        return {'link':'dont watch',
-                'msg':'This thread has been added to your favorites.'}
+        return {'link':_('dont watch'),
+                'msg':_('This thread has been added to your favorites.')}
 
 
 def rpc_abuse(request, **kwargs):
     # TODO: test this
-    assert('post' in kwargs, 'rpc_gsticky() requires "post"')
     abuse = AbuseReport.objects.get_or_create(
             submitter = request.user,
             post = kwargs['post'],
             )
     return {'link': '',
-            'msg':'The moderators have been notified of possible abuse'}
+            'msg':_('The moderators have been notified of possible abuse')}
 
 
 def rpc_censor(request, **kwargs):
-    assert(request.user.is_staff)
-    assert('post' in kwargs, 'rpc_gsticky() requires "post"')
+    if not request.user.is_staff:
+        raise PermissionDenied
     if _toggle_boolean_field(kwargs['post'], 'censor'):
-        return {'link':'uncensor', 'msg':'This post is censored!'}
+        return {'link':_('uncensor'), 'msg':_('This post is censored!')}
     else:
-        return {'link':'censor', 'msg':'This post is no longer censored.'}
+        return {'link':_('censor'), 'msg':_('This post is no longer censored.')}
+
+def rpc_quote(request, **kwargs):
+    post = Post.objects.select_related().get(id=kwargs['oid'])
+    if post.user != request.user and post.private.count() and request.user not in post.private.all():
+        raise PermissionDenied
+    return {'text': post.text, 'author': unicode(post.user)}
 
 # vim: ai ts=4 sts=4 et sw=4

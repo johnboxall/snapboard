@@ -5,6 +5,7 @@ try:
 except ImportError:
     from django.utils._threading_local import local
 
+
 _thread_locals = local()
 
 def get_current_user():

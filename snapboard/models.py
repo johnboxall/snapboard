@@ -1,42 +1,33 @@
-import sets
 from datetime import datetime
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
-from django.core import validators
-from django.db import models
+from django.contrib.auth.models import User
+from django.db import models, connection
 from django.db.models import signals
 from django.dispatch import dispatcher
+from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
 
-from fields import PhotoField
-from middleware import threadlocals
-
-import managers
+from snapboard import managers
+from snapboard.middleware import threadlocals
 
 SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
 SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
-        getattr(settings, 'MEDIA_URL', '') + '/media')
-SNAP_LOGIN_URL = SNAP_PREFIX + '/signin'
+        getattr(settings, 'MEDIA_URL', '') + '/snapboard')
+SNAP_POST_FILTER = getattr(settings, 'SNAP_POST_FILTER', 'markdown').lower()
 
+def is_user_banned(user):
+    return user.id in settings.SNAP_BANNED_USERS
 
-def isIPAddressList(field_data, all_data):
-    l = str(field_data).splitlines()
-    line = 1
-    for ip in l:
-        try:
-            validators.isValidIPAddress4(ip, all_data)
-            line = line + 1
-        except validators.ValidationError:
-            raise validators.ValidationError(
-                    "Line " + str(line) + " has an invalid IP address")
-
+def is_ip_banned(ip):
+    return ip in settings.SNAP_BANNED_IPS
 
 class Category(models.Model):
-    label = models.CharField(max_length=32)
+    label = models.CharField(max_length=32, verbose_name=_('label'))
 
     objects = managers.CategoryManager()    # adds thread_count
 
-    def __str__(self):
+    def __unicode__(self):
         return self.label
 
     def moderators(self):
@@ -47,41 +38,46 @@ class Category(models.Model):
             return None
 
     class Meta:
-        verbose_name_plural = 'categories'
+        verbose_name = _('category')
+        verbose_name_plural = _('categories')
 
     class Admin:
         pass
 
 
 class Moderator(models.Model):
-    category = models.ForeignKey(Category)
-    user = models.ForeignKey(User)
+    category = models.ForeignKey(Category, verbose_name=_('category'))
+    user = models.ForeignKey(User, verbose_name=_('user'))
+
+    class Meta:
+        verbose_name = _('moderator')
+        verbose_name_plural = _('moderators')
 
 
 class Thread(models.Model):
-    subject = models.CharField(max_length=160)
-    category = models.ForeignKey(Category)
+    subject = models.CharField(max_length=160, verbose_name=_('subject'))
+    category = models.ForeignKey(Category, verbose_name=_('category'))
 
-    closed = models.BooleanField(default=False)
+    closed = models.BooleanField(default=False, verbose_name=_('closed'))
 
     # Category sticky - will show up at the top of category listings.
-    csticky = models.BooleanField(default=False)
+    csticky = models.BooleanField(default=False, verbose_name=_('category sticky'))
 
     # Global sticky - will show up at the top of home listing.
-    gsticky = models.BooleanField(default=False)
+    gsticky = models.BooleanField(default=False, verbose_name=_('global sticky'))
 
     objects = models.Manager() # needs to be explicit due to below
     view_manager = managers.ThreadManager()
 
-    def __str__(self):
+    def __unicode__(self):
         return self.subject
 
     def get_url(self):
-        return SNAP_PREFIX + '/threads/id/' + self.id + '/'
+        return reverse('snapboard_thread', args=(self.id,))
 
-    class Admin:
-        list_display = ('subject', 'category')
-        list_filter = ('closed', 'csticky', 'gsticky', 'category')
+    class Meta:
+        verbose_name = _('thread')
+        verbose_name_plural = _('threads')
 
 
 class Post(models.Model):
@@ -91,16 +87,15 @@ class Post(models.Model):
     Both forward and backward revisions are stored as ForeignKeys.
     """
     # blank=True to get admin to work when the user field is missing
-    user = models.ForeignKey(User, editable=False, blank=True, default=None)
+    user = models.ForeignKey(User, editable=False, blank=True, default=None, verbose_name=_('user'))
 
-    thread = models.ForeignKey(Thread,
-            core=True, edit_inline=models.STACKED, num_in_admin=1)
-    text = models.TextField()
-    date = models.DateTimeField(editable=False,auto_now_add=True)
-    ip = models.IPAddressField(blank=True)
+    thread = models.ForeignKey(Thread, verbose_name=_('thread'))
+    text = models.TextField(verbose_name=_('text'))
+    date = models.DateTimeField(editable=False,auto_now_add=True, verbose_name=_('date'))
+    ip = models.IPAddressField(blank=True, verbose_name=_('ip address'))
 
     private = models.ManyToManyField(User,
-            related_name="private_recipients", null=True)
+            related_name="private_recipients", null=True, verbose_name=_('private recipients'))
 
     # (null or ID of post - most recent revision is always a diff of previous)
     odate = models.DateTimeField(editable=False, null=True)
@@ -110,8 +105,8 @@ class Post(models.Model):
             editable=False, null=True, blank=True)
 
     # (boolean set by mod.; true if abuse report deemed false)
-    censor = models.BooleanField(default=False) # moderator level access
-    freespeech = models.BooleanField(default=False) # superuser level access
+    censor = models.BooleanField(default=False, verbose_name=_('censored')) # moderator level access
+    freespeech = models.BooleanField(default=False, verbose_name=_('protected')) # superuser level access
 
 
     objects = models.Manager() # needs to be explicit due to below
@@ -153,33 +148,12 @@ class Post(models.Model):
         from forms import PostForm
         return PostForm(initial={'post':self.text})
 
-    def __str__(self):
-        return ''.join( (str(self.user), ': ', str(self.date)) )
+    def __unicode__(self):
+        return u''.join( (unicode(self.user), u': ', unicode(self.date)) )
 
-    class Admin:
-        list_display = ('user', 'date', 'thread', 'ip')
-        list_filter    = ('censor', 'freespeech', 'user',)
-        search_fields  = ('text', 'user')
-
-
-# class PostAdminOptions(models.options.AdminOptions):
-#     '''
-#     Replaces AdminOptions for Post model
-#     '''
-#     def _fields(self):
-#         user = threadlocals.get_current_user()
-#         assert(not(user is None or user.is_anonymous()))
-# 
-#         if user.has_perm('moderator.superuser'):
-#             pass
-#         else:
-#             pass
-#     fields = property(_fields)
-# 
-# # register PostAdminOptions
-# #del Post._meta.admin.fields
-# #Post._meta.admin.__class__ = PostAdminOptions
-
+    class Meta:
+        verbose_name = _('post')
+        verbose_name_plural = _('posts')
 
 class AbuseReport(models.Model):
     '''
@@ -189,122 +163,21 @@ class AbuseReport(models.Model):
     If the abuse report is rejected as false, the post.freespeech flag can be
     set to disallow further abuse reports on said thread.
     '''
-    post = models.ForeignKey(Post)
-    submitter = models.ForeignKey(User)
-    class Admin:
-        list_display = ('post', 'submitter')
+    post = models.ForeignKey(Post, verbose_name=_('post'))
+    submitter = models.ForeignKey(User, verbose_name=_('submitter'))
 
     class Meta:
+        verbose_name = _('abuse report')
+        verbose_name_plural = _('abuse reports')
         unique_together = (('post', 'submitter'),)
-
 
 class WatchList(models.Model):
     """
     Keep track of who is watching what thread.  Notify on change (sidebar).
     """
-    user = models.ForeignKey(User)
-    thread = models.ForeignKey(Thread)
+    user = models.ForeignKey(User, verbose_name=_('user'))
+    thread = models.ForeignKey(Thread, verbose_name=_('thread'))
     # no need to be in the admin
-
-
-class SnapboardProfile(models.Model):
-    '''
-    User data tied to user accounts from the auth module.
-
-    Real name, email, and date joined information are stored in the built-in
-    auth module.
-
-    After logging in, save these values in a session variable.
-    '''
-    user = models.ForeignKey(User, unique=True, editable=False,
-            core=True, edit_inline=models.STACKED, max_num_in_admin=1)
-    profile = models.TextField(blank=True)
-
-    avatar = PhotoField(blank=True, upload_to='img/snapboard/avatars/',
-            width=24, height=24)
-
-    # browsing options
-    ppp = models.IntegerField(
-            choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
-            default = 20,
-            help_text = "Posts per page")
-    tpp = models.IntegerField(
-            choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
-            default = 20,
-            help_text = "Threads per page")
-    notify_email = models.BooleanField(default=False, blank=True,
-            help_text = "Email notifications for watched discussions.")
-    reverse_posts = models.BooleanField(
-            default=False,
-            help_text = "Display newest posts first.")
-    frontpage_filters = models.ManyToManyField(Category,
-            null=True, blank=True,
-            help_text = "Filter your front page on these categories.")
-
-    ## edit inline
-    class Admin:
-        list_display = ('user', 'ppp', 'tpp', 'notify_email')
-        fields = (
-            (None, 
-                {'fields': ('avatar',)}),
-            ('Profile', 
-                {'fields': ('profile',)}),
-            ('Browsing Options', 
-                {'fields': 
-                    ('ppp', 'tpp', 'notify_email', 'reverse_posts', 'frontpage_filters',)}),
-        )
-
-
-# TODO: perhaps this should be placed in another application
-class BannedUser(models.Model):
-    '''
-    This is a login-level ban.  These users will be able to browse the board
-    but will not be able to log in.
-    '''
-    user = models.ForeignKey(User, unique=True)
-    reason = models.TextField()
-    def __str__(self):
-        return str(self.user)
-
-    class Admin:
-        pass
-
-
-class BannedIP(models.Model):
-    '''
-    Each line should have an IP address.
-    
-    The objects in this model are not allowed to log in or register new
-    accounts.
-    '''
-
-    iplist = models.TextField(validator_list=[isIPAddressList])
-    reason = models.TextField()
-
-    def get_ips(self):
-        return [i.strip() for i in str(self.iplist).splitlines()]
-
-    def __str__(self):
-        return ','.join(self.get_ips())
-
-    class Admin:
-        pass
-
-def update_ban_cache():
-    ips = []
-    users = [int(u.id) for u in BannedUser.objects.all()]
-
-    for ip in BannedIP.objects.all():
-        ips.extend(ip.get_ips())
-
-    settings.SNAP_BANNED_IPS = sets.Set(ips)
-    settings.SNAP_BANNED_USERS = sets.Set(users)
-
-dispatcher.connect(update_ban_cache, sender=BannedIP, signal=signals.post_save)
-dispatcher.connect(update_ban_cache, sender=BannedIP, signal=signals.post_delete)
-dispatcher.connect(update_ban_cache, sender=BannedUser, signal=signals.post_save)
-dispatcher.connect(update_ban_cache, sender=BannedUser, signal=signals.post_delete)
-
 
 # from django.contrib.site.models import Site
 # def watched_thread_notify(instance):
@@ -325,4 +198,94 @@ dispatcher.connect(update_ban_cache, sender=BannedUser, signal=signals.post_dele
 # connect this handler
 #dispatcher.connect(watched_thread_notify, sender=Post, signal=signals.post_save)
 
+class UserSettings(models.Model):
+    '''
+    User data tied to user accounts from the auth module.
+
+    Real name, email, and date joined information are stored in the built-in
+    auth module.
+
+    After logging in, save these values in a session variable.
+    '''
+    user = models.OneToOneField(User, unique=True, 
+            verbose_name=_('user'), related_name='snapboard_usersettings')
+    ppp = models.IntegerField(
+            choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
+            default = 20,
+            help_text = _('Posts per page'), verbose_name=_('posts per page'))
+    tpp = models.IntegerField(
+            choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
+            default = 20,
+            help_text = _('Threads per page'), verbose_name=_('threads per page'))
+#    notify_email = models.BooleanField(default=False, blank=True,
+#            help_text = "Email notifications for watched discussions.", verbose_name=_('notify'))
+    reverse_posts = models.BooleanField(
+            default=False,
+            help_text = _('Display newest posts first.'), verbose_name=_('new posts first'))
+    frontpage_filters = models.ManyToManyField(Category,
+            null=True, blank=True,
+            help_text = _('Filter the list of all topics on these categories.'), verbose_name=_('front page categories'))
+
+    class Meta:
+        verbose_name = _('User settings')
+        verbose_name_plural = _('User settings')
+
+    def __unicode__(self):
+        return _('%s\'s preferences') % self.user
+    
+class UserBan(models.Model):
+    '''
+    This bans the user from posting messages on the forum. He can still log in.
+    '''
+    user = models.ForeignKey(User, unique=True, verbose_name=_('user'), db_index=True,
+            help_text=_('The user may still browse the forums anonymously. '\
+            'Other functions may also still be available to him if he is logged in.'))
+    reason = models.CharField(max_length=255, verbose_name=_('reason'),
+        help_text=_('This may be displayed to the banned user.'))
+
+    class Meta:
+        verbose_name = _('banned user')
+        verbose_name_plural = _('banned users')
+
+    def __unicode__(self):
+        return _('Banned user: %s') % self.user
+
+    @classmethod
+    def update_cache(cls, **kwargs):
+        c = connection.cursor()
+        c.execute('SELECT user_id FROM %s;' % cls._meta.db_table)
+        settings.SNAP_BANNED_USERS = set((x for (x,) in c.fetchall()))
+
+signals.post_save.connect(UserBan.update_cache, sender=UserBan)
+signals.post_delete.connect(UserBan.update_cache, sender=UserBan)
+
+class IPBan(models.Model):
+    '''
+    IPs in the list are not allowed to use the boards.
+    Only IPv4 addresses are supported, one per record. (patch with IPv6 and/or address range support welcome)
+    '''
+    address = models.IPAddressField(unique=True, verbose_name=_('IP address'), 
+            help_text=_('A person\'s IP address may change and an IP address may be '\
+            'used by more than one person, or by different people over time. '\
+            'Be careful when using this.'), db_index=True)
+    reason = models.CharField(max_length=255, verbose_name=_('reason'),
+        help_text=_('This may be displayed to the people concerned by the ban.'))
+
+    class Meta:
+        verbose_name = _('banned IP address')
+        verbose_name_plural = _('banned IP addresses')
+    
+    def __unicode__(self):
+        return _('Banned IP: %s') % self.address
+
+    @classmethod
+    def update_cache(cls, **kwargs):
+        c = connection.cursor()
+        c.execute('SELECT address FROM %s;' % cls._meta.db_table)
+        settings.SNAP_BANNED_IPS = set((x for (x,) in c.fetchall()))
+
+signals.post_save.connect(IPBan.update_cache, sender=IPBan)
+signals.post_delete.connect(IPBan.update_cache, sender=IPBan)
+
 # vim: ai ts=4 sts=4 et sw=4
+

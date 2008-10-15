@@ -1,50 +1,51 @@
+{% load i18n %}
 <div class="forummenu-first">
     {% if user.is_authenticated %}
         <p style="font-size: 122%;">
-            <b><a href="{{ SNAP_PREFIX }}/newtopic/">New Topic</a></b>
+	<b><a href="{% url snapboard_new_thread %}">{% trans "New Topic" %}</a></b>
         </p>
         <br />
         <p>
-            You are signed in as <a href="{{ SNAP_PREFIX }}/profile">{{ user.username }}</a>
+	{# TODO: The next line used to be in a blocktrans before using the url tag #}
+	    {% trans "You are signed in as" %} <a href="{% url snapboard_edit_settings %}">{{ user.username }}</a>
             {% if user.is_staff %}
-            <b>(STAFF)</b>
+            <b>{% trans "(STAFF)" %}</b>
             {% endif %}
         </p>
         <br />
-        <p><a href="{{ SNAP_PREFIX }}/signout">Sign out</a></p>
+	<p><a href="{{ LOGOUT_URL }}">{% trans "Sign out" %}</a></p>
     {% else %}
-        <p>You are not logged in.</p>
+        <p>{% trans "You are not logged in." %}</p>
         <br />
         {% if form.has_errors %}
-        <p>Your username and password didn't match.</p>
+        <p>{% trans "Your username and password didn't match." %}</p>
         {% endif %}
 
-        <form method="post" action="{{ SNAP_PREFIX }}/signin/">
+        <form method="post" action="{{ LOGIN_URL }}">
             {{ login_form.as_p }}
             <div>
-                <input type="submit" value="Sign In" />
+                <input type="submit" value="{% trans "Sign In" %}" />
                 <input type="hidden" name="next" value="{{ request.path }}" />
             </div>
         </form>
         <br />
 
-        <p>You need to have a user account in order to contribute
-        to discussions on this forum.</p>
-        <p style="font-size:small"><a href="/accounts/register/">Create an account</a></p>
+        <p>{% trans "You need to have a user account in order to contribute to discussions on this forum." %}</p>
+        <p style="font-size:small"><a href="/accounts/register/">{% trans "Create an account" %}</a></p>
     {% endif %}
 </div>
 
 {% if user.is_staff %}
     <br />
     <div class="forummenu">
-    <p><b>Admin Shortcuts</b></p>
+    <p><b>{% trans "Admin Shortcuts" %}</b></p>
     <br />
     <ul>
-        <li>&#187; <b><a href="/admin/">Admin Site</a></b></li>
-        <li>&#187; <a href="/admin/snapboard/post/?censor__exact=1">Censored posts</a></li>
-        <li>&#187; <a href="/admin/snapboard/abusereport/">Abuse Reports</a></li>
-        <li>&#187; <a href="/admin/snapboard/thread/?csticky__exact=1">Category Sticky</a></li>
-        <li>&#187; <a href="/admin/snapboard/thread/?gsticky__exact=1">Global Sticky</a></li>
+        <li>&#187; <b><a href="/admin/">{% trans "Admin Site" %}</a></b></li>
+        <li>&#187; <a href="/admin/snapboard/post/?censor__exact=1">{% trans "Censored posts" %}</a></li>
+        <li>&#187; <a href="/admin/snapboard/abusereport/">{% trans "Abuse Reports" %}</a></li>
+        <li>&#187; <a href="/admin/snapboard/thread/?csticky__exact=1">{% trans "Category Sticky" %}</a></li>
+        <li>&#187; <a href="/admin/snapboard/thread/?gsticky__exact=1">{% trans "Global Sticky" %}</a></li>
     </ul>
     </div>
 {% endif %}
@@ -60,6 +61,6 @@
     
     <br />
     <div class="forummenu">
-        <p><b><a href="{{ SNAP_PREFIX }}/profile/">Forum Preferences</a></b></p>
+	<p><b><a href="{% url snapboard_edit_settings %}">{% trans "Forum Preferences" %}</a></b></p>
     </div>
 {% endif %}
