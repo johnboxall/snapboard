@@ -121,6 +121,10 @@ USE_SNAPBOARD_LOGIN_FORM = True
 # Possible values: 'bbcode', 'markdown', 'textile'
 SNAP_POST_FILTER = 'bbcode'
 
+# Set MEDIA_ROOT so the project works out of the box
+import os
+MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'snapboard/media')
+
 try:
 	from settings_local import *
 except ImportError:

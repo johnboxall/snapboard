@@ -1,0 +1,38 @@
+div.snapboard form {
+background:#e4efe2;
+border:1px solid #ccc;
+padding:5px;
+}
+
+div.snapboard form th {
+padding-right:0.5em;
+text-align:right;
+}
+
+div.snapboard form td {
+color:#999;
+}
+
+div.snapboard textarea,
+div.snapboard input,
+div.snapboard button,
+div.snapboard select {
+background:#fff;
+border:1px solid #ccc;
+margin-bottom:5px;
+margin-top:5px;
+}
+
+div.snapboard textarea,
+div.snapboard input[type="text"],
+div.snapboard input[type="password"] {
+width:100%;
+}
+
+div.snapboard input[type="submit"],
+div.snapboard input[type="button"],
+div.snapboard input[type="reset"] {
+background-color:#ccc;
+border:1px solid #000;
+color:#000;
+}

@@ -1,0 +1,14 @@
+{% extends "snapboard/base_forum.html" %}
+{% load i18n %}
+
+{% block snapboard_panel %}{% endblock %}
+{% block snapboard_main %}
+    <p>{% trans "You have been banned from the forums. You may still use the forums as an anonymous user. You need to log off first." %}</p>
+    <p><a href="{% url auth_signout %}">{% trans "Log off" %}</a></p>
+    {% if reason %}
+        <p>{% trans "The reason is:" %}</p>
+        <blockquote>{{ reason }}</blockquote>
+    {% endif %}
+    <p>{% trans "If you think this is a mistake, please contact the website administrator." %}</p>
+{% endblock %}
+

@@ -1,0 +1,19 @@
+{% extends "snapboard/base_forum.html" %}
+{% load i18n %}
+
+{% block snapboard_main %}
+    <div class="index_title">
+        <h2 style="font-size: 152%;">
+            {% trans "Boards preferences" %}
+        </h2>
+    </div>
+    <form method="post" action="">
+        <table>
+            {{ form }}
+            <tr><th></th><td><input type="submit" value="{% trans "Update" %}" /></td></tr>
+        </table>
+    </form>
+{% endblock %}
+<!--
+vim: ai ts=4 sts=4 et sw=4 
+-->

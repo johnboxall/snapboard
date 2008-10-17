@@ -1,0 +1,134 @@
+div.snapboard .post_text p {
+margin-bottom:10px;
+margin-top:10px;
+}
+
+div.snapboard .post_text h1,
+div.snapboard .post_text h2,
+div.snapboard .post_text h3,
+div.snapboard .post_text strong {
+font-weight:700;
+}
+
+div.snapboard .post_text h1 {
+font-size:130%;
+}
+
+div.snapboard .post_text h2 {
+font-size:120%;
+}
+
+div.snapboard .post_text h3 {
+font-size:110%;
+}
+
+div.snapboard table.post_text {
+border:1px solid #ccc;
+}
+
+div.snapboard ol.post_text,
+div.snapboard ul.post_text {
+margin-left:2em;
+margin-right:2em;
+}
+
+div.snapboard .post_text ol {
+list-style-type:decimal;
+}
+
+div.snapboard .post_text ul {
+list-style-type:square;
+}
+
+div.snapboard .post_text blockquote,
+div.snapboard .post_text pre {
+background:#EEE none repeat scroll 0;
+margin-left:1em;
+padding-left:0.5em;
+}
+
+div.snapboard .post_text pre {
+border-left:1px solid #363;
+}
+
+div.snapboard .post_text code {
+font-family:courier;
+}
+
+div.snapboard span.post_menuright {
+float:right;
+font-size:77%;
+padding-right:10%;
+}
+
+div.snapboard span.post_menuleft {
+font-size:77%;
+padding-left:10%;
+}
+
+div.snapboard span.post_summary {
+color:#B0BFAC;
+}
+
+div.snapboard div.post_reported {
+border:1px solid #f60;
+}
+
+div.snapboard hr.postend {
+background-color:#CCC;
+border:0 solid #CCC;
+height:1px;
+width:80%;
+}
+
+div.snapboard hr.firstpost {
+background-color:#000;
+border:0 solid #000;
+height:1px;
+width:80%;
+}
+
+div.snapboard div.post_censored {
+border:2px solid red;
+}
+
+div.snapboard p.post_header {
+padding-left:2em;
+}
+
+div.snapboard #snap_markdown_guide p,
+div.snapboard #snap_markdown_guide table,
+div.snapboard #snap_markdown_guide code,
+div.snapboard #snap_markdown_guide tr {
+border:none;
+color:#000;
+font-size:100%;
+}
+
+div.snapboard #snap_markdown_guide code {
+background-color:#eee;
+}
+
+div.snapboard #snap_markdown_guide {
+background:#efe;
+border:1px solid #666;
+padding:1em;
+}
+
+div.snapboard #snap_markdown_guide p {
+margin-bottom:0.5em;
+}
+
+div.snapboard #snap_markdown_guide table {
+width:100%;
+}
+
+div.snapboard .post_text em,
+div.snapboard .post_text i,
+div.snapboard #snap_markdown_guide em {
+font-style:italic;
+}
+
+div.snapboard .post_text .quoteheader {
+margin-left: 1em;
+}

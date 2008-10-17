@@ -1,0 +1,31 @@
+SNAPBoard is a bulletin board application for the Django web framework.
+It is written to run with Django 1.0 on Python 2.5.
+
+Features:
+
+    * Editable posts (all revisions publicly available)
+    * Private recipients for posts within topics
+    * BBCode, Markdwon and Textile supported for post formatting
+    * BBCode toolbar
+    * Multiple forums
+    * Moderators for each category
+    * User preferences
+    * Watched topics
+    * Abuse reports
+    * i18n hooks to create your own translations (ships with English and French
+      languages)
+    * User and IP address bans
+
+SNAPBoard's documentation is located in the docs/ directory. To build it in
+HTML format, cd to docs/ and run ``make html``. Sphinx is required for this 
+to work.
+
+A slightly modified version of django-pagination is required to use SNAPBoard.
+It is included in the 'pagination' directory.
+
+You are free to use any package or custom application for extra features such 
+as user profiles, private messaging or registration.
+
+SNAPBoard is free software. If you would like to submit a patch or report a 
+bug, please do so on the project's page at http://code.google.com/p/snapboard/.
+

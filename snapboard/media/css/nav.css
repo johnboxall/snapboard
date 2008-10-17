@@ -1,8 +1,8 @@
-#navigation div {
+div.snapboard #navigation div {
     text-align: center;
 }
 
-#navigation ul li {
+div.snapboard #navigation ul li {
     list-style: none;
     /* margin-left: auto; */
     margin-right: 1em;
