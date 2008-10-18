@@ -1,5 +1,4 @@
-# vim: ai ts=4 sts=4 et sw=4
-
+import logging
 from django import forms
 from django.conf import settings
 from django.contrib.auth import decorators
@@ -16,6 +15,8 @@ from django.utils.translation import ugettext as _
 from snapboard.forms import PostForm, ThreadForm, UserSettingsForm
 from snapboard.models import *
 from snapboard.rpc import *
+
+_log = logging.getLogger('snapboard.views')
 
 DEFAULT_USER_SETTINGS  = UserSettings()
 
@@ -50,6 +51,7 @@ def snapboard_default_context(request):
             'LOGIN_URL': settings.LOGIN_URL,
             'LOGOUT_URL': settings.LOGOUT_URL,
             }
+
 
 def user_settings_context(request):
     return {'user_settings': get_user_settings(request.user)}
@@ -138,13 +140,13 @@ def thread(request, thread_id):
             postobj = Post(thread = thr,
                     user = request.user,
                     text = postform.cleaned_data['post'],
-                    #
                     )
             postobj.save() # this needs to happen before many-to-many private is assigned
 
-            postobj.private = postform.cleaned_data['private']
-            postobj.save()
-            postform = PostForm()
+            if len(postform.cleaned_data['private']) > 0:
+                _log.debug('thread(): new post private = %s' % postform.cleaned_data['private'])
+                postobj.private = postform.cleaned_data['private']
+                postobj.save()
     else:
         postform = PostForm()
 

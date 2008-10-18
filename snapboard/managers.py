@@ -1,6 +1,9 @@
-from django.db import models
+import logging
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 from django.db.models import Q
+
+_log = logging.getLogger('snapboard.managers')
 
 class PostManager(models.Manager):
     def get_query_set(self):
@@ -20,6 +23,16 @@ class PostManager(models.Manager):
         # TODO: there's gotta be a better way to filter out private messages
         # Tested with postgresql and sqlite
         qs = self.get_query_set().filter(thread__id=thread_id)
+
+        # For some reason, the above query set produces duplicate values
+        # (probably due to the ManyToMany field).  Using distinct() fixes this
+        # but we need to better understand the reason why non-distinct values
+        # are being sent.  Caveats:
+        # http://docs.djangoproject.com/en/dev/ref/models/querysets/#distinct
+        qs = qs.distinct()
+
+        # optimization to leverage joins to reduce # queries for posts
+        qs = qs.select_related()
 
         if user.is_authenticated():
             qs = qs.filter((Q(user=user) | Q(private__isnull=True) | Q(private__exact=user)))
