@@ -1,19 +1,14 @@
 import os
 
-from django.conf import settings
 from django.db.models import signals 
+from django.conf import settings
 
 from snapboard import models as snapboard_app
 
-def sync_hook(**kwargs): 
-    pass
-
-signals.post_syncdb.connect(sync_hook, sender=snapboard_app) 
-
 def test_setup(**kwargs):
-    from django.contrib.auth.models import User
-    from models import Thread, Post, Category
     from random import choice
+    from django.contrib.auth.models import User
+    from snapboard.models import Thread, Post, Category
     from snapboard import sampledata
 
     if not settings.DEBUG:
@@ -72,3 +67,4 @@ def test_setup(**kwargs):
 
 signals.post_syncdb.connect(test_setup, sender=snapboard_app) 
 # vim: ai ts=4 sts=4 et sw=4
+

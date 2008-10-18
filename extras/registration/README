@@ -1,0 +1,6 @@
+A set of templates for django-registration that integrate well with SNAPboard's
+default skin.
+
+To enable them, add the directory containing this README file to 
+settings.TEMPLATE_DIRS.
+

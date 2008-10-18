@@ -1,0 +1,19 @@
+{% extends "registration/base.html" %}
+{% load i18n %}
+
+{% block sbreg_body_main %}
+    <form action="" method="post">
+        <table>
+            <tbody>
+                <input type="hidden" name="next" value="{% url snapboard_index %}" />
+                {{ form }}
+                <tr>
+                    <th></th>
+                    <td><input type="submit" value="{% trans "Log in" %}" /></td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+
+    
