@@ -1,16 +1,10 @@
-from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
-#from django.template import Context, loader
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
+from django.template.defaultfilters import striptags
 from django.utils import simplejson
 from django.utils.translation import ugettext as _
-from django.core.exceptions import PermissionDenied
-from django.db.models import Q
 
-from django.template.defaultfilters import striptags
-
-from snapboard.forms import PostForm, ThreadForm
-from snapboard.models import Thread, Post, Category, WatchList, AbuseReport
+from snapboard.models import Post, WatchList, AbuseReport
 from snapboard.templatetags.extras import render_filter
 
 

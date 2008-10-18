@@ -1,17 +1,6 @@
-# vim: ai ts=4 sts=4 et sw=4
-
-from django import forms
-from django.contrib.auth import decorators
-from django.contrib.auth import login, logout
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.utils import simplejson
-from django.views.generic.simple import redirect_to
-from django.conf import settings
 
 class PostManager(models.Manager):
     def get_query_set(self):

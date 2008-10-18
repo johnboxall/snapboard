@@ -1,15 +1,17 @@
+import logging
 from datetime import datetime
-
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models, connection
 from django.db.models import signals
 from django.dispatch import dispatcher
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
 
 from snapboard import managers
 from snapboard.middleware import threadlocals
+
+_log = logging.getLogger('snapboard.models')
 
 SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
 SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
@@ -113,8 +115,8 @@ class Post(models.Model):
     view_manager = managers.PostManager()
 
     def save(self):
-        #print 'user =', threadlocals.get_current_user()
-        #print threadlocals.get_current_ip(), type(threadlocals.get_current_ip())
+        _log.debug('user = %s, ip = %s' % (threadlocals.get_current_ip(),
+            threadlocals.get_current_user()))
 
         # hack to disallow admin setting arbitrary users to posts
         if getattr(self, 'user_id', None) is None:
@@ -122,7 +124,6 @@ class Post(models.Model):
 
         # disregard any modifications to ip address
         self.ip = threadlocals.get_current_ip()
-        # self.ip = '127.0.0.1'
 
         if self.previous is not None:
             self.odate = self.previous.odate

@@ -1,7 +1,7 @@
 import os
 
-from django.db.models import signals 
 from django.conf import settings
+from django.db.models import signals 
 
 from snapboard import models as snapboard_app
 

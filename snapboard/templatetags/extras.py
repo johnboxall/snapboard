@@ -1,7 +1,6 @@
 from time import mktime
 
 from django import template
-from django.contrib.auth.models import User
 from django.conf import settings
 
 from snapboard.templatetags.textile import textile

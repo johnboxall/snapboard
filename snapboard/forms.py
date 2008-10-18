@@ -1,9 +1,9 @@
 from sets import Set
 
 from django import forms
-from django.forms import widgets, ValidationError
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.forms import widgets, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 

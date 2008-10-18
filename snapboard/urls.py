@@ -1,15 +1,13 @@
 from django.conf.urls.defaults import *
 from django.contrib.auth.models import User
 
-from snapboard.views import thread, thread_index, new_thread, category_index, category_thread_index
-from snapboard.views import edit_post, rpc, favorite_index, private_index, edit_settings
-
-from snapboard.rpc import rpc_post, rpc_lookup, rpc_preview
 from snapboard.feeds import LatestPosts
+from snapboard.rpc import rpc_post, rpc_lookup, rpc_preview
+from snapboard.views import thread, thread_index, new_thread, category_index, \
+        category_thread_index, edit_post, rpc, favorite_index, private_index, \
+        edit_settings
 
-feeds = {
-    'latest': LatestPosts,
-    }
+feeds = {'latest': LatestPosts}
 
 js_info_dict = {
     'packages': ('snapboard',),

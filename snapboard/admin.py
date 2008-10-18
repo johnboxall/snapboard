@@ -38,3 +38,4 @@ admin.site.register(UserSettings)
 admin.site.register(UserBan, UserBanAdmin)
 admin.site.register(IPBan, IPBanAdmin)
 
+# vim: ai ts=4 sts=4 et sw=4
