@@ -1,10 +1,6 @@
 {% load i18n %}
 <div class="forummenu-first">
     {% if user.is_authenticated %}
-        <p style="font-size: 122%;">
-	<b><a href="{% url snapboard_new_thread %}">{% trans "New Topic" %}</a></b>
-        </p>
-        <br />
         <p>
 	{# TODO: The next line used to be in a blocktrans before using the url tag #}
 	    {% trans "You are signed in as" %} <a href="{% url snapboard_edit_settings %}">{{ user.username }}</a>

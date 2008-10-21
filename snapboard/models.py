@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import models, connection
 from django.db.models import signals
@@ -11,6 +12,14 @@ from django.utils.translation import ugettext_lazy as _
 from snapboard import managers
 from snapboard.middleware import threadlocals
 
+__all__ = [
+    'SNAP_PREFIX', 'SNAP_MEDIA_PREFIX', 'SNAP_POST_FILTER',
+    'NOBODY', 'ALL', 'USERS', 'CUSTOM', 'PERM_CHOICES', 'PERM_CHOICES_RESTRICTED',
+    'PermissionError', 'is_user_banned', 'is_ip_banned', 
+    'Category', 'Invitation', 'Group', 'Thread', 'Post', 'Moderator',
+    'WatchList', 'AbuseReport', 'UserSettings', 'IPBan', 'UserBan',
+    ]
+
 _log = logging.getLogger('snapboard.models')
 
 SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
@@ -18,14 +27,116 @@ SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX',
         getattr(settings, 'MEDIA_URL', '') + '/snapboard')
 SNAP_POST_FILTER = getattr(settings, 'SNAP_POST_FILTER', 'markdown').lower()
 
+NOBODY = 0
+ALL = 1
+USERS = 2
+CUSTOM = 3
+
+PERM_CHOICES = (
+    (NOBODY, _('Nobody')),
+    (ALL, _('All')),
+    (USERS, _('Users')),
+    (CUSTOM, _('Custom')),
+)
+
+PERM_CHOICES_RESTRICTED = (
+    (NOBODY, _('Nobody')),
+    (ALL, _('All')),
+    (USERS, _('Users')),
+    (CUSTOM, _('Custom')),
+)
+
+class PermissionError(PermissionDenied):
+    '''
+    Raised when a user tries to perform a forbidden operation, as per the 
+    permissions defined by Category objects.
+    '''
+    pass
+
 def is_user_banned(user):
     return user.id in settings.SNAP_BANNED_USERS
 
 def is_ip_banned(ip):
     return ip in settings.SNAP_BANNED_IPS
 
+class Group(models.Model):
+    '''
+    User-administerable group, be used to assign permissions to possibly 
+    several users.
+
+    Administrators of the group need to be explicitely added to the users
+    list to be considered members.
+    '''
+
+    name = models.CharField(_('name'), max_length=36)
+    users = models.ManyToManyField(User, verbose_name=_('users'), related_name='snapboard_member_of_group_set')
+    admins = models.ManyToManyField(User, verbose_name=_('admins'), related_name='snapboard_admin_of_group_set') 
+
+    class Meta:
+        verbose_name = _('group')
+        verbose_name_plural = _('groups')
+
+    def __unicode__(self):
+        return _('Group "%s"') % self.name
+
+    def has_user(self, user):
+        return self.users.filter(pk=user.pk).count() != 0
+
+    def has_admin(self, user):
+        return self.admins.filter(pk=user.pk).count() != 0
+
+class Invitation(models.Model):
+    '''
+    Group admins create invitations for users to join their group.
+
+    Staff with site admin access can assign users to groups without
+    restriction.
+    '''
+
+    group = models.ForeignKey(Group, verbose_name=_('group'), related_name='snapboard_invitation_set')
+    sent_by = models.ForeignKey(User, verbose_name=_('sent by'), related_name='snapboard_sent_invitation_set')
+    sent_to = models.ForeignKey(User, verbose_name=_('sent to'), related_name='snapboard_received_invitation_set')
+    sent_date = models.DateTimeField(_('sent date'), auto_now_add=True)
+    response_date = models.DateTimeField(_('response date'), blank=True, null=True)
+    accepted = models.BooleanField(_('accepted'), blank=True, null=True)
+
+    class Meta:
+        verbose_name = _('invitation')
+        verbose_name_plural = _('invitations')
+
+    def __unicode__(self):
+        return _('Invitation for "%(group)s" sent by %(sent_by)s to %(sent_to)s.') % {
+                'group': self.group.name,
+                'sent_by': self.sent_by,
+                'sent_to': self.sent_to }
+
 class Category(models.Model):
+
     label = models.CharField(max_length=32, verbose_name=_('label'))
+
+    view_perms = models.PositiveSmallIntegerField(_('view permission'), 
+        choices=PERM_CHOICES, default=ALL,
+        help_text=_('Limits the category\'s visibility.'))
+    read_perms = models.PositiveSmallIntegerField(_('read permission'),
+        choices=PERM_CHOICES, help_text=_('Limits the ability to read the '\
+        'category\'s contents.'), default=ALL)
+    post_perms = models.PositiveSmallIntegerField(_('post permission'),
+        choices=PERM_CHOICES_RESTRICTED, help_text=_('Limits the ability to '\
+        'post in the category.'), default=USERS)
+    new_thread_perms = models.PositiveSmallIntegerField(
+        _('create thread permission'), choices=PERM_CHOICES_RESTRICTED, 
+        help_text=_('Limits the ability to create new threads in the '\
+        'category. Only users with permission to post can create new threads,'\
+        'unless a group is specified.'), default=USERS)
+
+    view_group = models.ForeignKey(Group, verbose_name=_('view group'),
+        blank=True, null=True, related_name='can_view_category_set')
+    read_group = models.ForeignKey(Group, verbose_name=_('read group'),
+        blank=True, null=True, related_name='can_read_category_set')
+    post_group = models.ForeignKey(Group, verbose_name=_('post group'),
+        blank=True, null=True, related_name='can_post_category_set')
+    new_thread_group = models.ForeignKey(Group, verbose_name=_('create thread group'),
+        blank=True, null=True, related_name='can_create_thread_category_set')
 
     objects = managers.CategoryManager()    # adds thread_count
 
@@ -39,13 +150,45 @@ class Category(models.Model):
         else:
             return None
 
+    def can_view(self, user):
+        flag = False
+        if self.view_perms == ALL:
+            flag = True
+        elif self.view_perms == USERS:
+            flag = user.is_authenticated()
+        elif self.view_perms == CUSTOM:
+            flag = user.is_superuser or self.view_group.has_user(user)
+        return flag
+
+    def can_read(self, user):
+        flag = False
+        if self.read_perms == ALL:
+            flag = True
+        elif self.read_perms == USERS:
+            flag = user.is_authenticated()
+        elif self.read_perms == CUSTOM:
+            flag = user.is_superuser or self.read_group.has_user(user)
+        return flag
+
+    def can_post(self, user):
+        flag = False
+        if self.post_perms == USERS:
+            flag = user.is_authenticated()
+        elif self.post_perms == CUSTOM:
+            flag = user.is_superuser or self.post_group.has_user(user)
+        return flag
+
+    def can_create_thread(self, user):
+        flag = False
+        if self.new_thread_perms == USERS:
+            flag = user.is_authenticated()
+        elif self.new_thread_perms == CUSTOM:
+            flag = user.is_superuser or self.new_thread_group.has_user(user)
+        return flag
+
     class Meta:
         verbose_name = _('category')
         verbose_name_plural = _('categories')
-
-    class Admin:
-        pass
-
 
 class Moderator(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('category'))

@@ -4,7 +4,7 @@ from django.template.defaultfilters import striptags
 from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
-from snapboard.models import Post, WatchList, AbuseReport
+from snapboard.models import Post, WatchList, AbuseReport, PermissionError
 from snapboard.templatetags.extras import render_filter
 
 
@@ -16,6 +16,8 @@ def rpc_post(request):
     show_id = int(request.GET['show'])
     orig_id = int(request.GET['orig'])
     post = Post.objects.get(pk=show_id)
+    if not post.thread.category.can_read(request.user):
+        raise PermissionError
 
     prev_id = ''
     rev_id = ''
@@ -38,6 +40,7 @@ def rpc_preview(request):
 
 
 def rpc_lookup(request, queryset, field, limit=5):
+    # XXX We should probably restrict member (or other) lookups to registered users
     obj_list = []
     lookup = { '%s__icontains' % field: request.GET['query'],}
     for obj in queryset.filter(**lookup)[:limit]:
@@ -85,6 +88,8 @@ def rpc_close(request, **kwargs):
 
 def rpc_watch(request, **kwargs):
     thr = kwargs['thread']
+    if not thread.category.can_read(request.user):
+        raise PermissionError
     try:
         # it exists, stop watching it
         wl = WatchList.objects.get(user=request.user, thread=thr)
@@ -119,6 +124,8 @@ def rpc_censor(request, **kwargs):
 
 def rpc_quote(request, **kwargs):
     post = Post.objects.select_related().get(id=kwargs['oid'])
+    if not post.thread.category.can_read(user):
+        raise PermissionError
     if post.user != request.user and post.private.count() and request.user not in post.private.all():
         raise PermissionDenied
     return {'text': post.text, 'author': unicode(post.user)}

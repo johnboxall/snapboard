@@ -47,7 +47,12 @@
                 {% if user.is_authenticated %}
                 <li><a href="{% url snapboard_favorite_index %}"><span>{% trans "Favorites" %}</span></a></li>
                 <li><a href="{% url snapboard_private_index %}"><span>{% trans "Private Posts" %}</span></a></li>
-                <li><a href="{% url snapboard_new_thread %}"><span style="color: red;">{% trans "Start Thread" %}</span></a></li>
+                {% if thr %}
+                <li><a href="{% url snapboard_new_thread thr.category.id %}"><span style="color: red;">{% trans "Start Thread" %}</span></a></li>
+                {% endif %}
+                {% if category %}
+                <li><a href="{% url snapboard_new_thread category.id %}"><span style="color: red;">{% trans "Start Thread" %}</span></a></li>
+                {% endif %}
                 {% endif %}
             </ul>
         </div>
@@ -57,6 +62,15 @@
     <div id="bd">
         <div id="yui-main">
             <div class="yui-b">
+                {% if messages %}
+                    <div class="messagelist">
+                        <ul class="messagelist">
+                            {% for msg in messages %}
+                                <li>{{ msg }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %} 
                 {% block snapboard_header %}
                 {% endblock %}
                 {% block snapboard_main %}

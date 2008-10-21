@@ -29,6 +29,12 @@ class IPBanAdmin(admin.ModelAdmin):
 	list_display = ('address', 'reason')
 	search_fields = ('address', 'reason')
 
+class GroupAdmin(admin.ModelAdmin):
+    model = Group
+    list_display = ('name',)
+    search_fields = ('name',)
+    filter_horizontal = ('users', 'admins')
+
 admin.site.register(Category)
 admin.site.register(Moderator)
 admin.site.register(Post, PostAdmin)
@@ -37,5 +43,6 @@ admin.site.register(Thread, ThreadAdmin)
 admin.site.register(UserSettings)
 admin.site.register(UserBan, UserBanAdmin)
 admin.site.register(IPBan, IPBanAdmin)
+admin.site.register(Group, GroupAdmin)
 
 # vim: ai ts=4 sts=4 et sw=4

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="snapboard.category">
+        <field type="CharField" name="label">General Discussion</field>
+        <field type="PositiveSmallIntegerField" name="view_perms">1</field>
+        <field type="PositiveSmallIntegerField" name="read_perms">1</field>
+        <field type="PositiveSmallIntegerField" name="post_perms">2</field>
+        <field type="PositiveSmallIntegerField" name="new_thread_perms">2</field>
+        <field to="snapboard.group" name="view_group" rel="ManyToOneRel"><None></None></field>
+        <field to="snapboard.group" name="read_group" rel="ManyToOneRel"><None></None></field>
+        <field to="snapboard.group" name="post_group" rel="ManyToOneRel"><None></None></field>
+        <field to="snapboard.group" name="new_thread_group" rel="ManyToOneRel"><None></None></field>
+    </object>
+</django-objects>
+

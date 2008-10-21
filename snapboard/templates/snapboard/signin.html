@@ -7,13 +7,13 @@
 {% block snapboard_main %}
     {% if not user.is_authenticated %}
     <div style="margin-left: 25%; margin-right: 25%;">
-        <form method="post" action="{{ SNAP_PREFIX }}/signin/">
+        <form method="post" action="{% url auth_login %}">
             <table style="margin: 5px;">
-            {{ login_form.as_table }}
+            {{ form.as_table }}
             </table>
             <p>
             <input type="submit" value="{% trans "Sign In" %}" />
-            <input type="hidden" name="next" value="{{ login_next }}" />
+            <input type="hidden" name="next" value="{{ next }}" />
             </p>
         </form>
     </div>

@@ -1,0 +1,78 @@
+{% extends "snapboard/base_forum.html" %}
+{% load i18n pagination_tags %}
+
+{% block snap_extra_head %}
+    {{ block.super }}
+    <script type="text/javascript" src="{{ SNAP_MEDIA_PREFIX }}/js/group.js"></script>
+{% endblock %}
+
+{% block snapboard_main %}
+    <div class="index_title">
+    <h2 style="font-size: 152%;">
+        {% blocktrans with group.name as gname %}Manage group {{ gname }}{% endblocktrans %}
+    </h2>
+    </div>
+    {% if not users %}
+        <p><a href="?manage_users=1">{% trans "Manage group users" %}</a></p>
+    {% endif %}
+    {% if not admins %}
+        <p><a href="?manage_admins=1">{% trans "Manage group admins" %}</a></p>
+    {% endif %}
+    {% if not pending_invitations %}
+        <p><a href="?pending_invitations=1">{% trans "View pending invitations" %}</a></p>
+    {% endif %}
+    {% if not answered_invitations %}
+        <p><a href="?answered_invitations=1">{% trans "View answered invitations" %}</a></p>
+    {% endif %}
+
+    {% if users %}
+        {% autopaginate users 50 %}
+        {% url snapboard_remove_user_from_group group.id as remuser_url %}
+        {% url snapboard_grant_group_admin_rights group.id as promote_url %}
+        <h3>{% trans "Group members" %}</h3>
+        <div class="manage-users">
+            {% for user in users %}
+                <p>{{ user }} (<a href="#" onclick="do_post(&quot;{{ remuser_url }}&quot;,{user_id: {{user.id}}}, confirm_remove_user, '{{ user.username|escape }}')">remove</a>) 
+                (<a href="#" onclick="do_post(&quot;{{ promote_url }}&quot;,{user_id: {{user.id}}}, confirm_promote, '{{ user.username|escape }}')">grant 
+                    admin rights</a>)</p>
+            {% endfor %}
+        </div>
+        {% paginate %}
+    {% endif %}
+
+    {% if admins %}
+        {% autopaginate admins 50 %}
+        {% url snapboard_remove_user_from_group group.id as remuser_url %}
+        <div class="manage-admins">
+            {% for user in admins %}
+                <p>{{ user }} (<a href="#" onclick="do_post(&quot;{{ remuser_url }}&quot;,{user_id: {{user.id}}}, confirm_remove_user, '{{ user.username|escape }}')">remove from group</a>) 
+                (<a href="#" onclick="do_post(&quot;{{ remuser_url }}&quot;,{user_id: {{user.id}}, only_admin: '1'}, confirm_remove_ar, '{{ user.username|escape }}')">remove admin rights</a>)</p>
+            {% endfor %}
+        </div>
+        {% paginate %}
+    {% endif %}
+
+    {% if answered_invitations %}
+        {% autopaginate answered_invitations 50 %}
+        <div class="manage-answered-invitation">
+            {% for invitation in answered_invitations %}
+            <p>{{ invitation }} (<a href="#" onclick="do_post(&quot;{% url snapboard_discard_invitation invitation.id %}&quot;, {}, null, null)">discard</a>)</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if pending_invitations %}
+            {% autopaginate pending_invitations 50 %}
+        <div class="manage-pending-invitation">
+            {% for invitation in pending_invitations %}
+            <p>{{ invitation }} (<a href="#" onclick="do_post(&quot;{% url snapboard_discard_invitation invitation.id %}&quot;, {}, confirm_cancel_invitation, null)">cancel</a>)</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form action="{% url snapboard_invite_user_to_group group.id %}" method="post">
+        {{ invitation_form.as_p }}
+        <p><input type="submit" value="{% trans "Invite user" %}" /></p>
+    </form>
+{% endblock %}
+

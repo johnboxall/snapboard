@@ -1,0 +1,17 @@
+{% extends "snapboard/base_forum.html" %}
+{% load i18n %}
+
+{% block snapboard_main %}
+    <div class="index_title">
+        <h2 style="font-size: 152%;">
+            {% blocktrans with group.name as gname %}Invite user to group {{ gname }}{% endblocktrans %}
+        </h2>
+    </div>
+
+    <form action="{% url snapboard_invite_user_to_group group.id %}" method="post">
+            {{ form.as_p }}
+            <p><input type="submit" value="{% trans "Invite user" %}" /></p>
+    </form>
+{% endblock %}
+
+

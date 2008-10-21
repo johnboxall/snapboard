@@ -43,15 +43,15 @@ class PostForm(forms.Form):
 
 
 class ThreadForm(forms.Form):
-    def __init__( self, *args, **kwargs ):
-        super( ThreadForm, self ).__init__( *args, **kwargs )
-        self.fields['category'] = forms.ChoiceField(
-                label = _('Category'),
-                choices = [(str(x.id), x.label) for x in Category.objects.all()] 
-                )
+#    def __init__( self, *args, **kwargs ):
+#        super( ThreadForm, self ).__init__( *args, **kwargs )
+#        self.fields['category'] = forms.ChoiceField(
+#                label = _('Category'),
+#                choices = [(str(x.id), x.label) for x in Category.objects.all()] 
+#                )
 
-    # this is here to set the order
-    category = forms.CharField(label=_('Category'))
+#    # this is here to set the order
+#    category = forms.CharField(label=_('Category'))
 
     subject = forms.CharField(max_length=80,
             label=_('Subject'),
@@ -68,15 +68,31 @@ class ThreadForm(forms.Form):
             label=_('Message')
         )
 
-    def clean_category(self):
-        id = int(self.cleaned_data['category'])
-        return id
+#    def clean_category(self):
+#        id = int(self.cleaned_data['category'])
+#        return id
 
 class UserSettingsForm(forms.ModelForm):
+
+    def __init__(self, *pa, **ka):
+        super(UserSettingsForm, self).__init__(*pa, **ka)
+        user = ka['user']
+        self.fields['frontpage_filters'].choices = [
+            (cat.id, cat.name) for cat in Category.objects.all() if 
+            cat.can_read(user)
+        ]
+
+    frontpage_filters = forms.MultipleChoiceField(label=_('Front page categories'))
 
     class Meta:
         model = UserSettings
         exclude = ('user',)
+
+    def clean_frontpage_filters(self):
+        cd = self.cleaned_data
+        cd['frontpage_filters'] = [cat for cat in (Category.objects.get(pk=id) for id in
+                cd['frontpage_filters'] if cat.can_read(user))]
+        return cd
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=30, label=_("Username"))
@@ -93,4 +109,19 @@ class LoginForm(forms.Form):
                 raise ValidationError(_('Your account has been disabled.'))
         else:
             raise ValidationError(_('Your username or password were incorrect.'))
+
+class InviteForm(forms.Form):
+    user = forms.CharField(max_length=30, label=_('Username'))
+
+    def clean_user(self):
+        user = self.cleaned_data['user']
+        try:
+            user = User.objects.get(username=user)
+        except User.DoesNotExist:
+            raise ValidationError(_('Unknown username'))
+        return user
+
+class AnwserInvitationForm(forms.Form):
+    decision = forms.ChoiceField(label=_('Answer'), choices=((0, _('Decline')), (1, _('Accept'))))
+
 # vim: ai ts=4 sts=4 et sw=4

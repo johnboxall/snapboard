@@ -13,6 +13,8 @@ It is written to run with Django 1.0 on Python 2.5.
 
    howto
 
+   permissions
+
 Indices and tables
 ==================
 

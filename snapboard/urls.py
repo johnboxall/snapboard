@@ -3,9 +3,7 @@ from django.contrib.auth.models import User
 
 from snapboard.feeds import LatestPosts
 from snapboard.rpc import rpc_post, rpc_lookup, rpc_preview
-from snapboard.views import thread, thread_index, new_thread, category_index, \
-        category_thread_index, edit_post, rpc, favorite_index, private_index, \
-        edit_settings
+from snapboard.views import *
 
 feeds = {'latest': LatestPosts}
 
@@ -16,14 +14,24 @@ js_info_dict = {
 urlpatterns = patterns('',
     (r'^$', thread_index, {}, 'snapboard_index'),
     (r'^private/$', private_index, {}, 'snapboard_private_index'),
-    (r'^newtopic/$', new_thread, {}, 'snapboard_new_thread'),
     (r'^categories/$', category_index, {}, 'snapboard_category_index'),
     (r'^favorites/$', favorite_index, {}, 'snapboard_favorite_index'),
     (r'^edit_post/(?P<original>\d+)/$', edit_post, {}, 'snapboard_edit_post'),
     (r'^threads/$', thread_index, {}, 'snapboard_thread_index'),
     (r'^threads/id/(?P<thread_id>\d+)/$', thread, {}, 'snapboard_thread'),
     (r'^threads/category/(?P<cat_id>\d+)/$', category_thread_index, {}, 'snapboard_category_thread_index'),
+    (r'^threads/category/(?P<cat_id>\d+)/newtopic/$', new_thread, {}, 'snapboard_new_thread'),
     (r'^settings/$', edit_settings, {}, 'snapboard_edit_settings'),
+
+    # Groups
+    (r'^groups/(?P<group_id>\d+)/manage/$', manage_group, {}, 'snapboard_manage_group'),
+    (r'^groups/(?P<group_id>\d+)/invite/$', invite_user_to_group, {}, 'snapboard_invite_user_to_group'),
+    (r'^groups/(?P<group_id>\d+)/remuser/$', remove_user_from_group, {}, 'snapboard_remove_user_from_group'),
+    (r'^groups/(?P<group_id>\d+)/grant_admin/$', grant_group_admin_rights, {}, 'snapboard_grant_group_admin_rights'),
+
+    # Invitations
+    (r'invitations/(?P<invitation_id>\d+)/discard/$', discard_invitation, {}, 'snapboard_discard_invitation'),
+    (r'invitations/(?P<invitation_id>\d+)/answer/$', answer_invitation, {}, 'snapboard_answer_invitation'),
 
     # RPC
     (r'^rpc/action/$', rpc, {}, 'snapboard_rpc_action'),

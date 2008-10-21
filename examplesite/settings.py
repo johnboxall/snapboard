@@ -106,6 +106,8 @@ INSTALLED_APPS = (
 	'pagination',
 )
 
+LOGIN_REDIRECT_URL = '/snapboard/'
+
 # SNAPBoard specific OPTIONAL settings:
 
 # Defaults to MEDIA_URL + 'snapboard/'

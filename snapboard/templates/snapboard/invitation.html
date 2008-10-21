@@ -1,0 +1,35 @@
+{% extends "snapboard/base_forum.html" %}
+{% load i18n pagination_tags %}
+
+{% block snapboard_main %}
+    <div class="index_title">
+    <h2 style="font-size: 152%;">
+        {% blocktrans with invitation.group.name as gname %}Invitation to {{ gname }}{% endblocktrans %}
+    </h2>
+    </div>
+
+    <p>{% blocktrans with invitation.sent_by.username as sent_by and invitation.group.name as group and invitation.sent_date as date %}
+        You have been invited by {{ sent_by }} to join the group {{ group }} on {{ date }}.{% endblocktrans %}</p>
+
+    {% if form %}
+        <p>{% trans "Would you like to accept that invitation?" %}</p>
+        <form action="{% url snapboard_answer_invitation invitation.id %}" method="post">
+            {{ form.as_p }}
+            <p><input type="submit" value="{% trans "Submit" %}" /></p>
+        </form>
+    {% else %}
+        <p>
+        {% if invitation.accepted %}
+        {% blocktrans with invitation.response_date|date:"D d b, G:i" as date %}
+        You accepted this invitation on {{ date }}.
+        {% endblocktrans %}
+        {% else %}
+        {% blocktrans with invitation.response_date|date:"D d b, G:i" as date %}
+        You declined this invitation on {{ date }}.
+        {% endblocktrans %}
+        {% endif %}
+        </p>
+    {% endif %}
+
+{% endblock %}
+
