@@ -10,7 +10,8 @@ from snapboard import models
 def _get_snapboard_objects():
     for model in [models.Category, models.Moderator, models.Thread, models.Post,
             models.AbuseReport,    models.WatchList, models.UserSettings, 
-            models.UserBan, models.IPBan, User]:
+            models.UserBan, models.IPBan, models.Group, models.Invitation,
+            User]:
         qs = model.objects.all()
         for obj in qs:
             yield obj
