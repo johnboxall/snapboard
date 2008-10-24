@@ -1,0 +1,3 @@
+recursive-include snapboard/locale *.po
+recursive-include snapboard *.html *.txt
+include LICENSE

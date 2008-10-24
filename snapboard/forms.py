@@ -75,10 +75,11 @@ class ThreadForm(forms.Form):
 class UserSettingsForm(forms.ModelForm):
 
     def __init__(self, *pa, **ka):
+        user = ka.pop('user')
+        self.user = user
         super(UserSettingsForm, self).__init__(*pa, **ka)
-        user = ka['user']
         self.fields['frontpage_filters'].choices = [
-            (cat.id, cat.name) for cat in Category.objects.all() if 
+            (cat.id, cat.label) for cat in Category.objects.all() if 
             cat.can_read(user)
         ]
 
@@ -89,10 +90,9 @@ class UserSettingsForm(forms.ModelForm):
         exclude = ('user',)
 
     def clean_frontpage_filters(self):
-        cd = self.cleaned_data
-        cd['frontpage_filters'] = [cat for cat in (Category.objects.get(pk=id) for id in
-                cd['frontpage_filters'] if cat.can_read(user))]
-        return cd
+        frontpage_filters = [cat for cat in (Category.objects.get(pk=id) for id in
+                self.cleaned_data['frontpage_filters']) if cat.can_read(self.user)]
+        return frontpage_filters
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=30, label=_("Username"))

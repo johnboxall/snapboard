@@ -11,6 +11,17 @@ Subversion checkout on your PYTHONPATH.
 
 __ http://www.djangoproject.com/
 
+Get the dependencies
+====================
+
+SNAPboard depends on  `django-pagination`__. To install it, you will need to
+download `django-pagination`'s sources with Subversion and place the 
+:file:`pagination` package (or a link to that package) on your Python 
+interpreter's search path. If you are not familiar with this type of 
+installation, it is explained in the next section.
+
+__ http://code.google.com/p/django-pagination/
+
 Get SNAPboard
 =============
 
@@ -38,13 +49,6 @@ systems, is to make a symbolic link from a standard Python module directory to
 the :file:`snapboard` package. For example, you can run 
 ``ln -s ~/snapboard-trunk/snapboard /usr/lib/python2.5/site-packages/``. This 
 will typically require root privileges.
-
-SNAPboard depends on a slightly modified version of `django-pagination`__ that
-is included in the repository. The package lives in the :file:`pagination` 
-directory. Just like :file:`snapboard`, it needs to be on your Python 
-interpreter's search path.
-
-__ http://code.google.com/p/django-pagination/
 
 To test that `snapboard` is on your path, launch a python shell and run ``import 
 snapboard``.
