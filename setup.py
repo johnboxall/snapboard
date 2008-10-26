@@ -2,7 +2,7 @@
 from distutils.core import setup
 setup(
     name='snapboard',
-    version='0.1.0',
+    version='0.2.0',
     author='Bo Shi',
     maintainer='SNAPboard developers',
     maintainer_email='snapboard-discuss@googlegroups.com',

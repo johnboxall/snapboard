@@ -95,6 +95,14 @@ TEMPLATE_DIRS = (
 	# Don't forget to use absolute paths, not relative paths.
 )
 
+try:
+	import notification
+except ImportError:
+	use_notification = False
+	print 'django-notification not found: email notifications to users will not be available'
+else:
+	use_notification = True
+
 INSTALLED_APPS = (
 	'django.contrib.admin',
 	'django.contrib.auth',
@@ -105,6 +113,9 @@ INSTALLED_APPS = (
 	'snapboard',
 	'pagination',
 )
+
+if use_notification:
+	INSTALLED_APPS = INSTALLED_APPS + ('notification',)
 
 LOGIN_REDIRECT_URL = '/snapboard/'
 

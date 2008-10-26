@@ -40,12 +40,14 @@ class Command(BaseCommand):
             'Django\'s authentication framework\'s User instances are also '\
             'included.'
 
+    # TODO: store the version number somewhere
+
     def handle(self, *args, **kwargs):
         s = get_serializer('xml')()
         s.serialize(_get_snapboard_objects(), **kwargs)
         s.stream.seek(0)
         sys.stdout.write(s.stream.read(len('<?xml version="1.0" encoding="utf-8"?>\n')))
-        sys.stdout.write('''<snapboardDataDump version="0.1.0">''')
+        sys.stdout.write('''<snapboardDataDump version="0.2.0">''')
         for chunk in iter(s.stream):
             sys.stdout.write(chunk)
         sys.stdout.write('</snapboardDataDump>')

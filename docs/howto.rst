@@ -14,13 +14,17 @@ __ http://www.djangoproject.com/
 Get the dependencies
 ====================
 
-SNAPboard depends on  `django-pagination`__. To install it, you will need to
-download `django-pagination`'s sources with Subversion and place the 
-:file:`pagination` package (or a link to that package) on your Python 
-interpreter's search path. If you are not familiar with this type of 
-installation, it is explained in the next section.
+SNAPboard depends on  `django-pagination`__. To install `django-pagination`, 
+download :file:`django-pagination-1.0.4.tar.gz` (or any later version), then
+run the following commands:
 
 __ http://code.google.com/p/django-pagination/
+
+.. code-block:: bash
+
+    tar xvf django-pagination-1.0.4.tar.gz
+    cd django-pagination
+    python setup.py install
 
 Get SNAPboard
 =============
@@ -41,12 +45,12 @@ directory, then run:
 
     __ http://subversion.tigris.org/
 
-For Python to find the :file:`snapboard` package that is inside the directory 
+For Python to find the `snapboard` package that is inside the directory 
 where you loaded the SNAPboard development trunk, that directory needs to be on
 Python's search path. One way is to make the `PYTHONPATH` environment variable
 point to the directory. Another way, which is available on UNIX
 systems, is to make a symbolic link from a standard Python module directory to 
-the :file:`snapboard` package. For example, you can run 
+the `snapboard` package. For example, you can run 
 ``ln -s ~/snapboard-trunk/snapboard /usr/lib/python2.5/site-packages/``. This 
 will typically require root privileges.
 
@@ -68,11 +72,12 @@ values.
     If you are testing SNAPboard, we recommend that you use SQLite because it is
     fast and easy to use in such setting.
 
-Then, add SNAPboard to the `INSTALLED_APPS` setting::
+Then, add `snapboard` and `pagination` to the `INSTALLED_APPS` setting::
 
     INSTALLED_APPS = (
         'django.contrib.auth',
         ...
+        'pagination',
         'snapboard',
     )
 

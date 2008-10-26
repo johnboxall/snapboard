@@ -4,6 +4,8 @@ import os
 from django.core.management.base import BaseCommand
 from django.core.serializers.xml_serializer import Deserializer
 
+# For any version <= 0.2.0 where this command existed, there is no backwards-incompatible schema change
+
 class PreprocessingRequired(Exception):
     '''
     Raised when the data is too old to be loaded directly as a regular
