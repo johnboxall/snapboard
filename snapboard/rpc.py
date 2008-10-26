@@ -88,7 +88,7 @@ def rpc_close(request, **kwargs):
 
 def rpc_watch(request, **kwargs):
     thr = kwargs['thread']
-    if not thread.category.can_read(request.user):
+    if not thr.category.can_read(request.user):
         raise PermissionError
     try:
         # it exists, stop watching it
