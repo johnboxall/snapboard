@@ -107,7 +107,7 @@ class ThreadManager(models.Manager):
 
     def get_favorites(self, user):
         wl = user.watchlist_set.all()
-        return self.get_query_set().filter(pk__in=[x.id for x in wl])
+        return self.get_query_set().filter(pk__in=[x.thread_id for x in wl])
 
     def get_private(self, user):
         from models import Post
