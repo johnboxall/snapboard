@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Snapboard\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-10-21 17:05+0200\n"
-"PO-Revision-Date: 2008-10-21 15:05+0200\n"
+"POT-Creation-Date: 2008-10-26 22:02+0100\n"
+"PO-Revision-Date: 2008-10-26 21:53+0100\n"
 "Last-Translator: Julien Demoor <julien> at <jdemoor.com>\n"
 "Language-Team: FR\n"
 "MIME-Version: 1.0\n"
@@ -42,7 +42,7 @@ msgstr "Sujet"
 msgid "Message"
 msgstr "Message"
 
-#: forms.py:85
+#: forms.py:86
 msgid "Front page categories"
 msgstr "Catégories de la page principale"
 
@@ -78,268 +78,272 @@ msgstr "Décliner"
 msgid "Accept"
 msgstr "Accepter"
 
-#: models.py:36 models.py:43
+#: models.py:41 models.py:48
 msgid "Nobody"
 msgstr "Personne"
 
-#: models.py:37 models.py:44
+#: models.py:42 models.py:49
 msgid "All"
 msgstr "Tous"
 
-#: models.py:38 models.py:45
+#: models.py:43 models.py:50
 msgid "Users"
 msgstr "Utilisateurs"
 
-#: models.py:39 models.py:46
+#: models.py:44 models.py:51
 msgid "Custom"
 msgstr "Personnalisé"
 
-#: models.py:71
+#: models.py:76
 msgid "name"
 msgstr "nom"
 
-#: models.py:72
+#: models.py:77
 msgid "users"
 msgstr "utilisateurs"
 
-#: models.py:73
+#: models.py:78
 msgid "admins"
 msgstr "administrateurs"
 
-#: models.py:76 models.py:96
+#: models.py:81 models.py:101
 msgid "group"
 msgstr "groupe"
 
-#: models.py:77
+#: models.py:82
 msgid "groups"
 msgstr "groupes"
 
-#: models.py:80
+#: models.py:85
 #, python-format
 msgid "Group \"%s\""
 msgstr "Group \"%s\""
 
-#: models.py:97
+#: models.py:102
 msgid "sent by"
 msgstr "envoyée par"
 
-#: models.py:98
+#: models.py:103
 msgid "sent to"
 msgstr "envoyée à"
 
-#: models.py:99
+#: models.py:104
 msgid "sent date"
 msgstr "date d'envoi"
 
-#: models.py:100
+#: models.py:105
 msgid "response date"
 msgstr "date de la réponse"
 
-#: models.py:101
+#: models.py:106
 msgid "accepted"
 msgstr "acceptée"
 
-#: models.py:104
+#: models.py:109
 msgid "invitation"
 msgstr "invitation"
 
-#: models.py:105
+#: models.py:110
 msgid "invitations"
 msgstr "invitations"
 
-#: models.py:108
+#: models.py:113
 #, python-format
 msgid "Invitation for \"%(group)s\" sent by %(sent_by)s to %(sent_to)s."
-msgstr "Invitation pour le groupe \"%(group)s\" envoyée par %(sent_by)s to %(sent_to)s."
+msgstr ""
+"Invitation pour le groupe \"%(group)s\" envoyée par %(sent_by)s to %(sent_to)"
+"s."
 
-#: models.py:115
+#: models.py:120
 msgid "label"
 msgstr "nom"
 
-#: models.py:117
+#: models.py:122
 msgid "view permission"
 msgstr "visibilité"
 
-#: models.py:119
+#: models.py:124
 msgid "Limits the category's visibility."
 msgstr "Limite la visibilité de la catégorie."
 
-#: models.py:120
+#: models.py:125
 msgid "read permission"
 msgstr "lecture"
 
-#: models.py:121
+#: models.py:126
 msgid "Limits the ability to read the category's contents."
 msgstr "Limite la capacité à lire le contenu de la catégorie."
 
-#: models.py:123
+#: models.py:128
 msgid "post permission"
 msgstr "écriture"
 
-#: models.py:124
+#: models.py:129
 msgid "Limits the ability to post in the category."
-msgstr "Limite la capacité à poster des messages dans des fils de discussions de la catégorie."
+msgstr ""
+"Limite la capacité à poster des messages dans des fils de discussions de la "
+"catégorie."
 
-#: models.py:127
+#: models.py:132
 msgid "create thread permission"
 msgstr "création de fil"
 
-#: models.py:128
+#: models.py:133
 msgid ""
 "Limits the ability to create new threads in the category. Only users with "
 "permission to post can create new threads,unless a group is specified."
 msgstr ""
-"Limite la capacité à créer de nouveaux fils dans la catégorie. Seuls les utilisateurs "
-"ayant la permission d'écrire dans la catégorie peuvent créer de nouveaux fils, sauf si "
-"un groupe est spécifié."
+"Limite la capacité à créer de nouveaux fils dans la catégorie. Seuls les "
+"utilisateurs ayant la permission d'écrire dans la catégorie peuvent créer de "
+"nouveaux fils, sauf si un groupe est spécifié."
 
-#: models.py:132
+#: models.py:137
 msgid "view group"
 msgstr "visibilité (groupe)"
 
-#: models.py:134
+#: models.py:139
 msgid "read group"
 msgstr "lecture (groupe)"
 
-#: models.py:136
+#: models.py:141
 msgid "post group"
 msgstr "écriture (groupe)"
 
-#: models.py:138
+#: models.py:143
 msgid "create thread group"
 msgstr "création de file (groupe)"
 
-#: models.py:190 models.py:194 models.py:204
+#: models.py:195 models.py:199 models.py:209
 #: templates/snapboard/thread_index.html:45
 msgid "category"
 msgstr "catégorie"
 
-#: models.py:191
+#: models.py:196
 msgid "categories"
 msgstr "catégories"
 
-#: models.py:195 models.py:235 models.py:322 models.py:355 models.py:384
+#: models.py:200 models.py:240 models.py:338 models.py:371 models.py:400
 msgid "user"
 msgstr "utilisateur"
 
-#: models.py:198
+#: models.py:203
 msgid "moderator"
 msgstr "modérateur"
 
-#: models.py:199 templates/snapboard/category_index.html:18
+#: models.py:204 templates/snapboard/category_index.html:18
 msgid "moderators"
 msgstr "modérateurs"
 
-#: models.py:203
+#: models.py:208
 msgid "subject"
 msgstr "sujet"
 
-#: models.py:206
+#: models.py:211
 msgid "closed"
 msgstr "fermé"
 
-#: models.py:209
+#: models.py:214
 msgid "category sticky"
 msgstr "épinglé"
 
-#: models.py:212
+#: models.py:217
 msgid "global sticky"
 msgstr "épinglé global"
 
-#: models.py:224 models.py:237 models.py:323
+#: models.py:229 models.py:242 models.py:339
 msgid "thread"
 msgstr "fil de discussion"
 
-#: models.py:225
+#: models.py:230
 msgid "threads"
 msgstr "fils de discussion"
 
-#: models.py:238
+#: models.py:243
 msgid "text"
 msgstr "texte"
 
-#: models.py:239
+#: models.py:244
 msgid "date"
 msgstr "date"
 
-#: models.py:240
+#: models.py:245
 msgid "ip address"
 msgstr "adresse IP"
 
-#: models.py:243
+#: models.py:248
 msgid "private recipients"
 msgstr "destinataires privés"
 
-#: models.py:253
+#: models.py:258
 msgid "censored"
 msgstr "censuré"
 
-#: models.py:254
+#: models.py:259
 msgid "protected"
 msgstr "protégé"
 
-#: models.py:299 models.py:310
+#: models.py:312 models.py:326
 msgid "post"
 msgstr "message"
 
-#: models.py:300
+#: models.py:313
 msgid "posts"
 msgstr "posts"
 
-#: models.py:311
+#: models.py:327
 msgid "submitter"
 msgstr "posteur"
 
-#: models.py:314
+#: models.py:330
 msgid "abuse report"
 msgstr "rapport d'abus"
 
-#: models.py:315
+#: models.py:331
 msgid "abuse reports"
 msgstr "rapports d'abus"
 
-#: models.py:359
+#: models.py:375
 msgid "Posts per page"
 msgstr "Posts par page"
 
-#: models.py:359
+#: models.py:375
 msgid "posts per page"
 msgstr "posts par page"
 
-#: models.py:363
+#: models.py:379
 msgid "Threads per page"
 msgstr "Fils par page"
 
-#: models.py:363
+#: models.py:379
 msgid "threads per page"
 msgstr "fils par page"
 
-#: models.py:368
+#: models.py:384
 msgid "Display newest posts first."
 msgstr "Afficher les nouveaux messages en premier."
 
-#: models.py:368
+#: models.py:384
 msgid "new posts first"
 msgstr "nouveaux messages en premier"
 
-#: models.py:371
+#: models.py:387
 msgid "Filter the list of all topics on these categories."
 msgstr "Filtrer la liste de tous les sujets sur ces catégories."
 
-#: models.py:371
+#: models.py:387
 msgid "front page categories"
 msgstr "catégories de la page principale"
 
-#: models.py:374 models.py:375
+#: models.py:390 models.py:391
 msgid "User settings"
 msgstr "Préférences"
 
-#: models.py:378
+#: models.py:394
 #, python-format
 msgid "%s's preferences"
 msgstr "Préférences de %s"
 
-#: models.py:385
+#: models.py:401
 msgid ""
 "The user may still browse the forums anonymously. Other functions may also "
 "still be available to him if he is logged in."
@@ -347,32 +351,32 @@ msgstr ""
 "L'utilisateur peut naviguer les forums anonymement. D'autres fonctions "
 "peuvent rester disponibles s'il est identifié."
 
-#: models.py:387 models.py:415
+#: models.py:403 models.py:431
 msgid "reason"
 msgstr "raison"
 
-#: models.py:388
+#: models.py:404
 msgid "This may be displayed to the banned user."
 msgstr "Ceci peut être vu par l'utilisateur banni."
 
-#: models.py:391
+#: models.py:407
 msgid "banned user"
 msgstr "utilisateur banni"
 
-#: models.py:392
+#: models.py:408
 msgid "banned users"
 msgstr "utilisateurs bannis"
 
-#: models.py:395
+#: models.py:411
 #, python-format
 msgid "Banned user: %s"
 msgstr "Utilisateur banni: %s"
 
-#: models.py:411
+#: models.py:427
 msgid "IP address"
 msgstr "adresse IP"
 
-#: models.py:412
+#: models.py:428
 msgid ""
 "A person's IP address may change and an IP address may be used by more than "
 "one person, or by different people over time. Be careful when using this."
@@ -381,19 +385,19 @@ msgstr ""
 "personne ou par différentes personnes à différentes périodes. Soyez vigilant "
 "en utilisant cette fonction."
 
-#: models.py:416
+#: models.py:432
 msgid "This may be displayed to the people concerned by the ban."
 msgstr "Ceci peut être vu par les personnes bannies."
 
-#: models.py:419
+#: models.py:435
 msgid "banned IP address"
 msgstr "adresse IP bannie"
 
-#: models.py:420
+#: models.py:436
 msgid "banned IP addresses"
 msgstr "adresses IP bannies"
 
-#: models.py:423
+#: models.py:439
 #, python-format
 msgid "Banned IP: %s"
 msgstr "Adresse IP bannie: %s"
@@ -483,78 +487,201 @@ msgstr "cacher"
 msgid "This post is no longer censored."
 msgstr "Ce post n'est plus caché."
 
-#: views.py:261
+#: views.py:262
 msgid "Watched Discussions"
 msgstr "Favoris"
 
-#: views.py:271
+#: views.py:272
 msgid "Discussions with private messages to you"
 msgstr "Fils contenant des discussions privées"
 
-#: views.py:284
+#: views.py:285
 msgid "Category: "
 msgstr "Catégorie: "
 
-#: views.py:297
+#: views.py:298
 msgid "Recent Discussions"
 msgstr "Fils récents"
 
-#: views.py:358
+#: views.py:395
 #, python-format
 msgid "The user %s is already a member of this group."
 msgstr "L'utilisateur %s est déjà membre de ce groupe."
 
-#: views.py:364
+#: views.py:401
 #, python-format
 msgid "A invitation to join this group was sent to %s."
 msgstr "Une invitation à rejoindre ce groupe à été envoyée à %s"
 
-#: views.py:391
+#: views.py:428
 #, python-format
 msgid "The admin rights of user %s were removed for the group."
 msgstr "Les droits d'administrateurs ont été retirés à %s pour ce groupe."
 
-#: views.py:393
+#: views.py:430
 #, python-format
 msgid "User %s was removed from the group."
 msgstr "L'utilsateur %s a été retiré de ce groupe."
 
-#: views.py:395
+#: views.py:432
 #, python-format
 msgid "There was nothing to do for user %s."
 msgstr "Aucun changement effectué pour l'utilisateur %s."
 
-#: views.py:412
+#: views.py:449
 #, python-format
 msgid "The user %s is not a group member."
 msgstr "L'utilisateur %s n'est pas membre de ce groupe."
 
-#: views.py:414
+#: views.py:451
 #, python-format
 msgid "The user %s is already a group admin."
 msgstr "L'utilisateur %s est déjà administrateur du groupe."
 
-#: views.py:417
+#: views.py:454
 #, python-format
 msgid "The user %s is now a group admin."
 msgstr "L'utilisteur %s est maintenant administrateur du groupe."
 
-#: views.py:432
+#: views.py:469
 msgid "The invitation was cancelled."
 msgstr "L'invitation a été annulée."
 
-#: views.py:434
+#: views.py:471
 msgid "The invitation was discarded."
 msgstr "L'invitation a été détruite."
 
-#: views.py:451
+#: views.py:488
 #, python-format
 msgid "You are now a member of the group %s."
 msgstr "Vous êtes maintenant membre du groupe %s."
 
-#: views.py:454
+#: views.py:491
 msgid "The invitation has been declined."
 msgstr "L'invitation a été déclinée."
+
+#: management/notices.py:14
+#, fuzzy
+msgid "Private post received"
+msgstr "Message privé reçu"
+
+#: management/notices.py:15
+msgid "A private message addressed to you has been posted in a discussion."
+msgstr "Un message privé à votre intention a été posté dans une discussion"
+
+#: management/notices.py:18
+msgid "New post in a watched thread"
+msgstr "Nouveau message dans un fil favori"
+
+#: management/notices.py:19
+msgid "A new message has been posted in a watched discussion."
+msgstr "Un nouveau message a été posté dans un de vos fils favoris."
+
+#: management/notices.py:22
+msgid "Invitation to join a group"
+msgstr "Invitation à rejoindre un groupe reçue"
+
+#: management/notices.py:23
+msgid "You have been invited to join a group."
+msgstr "Vous avez été invité à rejoindre un groupe."
+
+#: management/notices.py:26
+msgid "Invitation to join a group cancelled"
+msgstr "Invitation à rejoindre un groupe annulée"
+
+#: management/notices.py:27
+msgid "An invitation you received to join a group has been cancelled."
+msgstr "Une invitation à rejoindre un groupe que vous avez reçu a été annulée."
+
+#: management/notices.py:30
+msgid "Group admin rights granted"
+msgstr "Droits d'administration accordés"
+
+#: management/notices.py:31
+msgid "You have been granted admin rights on a group."
+msgstr "Vous avez reçu les droits d'administration d'un groupe."
+
+#: management/notices.py:34
+msgid "Group admin rights removed"
+msgstr "Droits d'administration retirés"
+
+#: management/notices.py:35
+msgid "Your admin rights on a group have been removed."
+msgstr "Vos droits d'administration d'un groupe ont été retirés."
+
+#: management/notices.py:38
+msgid "New group admin"
+msgstr "Nouvel administrateur d'un groupe"
+
+#: management/notices.py:39
+msgid "There is a new admin in a group."
+msgstr "Il y a un nouvel administrateur dans un groupe."
+
+#: management/notices.py:42
+msgid "New group member"
+msgstr "Nouveau membre d'un groupe"
+
+#: management/notices.py:43
+msgid "There is a new member in a group."
+msgstr "Il y a un nouveau membre dans un groupe."
+
+#: templates/notification/email_body.txt:1
+#, python-format
+msgid ""
+"Dear %(user)s,\n"
+"\n"
+"This is an automatic notification sent to you by %(site_name)s.\n"
+"\n"
+"%(message)s\n"
+msgstr ""
+"Cher %(user)s,\n"
+"\n"
+"Ceci est une notification automatique qui vous est envoyée par %(site_name)s.\n"
+"\n"
+"%(message)s\n"
+
+#: templates/notification/email_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] %(message)s"
+msgstr "[%(site_name)s] %(message)s"
+
+#: templates/notification/full.html:1 templates/notification/full.txt:1
+#: templates/notification/notice.html:1 templates/notification/short.txt:1
+#, python-format
+msgid "%(notice)s"
+msgstr "%(notice)s"
+
+#: templates/notification/new_post_in_watched_thread/full.txt:1
+#, python-format
+msgid ""
+"\n"
+"\n"
+"A message was posted in a thread that you are currently watching.\n"
+"\n"
+"See the full post at http://%(base_url)s%(post_url)s\n"
+"\n"
+"Thread: %(post_thread_subject)s\n"
+"Posted by: %(post_user)s\n"
+"\n"
+"%(post_body)s\n"
+"\n"
+msgstr ""
+"\n"
+"\n"
+"Un message a été posté dans un de vos fils favoris.\n"
+"\n"
+"Accédez au message complet à l'adresse http://%(base_url)s%(post_url)s\n"
+"\n"
+"Discussion: %(post_thread_subject)s\n"
+"Posté par: %(post_user)s\n"
+"\n"
+"%(post_body)s\n"
+"\n"
+
+#: templates/notification/new_post_in_watched_thread/short.txt:1
+#, python-format
+msgid "New post in %(thread_subject)s"
+msgstr "Nouveau message dans le fil %(thread_subject)s"
 
 #: templates/snapboard/banned_ip.html:6
 msgid "Your IP address is banned from the forums."
@@ -629,7 +756,7 @@ msgid "Boards preferences"
 msgstr "Préférences du forum"
 
 #: templates/snapboard/edit_settings.html:13
-#: templates/snapboard/include/show_posts.html:91
+#: templates/snapboard/include/show_posts.html:92
 msgid "Update"
 msgstr "Mettre à jour"
 
@@ -646,7 +773,8 @@ msgid ""
 "(date)s."
 msgstr ""
 "\n"
-"Vous avez été invité par %(sent_by)s à rejoindre le groupe %(group)s le %(date)s."
+"Vous avez été invité par %(sent_by)s à rejoindre le groupe %(group)s le %"
+"(date)s."
 
 #: templates/snapboard/invitation.html:15
 msgid "Would you like to accept that invitation?"
@@ -664,8 +792,7 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"Vous avez accepté cette invitation le %(date)s."
-"        "
+"Vous avez accepté cette invitation le %(date)s.        "
 
 #: templates/snapboard/invitation.html:27
 #, python-format
@@ -728,7 +855,7 @@ msgstr "I"
 #: templates/snapboard/newthread.html:12 templates/snapboard/newthread.html:23
 #: templates/snapboard/include/addpost.html:21
 #: templates/snapboard/include/addpost.html:32
-#: templates/snapboard/include/show_posts.html:23
+#: templates/snapboard/include/show_posts.html:24
 msgid "quote"
 msgstr "citer"
 
@@ -964,43 +1091,43 @@ msgstr ""
 "Pour plus de détails, voyez <a href=\"http://michelf.com/projets/php-"
 "markdown/syntaxe/\">Markdown : Syntaxe</a>"
 
-#: templates/snapboard/include/show_posts.html:28
+#: templates/snapboard/include/show_posts.html:29
 msgid "Edit this post.  All revisions are saved!"
 msgstr "Éditer ce post. Toutes les versions sont sauvegardées."
 
-#: templates/snapboard/include/show_posts.html:29
+#: templates/snapboard/include/show_posts.html:30
 msgid "edit post"
 msgstr "éditer"
 
-#: templates/snapboard/include/show_posts.html:34
+#: templates/snapboard/include/show_posts.html:35
 msgid "ADMIN: mark this post for censorship"
 msgstr "Admin: cacher ce post"
 
-#: templates/snapboard/include/show_posts.html:36
+#: templates/snapboard/include/show_posts.html:37
 msgid "uncensor,censor"
 msgstr "afficher,cacher"
 
-#: templates/snapboard/include/show_posts.html:42
+#: templates/snapboard/include/show_posts.html:43
 msgid "Report this post for violation of forum policies."
 msgstr "Signaler ce message pour violation des règles du forum."
 
-#: templates/snapboard/include/show_posts.html:43
+#: templates/snapboard/include/show_posts.html:44
 msgid "report abuse"
 msgstr "signaler"
 
-#: templates/snapboard/include/show_posts.html:58
+#: templates/snapboard/include/show_posts.html:59
 msgid "to"
 msgstr "pour"
 
-#: templates/snapboard/include/show_posts.html:77
+#: templates/snapboard/include/show_posts.html:78
 msgid "previous"
 msgstr "précédente"
 
-#: templates/snapboard/include/show_posts.html:78
+#: templates/snapboard/include/show_posts.html:79
 msgid "This message has been revised"
 msgstr "Ce message a été modifié."
 
-#: templates/snapboard/include/show_posts.html:88
+#: templates/snapboard/include/show_posts.html:89
 msgid "All revisions of this post are stored and publicly viewable."
 msgstr ""
 "Toutes les versions de ce message sont conservées et visibles publiquement."

@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans with post.thread.subject|truncatewords:8 as thread_subject and current_site.name as site_name %}New post in {{ thread_subject }}{% endblocktrans %}

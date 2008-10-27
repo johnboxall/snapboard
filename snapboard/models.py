@@ -9,6 +9,11 @@ from django.db.models import signals
 from django.dispatch import dispatcher
 from django.utils.translation import ugettext_lazy as _
 
+try:
+    from notification import models as notification
+except ImportError:
+    notification = None
+
 from snapboard import managers
 from snapboard.middleware import threadlocals
 
@@ -284,6 +289,14 @@ class Post(models.Model):
             self.odate = datetime.now()
         super(Post, self).save()
 
+    def notify(instance, **kwargs):
+        if not instance.previous:
+            notification.send(
+                [wl.user for wl in WatchList.objects.filter(thread=instance.thread)],
+                'new_post_in_watched_thread',
+                {'post': instance}
+            )
+    notify = staticmethod(notify)
 
     def get_absolute_url(self):
         return ''.join(('/threads/id/', str(self.thread.id), '/#post', str(self.id)))
@@ -298,6 +311,9 @@ class Post(models.Model):
     class Meta:
         verbose_name = _('post')
         verbose_name_plural = _('posts')
+
+if notification:
+    signals.post_save.connect(Post.notify, sender=Post)
 
 class AbuseReport(models.Model):
     '''

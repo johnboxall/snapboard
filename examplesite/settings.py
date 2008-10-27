@@ -112,6 +112,7 @@ INSTALLED_APPS = (
 	'django.contrib.sites',
 	'snapboard',
 	'pagination',
+	'mailer',
 )
 
 if use_notification:

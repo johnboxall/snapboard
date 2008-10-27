@@ -124,9 +124,9 @@ def rpc_censor(request, **kwargs):
 
 def rpc_quote(request, **kwargs):
     post = Post.objects.select_related().get(id=kwargs['oid'])
-    if not post.thread.category.can_read(user):
+    if not post.thread.category.can_read(request.user):
         raise PermissionError
-    if post.user != request.user and post.private.count() and request.user not in post.private.all():
+    if post.user != request.user and post.private.count() and not post.private.filter(id=request.user.id).count():
         raise PermissionDenied
     return {'text': post.text, 'author': unicode(post.user)}
 

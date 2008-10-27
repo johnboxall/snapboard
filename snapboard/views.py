@@ -7,6 +7,7 @@ from django.contrib.auth import decorators
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
+from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404
@@ -299,6 +300,42 @@ def thread_index(request):
             render_dict,
             context_instance=RequestContext(request, processors=extra_processors))
 
+def locate_post(request, post_id):
+    '''
+    Redirects to a post, given its ID.
+    '''
+    post = get_object_or_404(Post, pk=post_id)
+    if not post.thread.category.can_read(request.user):
+        raise PermissionError
+    if post.private.count() and not post.private.filter(pk=request.user.id).count():
+        raise PermissionError
+    # Count the number of visible posts before the one we are looking for, 
+    # as well as the total
+    c = connection.cursor()
+    c.execute(
+        'SELECT COUNT(*) FROM snapboard_post WHERE snapboard_post.thread_id=%s '
+        'AND snapboard_post.revision_id IS NULL AND NOT snapboard_post.censor;',
+        (post.thread.id,)
+    )
+    total = c.fetchone()[0]
+    c.execute(
+        'SELECT COUNT(*) FROM snapboard_post WHERE snapboard_post.thread_id=%s '
+        'AND snapboard_post.revision_id IS NULL AND NOT snapboard_post.censor '
+        'AND snapboard_post.date < %s;',
+        (post.thread.id, post.odate)
+    )
+    preceding_count = c.fetchone()[0]
+    # Check the user's settings to locate the post in the various pages
+    settings = get_user_settings(request.user)
+    ppp = settings.ppp
+    if total < ppp:
+        page = 1
+    elif settings.reverse_posts:
+        page = (total - preceding_count - 1) // ppp + 1
+    else:
+        page = preceding_count // ppp + 1
+    return HttpResponseRedirect('%s?page=%i#post_%i' % (reverse('snapboard_thread', args=(post.thread.id,)), page, post.id))
+
 def category_index(request):
     return render_to_response('snapboard/category_index.html',
             {
@@ -487,6 +524,7 @@ _brand_view(favorite_index)
 _brand_view(private_index)
 _brand_view(category_thread_index)
 _brand_view(thread_index)
+_brand_view(locate_post)
 _brand_view(category_index)
 _brand_view(edit_settings)
 _brand_view(manage_group)
