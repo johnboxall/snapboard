@@ -1,0 +1,1124 @@
+# Snapboard.
+# Copyright (c) 2007, Bo Shi
+# This file is distributed under the same license as the Snapboard package.
+# Andy Mikhailenko <neithere@gmail.com>, 2008
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: svn\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-10-28 14:47+0500\n"
+"PO-Revision-Date: 2008-10-28 14:47+0500\n"
+"Last-Translator: Andy Mikhailenko <neithere@gmail.com>\n"
+"Language-Team: Andy Mikhailenko <neithere@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: feeds.py:11
+#, python-format
+msgid "%s Latest Discussions"
+msgstr "Последние дискуссии %s"
+
+#: feeds.py:13
+msgid "The latest contributions to discussions."
+msgstr "Недавнее участие в дискуссиях"
+
+#: forms.py:21
+msgid "Recipients"
+msgstr "Получатели"
+
+#: forms.py:39
+msgid "The following is not a valid user:"
+msgid_plural "The following are not valid user(s): "
+msgstr[0] "Это не имя пользователя: "
+msgstr[1] "Это не имена пользователей: "
+
+#: forms.py:57
+msgid "Subject"
+msgstr "Тема"
+
+#: forms.py:68
+msgid "Message"
+msgstr "Сообщение"
+
+#: forms.py:86
+msgid "Front page categories"
+msgstr "Категории на первую страницу"
+
+#: forms.py:98 forms.py:114
+msgid "Username"
+msgstr "Логин"
+
+#: forms.py:99
+msgid "Password"
+msgstr "Пароль"
+
+#: forms.py:109
+msgid "Your account has been disabled."
+msgstr "Ваш аккаунт заблокирован."
+
+#: forms.py:111
+msgid "Your username or password were incorrect."
+msgstr "Ваши логин или пароль введены неправильно."
+
+#: forms.py:121
+msgid "Unknown username"
+msgstr "Неизвестный логин"
+
+#: forms.py:125
+msgid "Answer"
+msgstr "Ответить"
+
+#: forms.py:125
+msgid "Decline"
+msgstr "Отклонить"
+
+#: forms.py:125
+msgid "Accept"
+msgstr "Принять"
+
+#: models.py:41 models.py:48
+msgid "Nobody"
+msgstr "Никто"
+
+#: models.py:42 models.py:49
+msgid "All"
+msgstr "Все"
+
+#: models.py:43 models.py:50
+msgid "Users"
+msgstr "Пользователи"
+
+#: models.py:44 models.py:51
+msgid "Custom"
+msgstr "Другое"
+
+#: models.py:76
+msgid "name"
+msgstr "имя"
+
+#: models.py:77
+msgid "users"
+msgstr "пользователи"
+
+#: models.py:78
+msgid "admins"
+msgstr "администраторы"
+
+#: models.py:81 models.py:101
+msgid "group"
+msgstr "группа"
+
+#: models.py:82
+msgid "groups"
+msgstr "группы"
+
+#: models.py:85
+#, python-format
+msgid "Group \"%s\""
+msgstr "Группа «%s»"
+
+#: models.py:102
+msgid "sent by"
+msgstr "отправитель"
+
+#: models.py:103
+msgid "sent to"
+msgstr "получатель"
+
+#: models.py:104
+msgid "sent date"
+msgstr "отправлено"
+
+#: models.py:105
+msgid "response date"
+msgstr "получено"
+
+#: models.py:106
+msgid "accepted"
+msgstr "принято"
+
+#: models.py:109
+msgid "invitation"
+msgstr "приглашение"
+
+#: models.py:110
+msgid "invitations"
+msgstr "приглашения"
+
+#: models.py:113
+#, python-format
+msgid "Invitation for \"%(group)s\" sent by %(sent_by)s to %(sent_to)s."
+msgstr "Приглашение в \"%(group)s\" послал %(sent_by)s для %(sent_to)s."
+
+#: models.py:120
+msgid "label"
+msgstr "название"
+
+#: models.py:122
+msgid "view permission"
+msgstr "право на просмотр"
+
+#: models.py:124
+msgid "Limits the category's visibility."
+msgstr "Ограничивает видимость категории."
+
+#: models.py:125
+msgid "read permission"
+msgstr "право на чтение"
+
+#: models.py:126
+msgid "Limits the ability to read the category's contents."
+msgstr "Ограничивает возможность читать содержимое категории."
+
+#: models.py:128
+msgid "post permission"
+msgstr "право на ответ"
+
+#: models.py:129
+msgid "Limits the ability to post in the category."
+msgstr "Ограничивает возможность публиковать сообщения в дискуссиях категории."
+
+#: models.py:132
+msgid "create thread permission"
+msgstr "право на создание дискуссии"
+
+#: models.py:133
+msgid ""
+"Limits the ability to create new threads in the category. Only users with "
+"permission to post can create new threads,unless a group is specified."
+msgstr "Ограничивает возможность начинать дискуссии в этой категории. Только пользователи с правом на ответ могут создавать дискуссии, если здесь не указана группа."
+
+#: models.py:137
+msgid "view group"
+msgstr "группа просмотра"
+
+#: models.py:139
+msgid "read group"
+msgstr "группа чтения"
+
+#: models.py:141
+msgid "post group"
+msgstr "группа ответа"
+
+#: models.py:143
+msgid "create thread group"
+msgstr "группа создания дискуссий"
+
+#: models.py:195 models.py:199 models.py:209
+#: templates/snapboard/thread_index.html:45
+msgid "category"
+msgstr "категория"
+
+#: models.py:196
+msgid "categories"
+msgstr "категории"
+
+#: models.py:200 models.py:240 models.py:338 models.py:371 models.py:400
+msgid "user"
+msgstr "пользователь"
+
+#: models.py:203
+msgid "moderator"
+msgstr "модератор"
+
+#: models.py:204 templates/snapboard/category_index.html:18
+msgid "moderators"
+msgstr "модераторы"
+
+#: models.py:208
+msgid "subject"
+msgstr "тема"
+
+#: models.py:211
+msgid "closed"
+msgstr "закрыта"
+
+#: models.py:214
+msgid "category sticky"
+msgstr "прикреплена в категории"
+
+#: models.py:217
+msgid "global sticky"
+msgstr "прикреплена везде"
+
+#: models.py:229 models.py:242 models.py:339
+msgid "thread"
+msgstr "дискуссия"
+
+#: models.py:230
+msgid "threads"
+msgstr "дискуссии"
+
+#: models.py:243
+msgid "text"
+msgstr "текст"
+
+#: models.py:244
+msgid "date"
+msgstr "дата"
+
+#: models.py:245
+msgid "ip address"
+msgstr "ip-адрес"
+
+#: models.py:248
+msgid "private recipients"
+msgstr "лично пользователям"
+
+#: models.py:258
+msgid "censored"
+msgstr "вымарано цензурой"
+
+#: models.py:259
+msgid "protected"
+msgstr "под замком"
+
+#: models.py:312 models.py:326
+msgid "post"
+msgstr "сообщение"
+
+#: models.py:313
+msgid "posts"
+msgstr "сообщения"
+
+#: models.py:327
+msgid "submitter"
+msgstr "отправитель"
+
+#: models.py:330
+msgid "abuse report"
+msgstr "жалоба"
+
+#: models.py:331
+msgid "abuse reports"
+msgstr "жалобы"
+
+#: models.py:375
+msgid "Posts per page"
+msgstr "Сообщений на страницу"
+
+#: models.py:375
+msgid "posts per page"
+msgstr "сообщений на страницу"
+
+#: models.py:379
+msgid "Threads per page"
+msgstr "Дискуссий на страницу"
+
+#: models.py:379
+msgid "threads per page"
+msgstr "дискуссий на страницу"
+
+#: models.py:384
+msgid "Display newest posts first."
+msgstr "Показывать новые сообщения в верхней части списка."
+
+#: models.py:384
+msgid "new posts first"
+msgstr "новые сообщения сверху"
+
+#: models.py:387
+msgid "Filter the list of all topics on these categories."
+msgstr "Показывать только дискуссии из этих категорий."
+
+#: models.py:387
+msgid "front page categories"
+msgstr "категории первой страницы"
+
+#: models.py:390 models.py:391
+msgid "User settings"
+msgstr "Настройки пользователя"
+
+#: models.py:394
+#, python-format
+msgid "%s's preferences"
+msgstr "настройки %s"
+
+#: models.py:401
+msgid ""
+"The user may still browse the forums anonymously. Other functions may also "
+"still be available to him if he is logged in."
+msgstr "Этот пользователь может и далее блуждать по форумам анонимно. Другие возможности также могут быть ему доступны, если он войдет в систему."
+
+#: models.py:403 models.py:431
+msgid "reason"
+msgstr "причина"
+
+#: models.py:404
+msgid "This may be displayed to the banned user."
+msgstr "Это сообщение может быть показано заблокированному пользователю."
+
+#: models.py:407
+msgid "banned user"
+msgstr "заблокированный пользователь"
+
+#: models.py:408
+msgid "banned users"
+msgstr "заблокированные пользователи"
+
+#: models.py:411
+#, python-format
+msgid "Banned user: %s"
+msgstr "заблокированный пользователь: %s"
+
+#: models.py:427
+msgid "IP address"
+msgstr "IP-адрес"
+
+#: models.py:428
+msgid ""
+"A person's IP address may change and an IP address may be used by more than "
+"one person, or by different people over time. Be careful when using this."
+msgstr "IP-адрес человека может меняться. Кроме того, один IP-адрес может использоваться многими людьми одномоментно или с течением времени. Будьте аккуратны с этой штукой."
+
+#: models.py:432
+msgid "This may be displayed to the people concerned by the ban."
+msgstr "Это сообщение может быть показано людям, которых затронет блокировка."
+
+#: models.py:435
+msgid "banned IP address"
+msgstr "заблокированный IP-адрес"
+
+#: models.py:436
+msgid "banned IP addresses"
+msgstr "заблокированные IP-адреса"
+
+#: models.py:439
+#, python-format
+msgid "Banned IP: %s"
+msgstr "Заблокированный IP: %s"
+
+#: rpc.py:66
+msgid "unset csticky"
+msgstr "открепить в категории"
+
+#: rpc.py:66
+msgid "This thread is sticky in its category."
+msgstr "Эта дискуссия отмечена как важная в своей категории."
+
+#: rpc.py:68
+msgid "set csticky"
+msgstr "прикрепить в категории"
+
+#: rpc.py:68
+msgid "Removed thread from category sticky list"
+msgstr "Дискуссия убрана из списка важных в категории."
+
+#: rpc.py:75
+msgid "unset gsticky"
+msgstr "открепить глобально"
+
+#: rpc.py:75
+msgid "This thread is now globally sticky."
+msgstr "Эта дискуссия отмечена как важная в масштабах форума."
+
+#: rpc.py:77
+msgid "set gsticky"
+msgstr "прикрепить по всему форуму"
+
+#: rpc.py:77
+msgid "Removed thread from global sticky list"
+msgstr "Дискуссия убрана из списка важных."
+
+#: rpc.py:84
+msgid "open thread"
+msgstr "открыть дискуссию"
+
+#: rpc.py:84
+msgid "This discussion is now CLOSED."
+msgstr "Эта дискуссия ЗАКРЫТА."
+
+#: rpc.py:86
+msgid "close thread"
+msgstr "закрыть дискуссию"
+
+#: rpc.py:86
+msgid "This discussion is now OPEN."
+msgstr "Эта дискуссия ОТКРЫТА."
+
+#: rpc.py:97
+msgid "watch"
+msgstr "наблюдать за дискуссией"
+
+#: rpc.py:98
+msgid "This thread has been removed from your favorites."
+msgstr "Эта дискуссия убрана из Ваших избранных."
+
+#: rpc.py:103
+msgid "dont watch"
+msgstr "не наблюдать"
+
+#: rpc.py:104
+msgid "This thread has been added to your favorites."
+msgstr "Эта дискуссия добавлена в Ваши избранные."
+
+#: rpc.py:114
+msgid "The moderators have been notified of possible abuse"
+msgstr "Жалоба отправлена модераторам."
+
+#: rpc.py:121
+msgid "uncensor"
+msgstr "снять цензуру"
+
+#: rpc.py:121
+msgid "This post is censored!"
+msgstr "Это сообщение вымарано цензурой!"
+
+#: rpc.py:123
+msgid "censor"
+msgstr "вымарать цензурой"
+
+#: rpc.py:123
+msgid "This post is no longer censored."
+msgstr "Этот пост освобожден от цензуры."
+
+#: views.py:262
+msgid "Watched Discussions"
+msgstr "Дискуссии под наблюдением"
+
+#: views.py:272
+msgid "Discussions with private messages to you"
+msgstr "Дискуссии с личными сообщениями для Вас"
+
+#: views.py:285
+msgid "Category: "
+msgstr "Категория: "
+
+#: views.py:298
+msgid "Recent Discussions"
+msgstr "Последние дискуссии"
+
+#: views.py:395
+#, python-format
+msgid "The user %s is already a member of this group."
+msgstr "Пользователь %s уже участвует в этой группе."
+
+#: views.py:401
+#, python-format
+msgid "A invitation to join this group was sent to %s."
+msgstr "Приглашение в эту группу отправлено пользователю %s."
+
+#: views.py:428
+#, python-format
+msgid "The admin rights of user %s were removed for the group."
+msgstr "С пользователя %s сняты административные полномочия в данной группе."
+
+#: views.py:430
+#, python-format
+msgid "User %s was removed from the group."
+msgstr "Пользователь %s выведен из состава группы."
+
+#: views.py:432
+#, python-format
+msgid "There was nothing to do for user %s."
+msgstr "С пользователем %s оказалось нечего делать."
+
+#: views.py:449
+#, python-format
+msgid "The user %s is not a group member."
+msgstr "Пользователь %s не входит в эту группу."
+
+#: views.py:451
+#, python-format
+msgid "The user %s is already a group admin."
+msgstr "Пользователь %s уже управляет этой группой."
+
+#: views.py:454
+#, python-format
+msgid "The user %s is now a group admin."
+msgstr "Пользователю %s выданы административные привилегии."
+
+#: views.py:469
+msgid "The invitation was cancelled."
+msgstr "Приглашение отменено."
+
+#: views.py:471
+msgid "The invitation was discarded."
+msgstr "Приглашение отложено."
+
+#: views.py:488
+#, python-format
+msgid "You are now a member of the group %s."
+msgstr "Вы вступили в группу %s."
+
+#: views.py:491
+msgid "The invitation has been declined."
+msgstr "Приглашение отклонено."
+
+#: management/notices.py:14
+msgid "Private post received"
+msgstr "Получено личное сообщение"
+
+#: management/notices.py:15
+msgid "A private message addressed to you has been posted in a discussion."
+msgstr "В одной из дискуссий появилось сообщение, адресованное лично Вам."
+
+#: management/notices.py:18
+msgid "New post in a watched thread"
+msgstr "Новое сообщение в интересной дискуссии"
+
+#: management/notices.py:19
+msgid "A new message has been posted in a watched discussion."
+msgstr "Появилось новое сообщение в дискуссии, которую Вы наблюдаете."
+
+#: management/notices.py:22
+msgid "Invitation to join a group"
+msgstr "Приглашение в группу"
+
+#: management/notices.py:23
+msgid "You have been invited to join a group."
+msgstr "Вас пригласили вступить в группу."
+
+#: management/notices.py:26
+msgid "Invitation to join a group cancelled"
+msgstr "Приглашение отменено"
+
+#: management/notices.py:27
+msgid "An invitation you received to join a group has been cancelled."
+msgstr "Приглашение в группу, присланное Вам, было отменено."
+
+#: management/notices.py:30
+msgid "Group admin rights granted"
+msgstr "Полномочия выданы"
+
+#: management/notices.py:31
+msgid "You have been granted admin rights on a group."
+msgstr "Вам даны административные привилегии в одной из групп."
+
+#: management/notices.py:34
+msgid "Group admin rights removed"
+msgstr "Полномочия сняты"
+
+#: management/notices.py:35
+msgid "Your admin rights on a group have been removed."
+msgstr "У Вас больше нет административных привилегий в одной из групп."
+
+#: management/notices.py:38
+msgid "New group admin"
+msgstr "Новый администратор группы"
+
+#: management/notices.py:39
+msgid "There is a new admin in a group."
+msgstr "В группе появился новый администратор."
+
+#: management/notices.py:42
+msgid "New group member"
+msgstr "Новый участник группы"
+
+#: management/notices.py:43
+msgid "There is a new member in a group."
+msgstr "В группе появился новый участник."
+
+#: templates/notification/full.html:1 templates/notification/notice.html:1
+#, python-format
+msgid "%(notice)s"
+msgstr "%(notice)s"
+
+#: templates/snapboard/banned_ip.html:6
+msgid "Your IP address is banned from the forums."
+msgstr "Ваш IP-адрес забанен."
+
+#: templates/snapboard/banned_ip.html:8 templates/snapboard/banned_user.html:9
+msgid "The reason is:"
+msgstr "Причина:"
+
+#: templates/snapboard/banned_ip.html:11
+#: templates/snapboard/banned_user.html:12
+msgid ""
+"If you think this is a mistake, please contact the website administrator."
+msgstr "Если Вы уверены, что это ошибка, пожалуйста, свяжитесь с администратором сайта."
+
+#: templates/snapboard/banned_user.html:6
+msgid ""
+"You have been banned from the forums. You may still use the forums as an "
+"anonymous user. You need to log off first."
+msgstr "Вас забанили в форумах. Вы все еще можете блуждать по ним в качестве гостя. Вначале выйдите из системы."
+
+#: templates/snapboard/banned_user.html:7
+msgid "Log off"
+msgstr "Выйти"
+
+#: templates/snapboard/base_forum.html:45
+msgid "All Discussions"
+msgstr "Все дискуссии"
+
+#: templates/snapboard/base_forum.html:46
+msgid "Categories"
+msgstr "Категории"
+
+#: templates/snapboard/base_forum.html:48
+msgid "Favorites"
+msgstr "Избранные"
+
+#: templates/snapboard/base_forum.html:49
+msgid "Private Posts"
+msgstr "Личные сообщения"
+
+#: templates/snapboard/base_forum.html:51
+#: templates/snapboard/base_forum.html:54
+msgid "Start Thread"
+msgstr "Начать дискуссию"
+
+#: templates/snapboard/base_forum.html:90
+msgid "This community is powered by"
+msgstr "Под капотом сообщества находится"
+
+#: templates/snapboard/category_index.html:7
+msgid "Topics Category List"
+msgstr "Список категорий"
+
+#: templates/snapboard/category_index.html:23
+#, python-format
+msgid "%(cnt)s discussion"
+msgid_plural "%(cnt)s discussions"
+msgstr[0] "%(cnt)s дискуссия"
+msgstr[1] "%(cnt)s дискуссии"
+
+#: templates/snapboard/category_index.html:28
+msgid "No categories are available."
+msgstr "Категорий нет."
+
+#: templates/snapboard/edit_settings.html:7
+msgid "Boards preferences"
+msgstr "Настройки форума"
+
+#: templates/snapboard/edit_settings.html:13
+#: templates/snapboard/include/show_posts.html:92
+msgid "Update"
+msgstr "Обновить"
+
+#: templates/snapboard/invitation.html:7
+#, python-format
+msgid "Invitation to %(gname)s"
+msgstr "Приглашение в %(gname)s"
+
+#: templates/snapboard/invitation.html:11
+#, python-format
+msgid ""
+"\n"
+"        You have been invited by %(sent_by)s to join the group %(group)s on %(date)s."
+msgstr ""
+"\n"
+"        Пользователь %(sent_by)s пригласил Вас %(date)s присоединиться к группе %(group)s."
+
+#: templates/snapboard/invitation.html:15
+msgid "Would you like to accept that invitation?"
+msgstr "Хотите принять это приглашение?"
+
+#: templates/snapboard/invitation.html:18
+msgid "Submit"
+msgstr "Отправить"
+
+#: templates/snapboard/invitation.html:23
+#, python-format
+msgid ""
+"\n"
+"        You accepted this invitation on %(date)s.\n"
+"        "
+msgstr ""
+"\n"
+"        Вы приняли этол приглашение %(date)s.\n"
+"        "
+
+#: templates/snapboard/invitation.html:27
+#, python-format
+msgid ""
+"\n"
+"        You declined this invitation on %(date)s.\n"
+"        "
+msgstr ""
+"\n"
+"        Вы отклонили это приглашение %(date)s.\n"
+"        "
+
+#: templates/snapboard/invite_user.html:7
+#, python-format
+msgid "Invite user to group %(gname)s"
+msgstr "Пригласить пользователя в группу %(gname)s"
+
+#: templates/snapboard/invite_user.html:13
+#: templates/snapboard/manage_group.html:75
+msgid "Invite user"
+msgstr "Пригласить пользователя"
+
+#: templates/snapboard/manage_group.html:12
+#, python-format
+msgid "Manage group %(gname)s"
+msgstr "Управление группой %(gname)s"
+
+#: templates/snapboard/manage_group.html:16
+msgid "Manage group users"
+msgstr "Управление пользователями группы"
+
+#: templates/snapboard/manage_group.html:19
+msgid "Manage group admins"
+msgstr "Управление администраторами группы"
+
+#: templates/snapboard/manage_group.html:22
+msgid "View pending invitations"
+msgstr "Посмотреть ожидающие приглашения"
+
+#: templates/snapboard/manage_group.html:25
+msgid "View answered invitations"
+msgstr "Посмотреть обработанные приглашения"
+
+#: templates/snapboard/manage_group.html:32
+msgid "Group members"
+msgstr "Участники группы"
+
+#: templates/snapboard/newthread.html:10 templates/snapboard/newthread.html:21
+#: templates/snapboard/include/addpost.html:19
+#: templates/snapboard/include/addpost.html:30
+msgid "B"
+msgstr "Ж"
+
+#: templates/snapboard/newthread.html:11 templates/snapboard/newthread.html:22
+#: templates/snapboard/include/addpost.html:20
+#: templates/snapboard/include/addpost.html:31
+msgid "I"
+msgstr "К"
+
+#: templates/snapboard/newthread.html:12 templates/snapboard/newthread.html:23
+#: templates/snapboard/include/addpost.html:21
+#: templates/snapboard/include/addpost.html:32
+#: templates/snapboard/include/show_posts.html:24
+msgid "quote"
+msgstr "цитировать"
+
+#: templates/snapboard/newthread.html:13 templates/snapboard/newthread.html:24
+#: templates/snapboard/include/addpost.html:22
+#: templates/snapboard/include/addpost.html:33
+msgid "code"
+msgstr "код"
+
+#: templates/snapboard/newthread.html:14 templates/snapboard/newthread.html:25
+#: templates/snapboard/include/addpost.html:23
+#: templates/snapboard/include/addpost.html:34
+msgid "list"
+msgstr "список"
+
+#: templates/snapboard/newthread.html:15 templates/snapboard/newthread.html:26
+#: templates/snapboard/include/addpost.html:24
+#: templates/snapboard/include/addpost.html:35
+msgid "img"
+msgstr "картинка"
+
+#: templates/snapboard/newthread.html:16 templates/snapboard/newthread.html:27
+#: templates/snapboard/include/addpost.html:25
+#: templates/snapboard/include/addpost.html:36
+msgid "link"
+msgstr "ссылка"
+
+#: templates/snapboard/newthread.html:35
+msgid "Start Subject"
+msgstr "Начать дискуссию"
+
+#: templates/snapboard/newthread.html:35
+msgid "Reset"
+msgstr "Сбросить"
+
+#: templates/snapboard/newthread.html:40
+msgid "You must be signed in to start a new discussion."
+msgstr "Нужно войти в систему, чтобы начать дискуссию."
+
+#: templates/snapboard/signin.html:15
+#: templates/snapboard/include/side_panel.html:23
+msgid "Sign In"
+msgstr "Войти"
+
+#: templates/snapboard/signin.html:21
+msgid "You are already signed in."
+msgstr "Вы уже вошли в систему."
+
+#: templates/snapboard/signout.html:8
+msgid "You are now logged off."
+msgstr "Вы вышли из системы."
+
+#: templates/snapboard/thread.html:20
+msgid "unset csticky,set csticky"
+msgstr "открепить в категории,прикрепить в категории"
+
+#: templates/snapboard/thread.html:26
+msgid "unset gsticky,set gsticky"
+msgstr "открепить глобально,прикрепить глобально"
+
+#: templates/snapboard/thread.html:32
+msgid "open thread,close thread"
+msgstr "открыть дискуссию,закрыть дискуссию"
+
+#: templates/snapboard/thread.html:40
+msgid "don't watch,watch"
+msgstr "не отслеживать,отслеживать"
+
+#: templates/snapboard/thread_index.html:19
+msgid "posts started by"
+msgstr "реплик, начал"
+
+#: templates/snapboard/thread_index.html:24
+#: templates/snapboard/thread_index.html:27
+msgid "STICKY"
+msgstr "ВАЖНО"
+
+#: templates/snapboard/thread_index.html:31
+msgid "CLOSED"
+msgstr "ЗАКРЫТА"
+
+#: templates/snapboard/thread_index.html:38
+msgid "last updated"
+msgstr "обновлено"
+
+#: templates/snapboard/thread_index.html:41
+msgid "by"
+msgstr "от"
+
+#: templates/snapboard/thread_index.html:55
+msgid "No threads are available."
+msgstr "Дискуссий нет."
+
+#: templates/snapboard/include/addpost.html:7
+msgid "Pretty-print guide"
+msgstr "Помощь по оформлению"
+
+#: templates/snapboard/include/addpost.html:9
+msgid "Got something to say?"
+msgstr "Есть, что сказать?"
+
+#: templates/snapboard/include/addpost.html:44
+msgid "set private recipients (optional)"
+msgstr "указать получателей (не обязательно)"
+
+#: templates/snapboard/include/addpost.html:63
+msgid "Post"
+msgstr "Опубликовать"
+
+#: templates/snapboard/include/addpost.html:64
+msgid "Preview"
+msgstr "Посмотреть"
+
+#: templates/snapboard/include/addpost.html:68
+msgid "Post Preview:"
+msgstr "Предпросмотр:"
+
+#: templates/snapboard/include/addpost.html:73
+#, python-format
+msgid ""
+"\n"
+"        You need to <a href=\"%(LOGIN_URL)s?next=%(reqpath)s#add_post_div"
+"\">sign in</a> to post messages.\n"
+"    "
+msgstr ""
+"\n"
+"        Вам нужно <a href=\"%(LOGIN_URL)s?next=%(reqpath)s#add_post_div"
+"\">войти в систему</a>, чтобы участвовать в дискуссиях.\n"
+"    "
+
+#: templates/snapboard/include/addpost.html:79
+msgid ""
+"This discussion has been closed by the staff.  You can no longer add posts."
+msgstr "Эта дискуссия закрыта администрацией.  Писать новые сообщения нельзя."
+
+#: templates/snapboard/include/markdown_guide.html:4
+msgid "italic"
+msgstr "курсив"
+
+#: templates/snapboard/include/markdown_guide.html:4
+msgid "or"
+msgstr "или"
+
+#: templates/snapboard/include/markdown_guide.html:4
+msgid "bold"
+msgstr "полужирный"
+
+#: templates/snapboard/include/markdown_guide.html:5
+msgid "example"
+msgstr "пример"
+
+#: templates/snapboard/include/markdown_guide.html:5
+msgid "shows up as"
+msgstr "выглядит как"
+
+#: templates/snapboard/include/markdown_guide.html:10
+msgid "Indent lines of code blocks by 4 or more spaces"
+msgstr "Делайте отступы перед блоками кода минимум в 4 пробела"
+
+#: templates/snapboard/include/markdown_guide.html:11
+msgid "This is a normal paragraph."
+msgstr "Это обычный абзац."
+
+#: templates/snapboard/include/markdown_guide.html:13
+msgid ""
+"    This is a preformatted\n"
+"    code block."
+msgstr ""
+"    Это предварительно отформатированный\n"
+"    блок кода."
+
+#: templates/snapboard/include/markdown_guide.html:17
+msgid "Blockquotes use e-mail style quoting"
+msgstr "Цитаты оформляются как в электронных письмах"
+
+#: templates/snapboard/include/markdown_guide.html:18
+msgid "Email-style angle brackets"
+msgstr "Угловые скобки в стиле e-mail"
+
+#: templates/snapboard/include/markdown_guide.html:19
+msgid "are used for blockquotes."
+msgstr "используются для цитирования."
+
+#: templates/snapboard/include/markdown_guide.html:21
+msgid "And, they can be nested."
+msgstr "Допускаются и вложенные."
+
+#: templates/snapboard/include/markdown_guide.html:29
+msgid "Lists and unordered lists are nestable and mixable."
+msgstr "Списки разных видов можно смешивать и помещать друг в друга."
+
+#: templates/snapboard/include/markdown_guide.html:30
+msgid ""
+"\n"
+"<pre><code>*   Abacus\n"
+"    * answer\n"
+"*   Bubbles\n"
+"    1.  bunk\n"
+"    2.  bupkis</code></pre>\n"
+"    </td>\n"
+"    <td>\n"
+"        <p>... shows up as</p>\n"
+"        <ul>\n"
+"            <li>Abacus\n"
+"            <ul><li>answer</li></ul></li>\n"
+"            <li>Bubbles\n"
+"            <ol><li>bunk</li>\n"
+"                <li>bupkis</li></ol></li>\n"
+"        </ul>\n"
+msgstr ""
+"\n"
+"<pre><code>*   Астероид\n"
+"    * традиционно меняет афелий\n"
+"*   Комета Хейла-Боппа\n"
+"    1.  ищет спектральный класс\n"
+"    2.  гасит далекий экватор</code></pre>\n"
+"    </td>\n"
+"    <td>\n"
+"        <p>... выглядит как</p>\n"
+"        <ul>\n"
+"            <li>Астероид\n"
+"            <ul><li>традиционно меняет афелий</li></ul></li>\n"
+"            <li>Комета Хейла-Боппа\n"
+"            <ol><li>ищет спектральный класс</li>\n"
+"                <li>гасит далекий экватор</li></ol></li>\n"
+"        </ul>\n"
+
+#: templates/snapboard/include/markdown_guide.html:50
+msgid ""
+"For details on the markdown syntax, see <a href=\"http://daringfireball.net/"
+"projects/markdown/dingus\">Dingus</a>."
+msgstr ""
+"Подробнее о синтаксисе «markdown» можно узнаиь на странице <a href=\"http://daringfireball.net/"
+"projects/markdown/dingus\">Dingus</a>."
+
+#: templates/snapboard/include/show_posts.html:29
+msgid "Edit this post.  All revisions are saved!"
+msgstr "Редактировать это сообщение.  Все правки запоминаются!"
+
+#: templates/snapboard/include/show_posts.html:30
+msgid "edit post"
+msgstr "исправить текст"
+
+#: templates/snapboard/include/show_posts.html:35
+msgid "ADMIN: mark this post for censorship"
+msgstr "АДМИН: отметить это сообщение цензурой"
+
+#: templates/snapboard/include/show_posts.html:37
+msgid "uncensor,censor"
+msgstr "снять цензуру,вымарать цензурой"
+
+#: templates/snapboard/include/show_posts.html:43
+msgid "Report this post for violation of forum policies."
+msgstr "Пожаловаться на это сообщение как нарушающее правила форума."
+
+#: templates/snapboard/include/show_posts.html:44
+msgid "report abuse"
+msgstr "пожаловаться"
+
+#: templates/snapboard/include/show_posts.html:59
+msgid "to"
+msgstr "для"
+
+#: templates/snapboard/include/show_posts.html:78
+msgid "previous"
+msgstr "предыдущая"
+
+#: templates/snapboard/include/show_posts.html:79
+msgid "This message has been revised"
+msgstr "Это сообщение было изменено"
+
+#: templates/snapboard/include/show_posts.html:89
+msgid "All revisions of this post are stored and publicly viewable."
+msgstr "Все исправления этого сообщения сохранены и общедоступны."
+
+#: templates/snapboard/include/side_panel.html:6
+msgid "You are signed in as"
+msgstr "Вы вошли как"
+
+#: templates/snapboard/include/side_panel.html:8
+msgid "(STAFF)"
+msgstr "(МОДЕР)"
+
+#: templates/snapboard/include/side_panel.html:12
+msgid "Sign out"
+msgstr "Выйти"
+
+#: templates/snapboard/include/side_panel.html:14
+msgid "You are not logged in."
+msgstr "Вы не вошли в систему."
+
+#: templates/snapboard/include/side_panel.html:17
+msgid "Your username and password didn't match."
+msgstr "Ваши логин и пароль не подходят."
+
+#: templates/snapboard/include/side_panel.html:29
+msgid ""
+"You need to have a user account in order to contribute to discussions on "
+"this forum."
+msgstr ""
+"Чтобы участвовать в дискуссиях на этом форуме, Вам нужно зарегистрироваться."
+
+#: templates/snapboard/include/side_panel.html:30
+msgid "Create an account"
+msgstr "Создать учетную запись"
+
+#: templates/snapboard/include/side_panel.html:37
+msgid "Admin Shortcuts"
+msgstr "Ярлыки управления"
+
+#: templates/snapboard/include/side_panel.html:40
+msgid "Admin Site"
+msgstr "Админка"
+
+#: templates/snapboard/include/side_panel.html:41
+msgid "Censored posts"
+msgstr "Вымаранные сообщения"
+
+#: templates/snapboard/include/side_panel.html:42
+msgid "Abuse Reports"
+msgstr "Жалобы"
+
+#: templates/snapboard/include/side_panel.html:43
+msgid "Category Sticky"
+msgstr "Важное в категориях"
+
+#: templates/snapboard/include/side_panel.html:44
+msgid "Global Sticky"
+msgstr "Важное глобально"
+
+#: templates/snapboard/include/side_panel.html:60
+msgid "Forum Preferences"
+msgstr "Настройки форума"
+
+#: templatetags/bbcode.py:261
+#, python-format
+msgid "%s said:"
+msgstr "%s пишет:"

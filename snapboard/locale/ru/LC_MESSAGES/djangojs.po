@@ -1,0 +1,132 @@
+# Snapboard.
+# Copyright (c) 2007, Bo Shi
+# This file is distributed under the same license as the Snapboard package.
+# Andy Mikhailenko <neithere@gmail.com>, 2008
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: svn\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-10-28 14:47+0500\n"
+"PO-Revision-Date: 2008-10-28 14:47+0500\n"
+"Last-Translator: Andy Mikhailenko <neithere@gmail.com>\n"
+"Language-Team: Andy Mikhailenko <neithere@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: media/js/group.js:26
+#, perl-format
+msgid "Are you sure you want to remove the user %s from this group?"
+msgstr "Вы действительно хотите удалить пользователя %s из этой группы?"
+
+#: media/js/group.js:30
+#, perl-format
+msgid "Are you sure you want to remove the admin rights of %s for the group?"
+msgstr "Вы действительно хотите лишить %s права управления этой группой?"
+
+#: media/js/group.js:34
+msgid "Are you sure you want to cancel this invitation ?"
+msgstr "Вы действительно хотите отменить это приглашение?"
+
+#: media/js/group.js:38
+#, perl-format
+msgid "Are you sure you want to promote %s to administrator of this group?"
+msgstr "Вы действительно хотите сделать %s администратором этой группы?"
+
+#: media/js/thread.js:38
+msgid "There was an error previewing your post."
+msgstr "Произошла ошибка при попытке предпросмотра."
+
+#: media/js/thread.js:66
+msgid "previous"
+msgstr "назад"
+
+#: media/js/thread.js:68
+msgid "This message has been revised"
+msgstr "Это сообщение было исправлено"
+
+#: media/js/thread.js:73
+msgid "next"
+msgstr "дальше"
+
+#: media/js/thread.js:118
+msgid "ERROR"
+msgstr "ОШИБКА"
+
+#: media/js/thread.js:180
+msgid " and "
+msgstr " "
+
+#: media/js/thread.js:183
+msgid "year"
+msgstr "год"
+
+#: media/js/thread.js:183
+msgid "years"
+msgstr "лет"
+
+#: media/js/thread.js:184
+msgid "month"
+msgstr "месяц"
+
+#: media/js/thread.js:184
+msgid "months"
+msgstr "месяцев"
+
+#: media/js/thread.js:185
+msgid "week"
+msgstr "неделю"
+
+#: media/js/thread.js:185
+msgid "weeks"
+msgstr "недель"
+
+#: media/js/thread.js:186
+msgid "day"
+msgstr "день"
+
+#: media/js/thread.js:186
+msgid "days"
+msgstr "дней"
+
+#: media/js/thread.js:187
+msgid "hour"
+msgstr "ч."
+
+#: media/js/thread.js:187
+msgid "hours"
+msgstr "ч."
+
+#: media/js/thread.js:188
+msgid "minute"
+msgstr "мин."
+
+#: media/js/thread.js:188
+msgid "minutes"
+msgstr "мин."
+
+#: media/js/thread.js:233
+msgid "just now"
+msgstr "только что"
+
+#: media/js/thread.js:235
+#, perl-format
+msgid "%s ago"
+msgstr "%s назад"
+
+#: media/js/thread.js:297
+msgid "What is the URL of the image?"
+msgstr "Ссылка на изображение (в Интернете):"
+
+#: media/js/thread.js:303
+msgid "What is the title of the image?"
+msgstr "Кратко опишите изображение:"
+
+#: media/js/thread.js:320
+msgid "What is the URL of the link?"
+msgstr "Укажите ссылку:"
+
+#: media/js/thread.js:326
+msgid "What is the title of the link?"
+msgstr "Дайте ссылке название:"
