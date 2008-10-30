@@ -18,31 +18,23 @@ class PostManager(models.Manager):
             select = select).exclude(revision__isnull=False).order_by('odate')
 
     def posts_for_thread(self, thread_id, user):
-        # filter out the private messages.  admin cannot see private messages
-        # (although they can use the Django admin interface to do so)
-        # TODO: there's gotta be a better way to filter out private messages
-        # Tested with postgresql and sqlite
-        qs = self.get_query_set().filter(thread__id=thread_id)
-
-        # For some reason, the above query set produces duplicate values
-        # (probably due to the ManyToMany field).  Using distinct() fixes this
-        # but we need to better understand the reason why non-distinct values
-        # are being sent.  Caveats:
-        # http://docs.djangoproject.com/en/dev/ref/models/querysets/#distinct
-        qs = qs.distinct()
-
-        # optimization to leverage joins to reduce # queries for posts
-        qs = qs.select_related()
-
+        '''
+        Returns a query set filtered to contain only the posts the user is 
+        allowed to see with regards the post's ``private`` and ``censor`` 
+        attributes.
+        This does not perform any category permissions check.
+        '''
+        # XXX: Before the Post.private refactor, the query here used to return
+        # duplicate values, forcing the use of SELECT DISTINCT.
+        # Do we still have such a problem, and if so, why?
+        qs = self.get_query_set().filter(thread__id=thread_id).select_related().distinct()
         if user.is_authenticated():
-            qs = qs.filter((Q(user=user) | Q(private__isnull=True) | Q(private__exact=user)))
+            qs = qs.filter((Q(user=user) | Q(is_private=False) | Q(private__exact=user)))
         else:
-            qs = qs.exclude(private__isnull=False)
+            qs = qs.exclude(is_private=True)
         if not getattr(user, 'is_staff', False):
             qs = qs.exclude(censor=True)
-
         return qs
-
 
 class ThreadManager(models.Manager):
     def get_query_set(self):
@@ -96,30 +88,28 @@ class ThreadManager(models.Manager):
 
     def get_user_query_set(self, user):
         try:
-            us = user.snapboard_usersettings
+            us = user.sb_usersettings
         except ObjectDoesNotExist:
             pass
         else:
-            if us.frontpage_filters.all().count() > 0:
+            if us.frontpage_filters.count():
                 return self.get_query_set().filter(
                     category__in=us.frontpage_filters.all())
         return self.get_query_set()
 
     def get_favorites(self, user):
-        wl = user.watchlist_set.all()
+        wl = user.sb_watchlist.all()
         return self.get_query_set().filter(pk__in=[x.thread_id for x in wl])
 
     def get_private(self, user):
-        from models import Post
+        from snapboard.models import Post
         import sets
         post_list = Post.objects.filter(private__exact=user).select_related()
         thread_ids = sets.Set([p.thread.id for p in post_list])
         return self.get_query_set().filter(pk__in=thread_ids)
 
-
     def get_category(self, cat_id):
         return self.get_query_set().filter(category__id=cat_id)
-
 
 class CategoryManager(models.Manager):
     def get_query_set(self):

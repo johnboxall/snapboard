@@ -3,25 +3,29 @@ It is written to run with Django 1.0 on Python 2.5.
 
 Features:
 
-    * Editable posts (all revisions publicly available)
-    * Private recipients for posts within topics
-    * BBCode, Markdwon and Textile supported for post formatting
+    * Editable posts with all revisions publicly available
+    * Messages posted within threads can be made visible only to selected 
+      users
+    * BBCode, Markdown and Textile supported for post formatting
     * BBCode toolbar
-    * Multiple forums
-    * Moderators for each category
+    * Multiple forums with four types of permissions
+    * Forum permissions can be assigned to custom groups of users
+    * Group administration can be delegated to end users on a per-group basis
+    * Moderators for each forum
     * User preferences
     * Watched topics
     * Abuse reports
-    * i18n hooks to create your own translations (ships with English and French
-      languages)
-    * User and IP address bans
+    * User and IP address bans that don't automatically spread to other Django
+      applications within the project
+    * i18n hooks to create your own translations
+    * Included translations: French, Russian
 
 SNAPBoard's documentation is located in the docs/ directory. To build it in
 HTML format, cd to docs/ and run ``make html``. Sphinx is required for this 
 to work.
 
-A slightly modified version of django-pagination is required to use SNAPBoard.
-It is included in the 'pagination' directory.
+SNAPBoard depends on django-pagination, which can be found at 
+http://code.google.com/p/django-pagination/.
 
 You are free to use any package or custom application for extra features such 
 as user profiles, private messaging or registration.

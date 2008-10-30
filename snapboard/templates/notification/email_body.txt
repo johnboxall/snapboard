@@ -2,5 +2,4 @@
 
 This is an automatic notification sent to you by {{ site_name }}.
 
-{{ message }}
-{% endblocktrans %}{% endfilter %}
+{{ message }}{% endblocktrans %}{% endfilter %}

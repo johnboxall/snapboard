@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.core.serializers import get_serializer
 from django.contrib.auth.models import User
 
-from snapboard import models
+from snapboard import models, __version__
 
 def _get_snapboard_objects():
     for model in [models.Category, models.Moderator, models.Thread, models.Post,
@@ -40,14 +40,12 @@ class Command(BaseCommand):
             'Django\'s authentication framework\'s User instances are also '\
             'included.'
 
-    # TODO: store the version number somewhere
-
     def handle(self, *args, **kwargs):
         s = get_serializer('xml')()
         s.serialize(_get_snapboard_objects(), **kwargs)
         s.stream.seek(0)
         sys.stdout.write(s.stream.read(len('<?xml version="1.0" encoding="utf-8"?>\n')))
-        sys.stdout.write('''<snapboardDataDump version="0.2.0">''')
+        sys.stdout.write('''<snapboardDataDump version="%s">''' % __version__)
         for chunk in iter(s.stream):
             sys.stdout.write(chunk)
         sys.stdout.write('</snapboardDataDump>')

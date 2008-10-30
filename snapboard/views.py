@@ -137,10 +137,8 @@ def thread(request, thread_id):
     if request.POST:
         if not thr.category.can_post(request.user):
             raise PermissionError
-        postform = PostForm(request.POST.copy()) # XXX Do we need to copy the dict?
-
+        postform = PostForm(request.POST)
         if postform.is_valid():
-            # reset post object
             postobj = Post(thread = thr,
                     user = request.user,
                     text = postform.cleaned_data['post'],
@@ -150,7 +148,10 @@ def thread(request, thread_id):
             if len(postform.cleaned_data['private']) > 0:
                 _log.debug('thread(): new post private = %s' % postform.cleaned_data['private'])
                 postobj.private = postform.cleaned_data['private']
+                postobj.is_private = True
                 postobj.save()
+            postobj.notify()
+            return HttpResponseRedirect(reverse('snapboard_locate_post', args=(postobj.id,)))
     else:
         postform = PostForm()
 
@@ -173,7 +174,7 @@ def edit_post(request, original, next=None):
     '''
     Edit an existing post.decorators in python
     '''
-    if not request.POST:
+    if not request.method == 'POST':
         raise Http404
 
     try:
@@ -195,6 +196,7 @@ def edit_post(request, original, next=None):
                 )
         post.save()
         post.private = orig_post.private.all()
+        post.is_private = orig_post.is_private
         post.save()
 
         orig_post.revision = post
@@ -207,7 +209,7 @@ def edit_post(request, original, next=None):
     try:
         next = request.POST['next'].split('#')[0] + '#snap_post' + str(div_id_num)
     except KeyError:
-        next = reverse('snapboard_thread', args=(orig_post.thread.id,))
+        next = reverse('snapboard_locate_post', args=(orig_post.id,))
 
     return HttpResponseRedirect(next)
 
@@ -307,24 +309,12 @@ def locate_post(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if not post.thread.category.can_read(request.user):
         raise PermissionError
-    if post.private.count() and not post.private.filter(pk=request.user.id).count():
+    if post.is_private and not (post.user==request.user or post.private.filter(pk=request.user.id).count()):
         raise PermissionError
     # Count the number of visible posts before the one we are looking for, 
     # as well as the total
-    c = connection.cursor()
-    c.execute(
-        'SELECT COUNT(*) FROM snapboard_post WHERE snapboard_post.thread_id=%s '
-        'AND snapboard_post.revision_id IS NULL AND NOT snapboard_post.censor;',
-        (post.thread.id,)
-    )
-    total = c.fetchone()[0]
-    c.execute(
-        'SELECT COUNT(*) FROM snapboard_post WHERE snapboard_post.thread_id=%s '
-        'AND snapboard_post.revision_id IS NULL AND NOT snapboard_post.censor '
-        'AND snapboard_post.date < %s;',
-        (post.thread.id, post.odate)
-    )
-    preceding_count = c.fetchone()[0]
+    total = post.thread.count_posts(request.user)
+    preceding_count = post.thread.count_posts(request.user, before=post.date)
     # Check the user's settings to locate the post in the various pages
     settings = get_user_settings(request.user)
     ppp = settings.ppp
@@ -334,7 +324,7 @@ def locate_post(request, post_id):
         page = (total - preceding_count - 1) // ppp + 1
     else:
         page = preceding_count // ppp + 1
-    return HttpResponseRedirect('%s?page=%i#post_%i' % (reverse('snapboard_thread', args=(post.thread.id,)), page, post.id))
+    return HttpResponseRedirect('%s?page=%i#snap_post%i' % (reverse('snapboard_thread', args=(post.thread.id,)), page, post.id))
 
 def category_index(request):
     return render_to_response('snapboard/category_index.html',
@@ -373,9 +363,9 @@ def manage_group(request, group_id):
     elif request.GET.get('manage_admins', False):
         render_dict['admins'] = group.admins.all()
     elif request.GET.get('pending_invitations', False):
-        render_dict['pending_invitations'] = group.snapboard_invitation_set.filter(accepted=None)
+        render_dict['pending_invitations'] = group.sb_invitation_set.filter(accepted=None)
     elif request.GET.get('answered_invitations', False):
-        render_dict['answered_invitations'] = group.snapboard_invitation_set.exclude(accepted=None)
+        render_dict['answered_invitations'] = group.sb_invitation_set.exclude(accepted=None)
     return render_to_response(
             'snapboard/manage_group.html',
             render_dict,
@@ -454,7 +444,7 @@ def grant_group_admin_rights(request, group_id):
             request.user.message_set.create(message=_('The user %s is now a group admin.') % user)
     else:
         raise Http404
-    return HttpResponse('ok')#HttpResponseRedirect(reverse('snapboard_manage_group', args=(group_id,)))
+    return HttpResponse('ok')
 grant_group_admin_rights = login_required(grant_group_admin_rights)
 
 def discard_invitation(request, invitation_id):
@@ -469,7 +459,7 @@ def discard_invitation(request, invitation_id):
         request.user.message_set.create(message=_('The invitation was cancelled.'))
     else:
         request.user.message_set.create(message=_('The invitation was discarded.'))
-    return HttpResponse('ok')#HttpResponseRedirect(reverse('snapboard_manage_group', args=(invitation.group.id,)))
+    return HttpResponse('ok')
 discard_invitation = login_required(discard_invitation)
 
 def answer_invitation(request, invitation_id):
@@ -502,8 +492,7 @@ def get_user_settings(user):
     if not user.is_authenticated():
         return DEFAULT_USER_SETTINGS
     try:
-        return user.snapboard_usersettings
-#       return UserSettings.objects.get(user=user)
+        return user.sb_usersettings
     except UserSettings.DoesNotExist:
         return DEFAULT_USER_SETTINGS
 

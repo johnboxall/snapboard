@@ -6,6 +6,13 @@ from django.core.serializers.xml_serializer import Deserializer
 
 # For any version <= 0.2.0 where this command existed, there is no backwards-incompatible schema change
 
+# Note:
+# The data converters take XML and output XML; this is highly inefficient
+# When chaining converters to convert large datasets, this command will take 
+# a long time to run
+#
+# It can be fixed later though
+
 class PreprocessingRequired(Exception):
     '''
     Raised when the data is too old to be loaded directly as a regular
@@ -24,7 +31,7 @@ class SNAPboardDeserializer(Deserializer):
                     self.event_stream.expandNode(node)
                     return self._handle_object(node)
                 elif node.nodeName == "snapboardDataDump":
-                    version = node.getAttribute('version')
+                    version = tuple((int(x) for x in node.getAttribute('version').split('.')))
                     if not self.check_version_compatibility(version):
                         raise PreprocessingRequired(version)
         raise StopIteration
@@ -35,6 +42,9 @@ class SNAPboardDeserializer(Deserializer):
         Returns whether the supplier version number is compatible with the 
         current one.
         '''
+        for v in converters.keys():
+            if v > version:
+                return False
         return True
 
 class Command(BaseCommand):
@@ -71,12 +81,13 @@ class Command(BaseCommand):
             try:
                 objects = SNAPboardDeserializer(f)
             except PreprocessingRequired, e:
-                # This is where future versions must convert data from old
-                # releases to the new format.
-                raise NotImplementedError
-                # stream = SNAPboardConverter(f)
-                # f.close()
-                # objects = Deserializer(stream)
+                converter_versions = (v for v in converters.iterkeys() if v > e.version)
+                converter_versions.sort()
+                stream = f
+                stream.seek(0)
+                for v in converter_versions:
+                    stream = converters[v](stream)
+                objects = Deserializer(stream)
         except Exception:
             transaction.rollback()
             transaction.leave_transaction_management()
@@ -94,4 +105,48 @@ class Command(BaseCommand):
             transaction.commit()
             transaction.leave_transaction_management()
             print "Successfully loaded %i objects." % count
+
+#from xml.dom import pulldom
+#from StringIO import StringIO
+#class BaseConverter(object):
+#
+#   def __init__(self, stream):
+#       self.event_stream = pulldom.parse(stream)
+#       self.out_stream = StringIO()
+#
+#   def convert(self):
+#       '''
+#       Returns a converted stream that contains the serialized data for this 
+#       version.
+#       '''
+#       self._begin_stream()
+#       for event, node in self.event_stream:
+#           if event == "START_ELEMENT" and node.nodeName == "object":
+#               self.event_stream.expandNode(node)
+#               self._handle_object(node)
+#       self._end_stream()
+#       return self.out_stream
+#
+#   def _write_node(self, node):
+#       self.out_stream
+#   def _begin_stream(self):
+#       raise NotImplementedError
+#
+#   def _end_stream(self):
+#       raise NotImplementedError
+#
+#   def _handle_object(self, node):
+#       raise NotImplementedError
+
+def to_0_2_1(stream):
+    '''
+    Sets the is_private attribute of Post objects.
+    '''
+    raise NotImplementedError
+    stream.close()
+
+# Mapping of version triples to converters
+converters = {
+    (0, 2, 1): to_0_2_1
+}
 

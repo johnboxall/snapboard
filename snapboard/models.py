@@ -1,11 +1,12 @@
 import logging
 from datetime import datetime
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import models, connection
-from django.db.models import signals
+from django.db.models import signals, Q
 from django.dispatch import dispatcher
 from django.utils.translation import ugettext_lazy as _
 
@@ -74,8 +75,8 @@ class Group(models.Model):
     '''
 
     name = models.CharField(_('name'), max_length=36)
-    users = models.ManyToManyField(User, verbose_name=_('users'), related_name='snapboard_member_of_group_set')
-    admins = models.ManyToManyField(User, verbose_name=_('admins'), related_name='snapboard_admin_of_group_set') 
+    users = models.ManyToManyField(User, verbose_name=_('users'), related_name='sb_member_of_group_set')
+    admins = models.ManyToManyField(User, verbose_name=_('admins'), related_name='sb_admin_of_group_set') 
 
     class Meta:
         verbose_name = _('group')
@@ -98,9 +99,9 @@ class Invitation(models.Model):
     restriction.
     '''
 
-    group = models.ForeignKey(Group, verbose_name=_('group'), related_name='snapboard_invitation_set')
-    sent_by = models.ForeignKey(User, verbose_name=_('sent by'), related_name='snapboard_sent_invitation_set')
-    sent_to = models.ForeignKey(User, verbose_name=_('sent to'), related_name='snapboard_received_invitation_set')
+    group = models.ForeignKey(Group, verbose_name=_('group'), related_name='sb_invitation_set')
+    sent_by = models.ForeignKey(User, verbose_name=_('sent by'), related_name='sb_sent_invitation_set')
+    sent_to = models.ForeignKey(User, verbose_name=_('sent to'), related_name='sb_received_invitation_set')
     sent_date = models.DateTimeField(_('sent date'), auto_now_add=True)
     response_date = models.DateTimeField(_('response date'), blank=True, null=True)
     accepted = models.BooleanField(_('accepted'), blank=True, null=True)
@@ -197,7 +198,7 @@ class Category(models.Model):
 
 class Moderator(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('category'))
-    user = models.ForeignKey(User, verbose_name=_('user'))
+    user = models.ForeignKey(User, verbose_name=_('user'), related_name='sb_moderator_set')
 
     class Meta:
         verbose_name = _('moderator')
@@ -229,6 +230,23 @@ class Thread(models.Model):
         verbose_name = _('thread')
         verbose_name_plural = _('threads')
 
+    def count_posts(self, user, before=None):
+        '''
+        Returns the number of visible posts in the thread or, if ``before`` is 
+        a Post object, the number of visible posts in the thread that are
+        older.
+        '''
+        # This partly does what Thread.objects.get_query_set() does, except 
+        # it takes into account the user and therefore knows what posts
+        # are visible to him
+        qs = self.post_set.filter(revision=None)
+        if user.is_authenticated():
+            qs = qs.filter(Q(user=user) | Q(is_private=False) | Q(private__exact=user))
+        if not getattr(user, 'is_staff', False):
+            qs = qs.exclude(censor=True)
+        if before:
+            qs.filter(date__lt=before.date)
+        return qs.count()
 
 class Post(models.Model):
     """
@@ -237,15 +255,22 @@ class Post(models.Model):
     Both forward and backward revisions are stored as ForeignKeys.
     """
     # blank=True to get admin to work when the user field is missing
-    user = models.ForeignKey(User, editable=False, blank=True, default=None, verbose_name=_('user'))
+    user = models.ForeignKey(User, editable=False, blank=True, default=None,
+            verbose_name=_('user'), related_name='sb_created_posts_set')
 
     thread = models.ForeignKey(Thread, verbose_name=_('thread'))
     text = models.TextField(verbose_name=_('text'))
     date = models.DateTimeField(editable=False,auto_now_add=True, verbose_name=_('date'))
-    ip = models.IPAddressField(blank=True, verbose_name=_('ip address'))
+    ip = models.IPAddressField(verbose_name=_('ip address'), blank=True, null=True)
 
     private = models.ManyToManyField(User,
-            related_name="private_recipients", null=True, verbose_name=_('private recipients'))
+            related_name="sb_private_posts_set", null=True, verbose_name=_('private recipients'))
+    # The 'private message' status is denormalized by the ``is_private`` flag.
+    # It's currently quite hard to do the denormalization automatically 
+    # If ManyRelatedManager._add_items() fired some signal on update, it would help.
+    # Right now it's up to the code that changes the 'private' many-to-many field to 
+    # change ``is_private``.
+    is_private = models.BooleanField(_('private'), default=False, editable=False)
 
     # (null or ID of post - most recent revision is always a diff of previous)
     odate = models.DateTimeField(editable=False, null=True)
@@ -289,14 +314,28 @@ class Post(models.Model):
             self.odate = datetime.now()
         super(Post, self).save()
 
-    def notify(instance, **kwargs):
-        if not instance.previous:
-            notification.send(
-                [wl.user for wl in WatchList.objects.filter(thread=instance.thread)],
-                'new_post_in_watched_thread',
-                {'post': instance}
-            )
-    notify = staticmethod(notify)
+    def notify(self, **kwargs):
+        if not notification:
+            return
+        if not self.previous:
+            all_recipients = set()
+            if self.is_private:
+                recipients = set(self.private.all())
+                if recipients:
+                    notification.send(
+                        recipients,
+                        'private_post_received',
+                        {'post': self}
+                    )
+                    all_recipients = all_recipients.union(recipients)
+            recipients = set((wl.user for wl in WatchList.objects.filter(thread=self.thread) if wl.user not in all_recipients))
+            if recipients:
+                notification.send(
+                    recipients,
+                    'new_post_in_watched_thread',
+                    {'post': self}
+                )
+                all_recipients = all_recipients.union(recipients)
 
     def get_absolute_url(self):
         return ''.join(('/threads/id/', str(self.thread.id), '/#post', str(self.id)))
@@ -312,8 +351,9 @@ class Post(models.Model):
         verbose_name = _('post')
         verbose_name_plural = _('posts')
 
-if notification:
-    signals.post_save.connect(Post.notify, sender=Post)
+# Signals make it hard to handle the notification of private recipients
+#if notification:
+#    signals.post_save.connect(Post.notify, sender=Post)
 
 class AbuseReport(models.Model):
     '''
@@ -324,7 +364,7 @@ class AbuseReport(models.Model):
     set to disallow further abuse reports on said thread.
     '''
     post = models.ForeignKey(Post, verbose_name=_('post'))
-    submitter = models.ForeignKey(User, verbose_name=_('submitter'))
+    submitter = models.ForeignKey(User, verbose_name=_('submitter'), related_name='sb_abusereport_set')
 
     class Meta:
         verbose_name = _('abuse report')
@@ -335,28 +375,9 @@ class WatchList(models.Model):
     """
     Keep track of who is watching what thread.  Notify on change (sidebar).
     """
-    user = models.ForeignKey(User, verbose_name=_('user'))
+    user = models.ForeignKey(User, verbose_name=_('user'), related_name='sb_watchlist')
     thread = models.ForeignKey(Thread, verbose_name=_('thread'))
     # no need to be in the admin
-
-# from django.contrib.site.models import Site
-# def watched_thread_notify(instance):
-#     thread_id = instance.thread.id
-#     watchlist = WatchList.objects.select_related().filter(thread__id=thread_id)
-# 
-#     site = Site.objects.get(pk=settings.SITE_ID)
-# 
-#     people = [w.user.email for w in watchlist]
-#     subject_tmp = loader.get_template("tracker/watched_thread_notify_subject.txt")
-#     body_tmp = loader.get_template("tracker/watched_thread_notify_body.txt")
-# 
-#     ctx = Context({'post':instance, 'site':site})
-#     subject = subject_tmp.render(ctx).strip()
-#     body = body_tmp.render(ctx)
-# 
-#     send_mail(subject, body, 'snapboard@'+site.domain, people)
-# connect this handler
-#dispatcher.connect(watched_thread_notify, sender=Post, signal=signals.post_save)
 
 class UserSettings(models.Model):
     '''
@@ -368,7 +389,7 @@ class UserSettings(models.Model):
     After logging in, save these values in a session variable.
     '''
     user = models.OneToOneField(User, unique=True, 
-            verbose_name=_('user'), related_name='snapboard_usersettings')
+            verbose_name=_('user'), related_name='sb_usersettings')
     ppp = models.IntegerField(
             choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
             default = 20,
@@ -398,7 +419,8 @@ class UserBan(models.Model):
     This bans the user from posting messages on the forum. He can still log in.
     '''
     user = models.ForeignKey(User, unique=True, verbose_name=_('user'), db_index=True,
-            help_text=_('The user may still browse the forums anonymously. '\
+            related_name='sb_userban_set',
+            help_text=_('The user may still browse the forums anonymously. '
             'Other functions may also still be available to him if he is logged in.'))
     reason = models.CharField(max_length=255, verbose_name=_('reason'),
         help_text=_('This may be displayed to the banned user.'))
@@ -425,8 +447,8 @@ class IPBan(models.Model):
     Only IPv4 addresses are supported, one per record. (patch with IPv6 and/or address range support welcome)
     '''
     address = models.IPAddressField(unique=True, verbose_name=_('IP address'), 
-            help_text=_('A person\'s IP address may change and an IP address may be '\
-            'used by more than one person, or by different people over time. '\
+            help_text=_('A person\'s IP address may change and an IP address may be '
+            'used by more than one person, or by different people over time. '
             'Be careful when using this.'), db_index=True)
     reason = models.CharField(max_length=255, verbose_name=_('reason'),
         help_text=_('This may be displayed to the people concerned by the ban.'))

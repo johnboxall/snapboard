@@ -1,8 +1,9 @@
 __author__ = "Bo Shi"
-__version__ = "0.1pre"
-__date__ = "01/2007"
+__version__ = "0.2.1"
+__date__ = "10/2008"
 __copyright__ = """
 Copyright (c) 2007, Bo Shi
+Copyright (c) 2008, Julien Demoor
 All rights reserved.
 """
 __license__ = """
@@ -16,7 +17,7 @@ modification, are permitted provided that the following conditions are met:
   this list of conditions and the following disclaimer in the documentation
   and/or other materials provided with the distribution.
 
-* Neither the name Textile nor the names of its contributors may be used to
+* Neither the name SNAPboard nor the names of its contributors may be used to
   endorse or promote products derived from this software without specific
   prior written permission.
 
