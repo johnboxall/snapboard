@@ -29,7 +29,14 @@ SNAPboard requires Django 1.0.''',
         'Operating System :: POSIX',
         'Programming Language :: Python',
     ],
-    packages=['snapboard',]
+    packages=['snapboard',],
+    package_dir={'snapboard': 'snapboard'},
+    package_data={'snapboard': [
+        'templates/*.*',
+        'templates/snapboard/*.*',
+        'templates/notification/*.*',
+        'templates/notification/*/*.*',
+        ]},
 )
 
 # vim: ai ts=4 sts=4 et sw=4
