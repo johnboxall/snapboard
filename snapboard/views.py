@@ -15,6 +15,11 @@ from django.template import RequestContext
 from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
+try:
+    from notification import models as notification
+except ImportError:
+    notification = None
+
 from snapboard.forms import *
 from snapboard.models import *
 from snapboard.rpc import *
@@ -185,7 +190,7 @@ def edit_post(request, original, next=None):
     if orig_post.user != request.user or not orig_post.thread.category.can_post(request.user):
         raise PermissionError
 
-    postform = PostForm(request.POST.copy())
+    postform = PostForm(request.POST)
     if postform.is_valid():
         # create the post
         post = Post(
@@ -224,7 +229,7 @@ def new_thread(request, cat_id):
         raise PermissionError
 
     if request.POST:
-        threadform= ThreadForm(request.POST.copy())
+        threadform = ThreadForm(request.POST)
         if threadform.is_valid():
             # create the thread
             thread = Thread(
@@ -412,6 +417,11 @@ def remove_user_from_group(request, group_id):
             done = True
         if group.has_admin(user):
             group.admins.remove(user)
+            if notification:
+                notification.send(
+                    [user],
+                    'group_admin_rights_removed',
+                    {'group': group})
             done = True
         if done:
             if only_admin:
@@ -442,6 +452,15 @@ def grant_group_admin_rights(request, group_id):
         else:
             group.admins.add(user)
             request.user.message_set.create(message=_('The user %s is now a group admin.') % user)
+            if notification:
+                notification.send(
+                    [user],
+                    'group_admin_rights_granted',
+                    {'group': group})
+                notification.send(
+                    list(group.admins.all()),
+                    'new_group_admin',
+                    {'new_admin': user, 'group': group})
     else:
         raise Http404
     return HttpResponse('ok')
@@ -476,6 +495,11 @@ def answer_invitation(request, invitation_id):
                 invitation.group.users.add(request.user)
                 invitation.accepted = True
                 request.user.message_set.create(message=_('You are now a member of the group %s.') % invitation.group.name)
+                if notification:
+                    notification.send(
+                        list(invitation.group.admins.all()),
+                        'new_group_member',
+                        {'new_member': request.user, 'group': invitation.group})
             else:
                 invitation.accepted = False
                 request.user.message_set.create(message=_('The invitation has been declined.'))

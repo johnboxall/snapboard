@@ -1,0 +1,1 @@
+{% load i18n snapboard_tags %}{% blocktrans with group.name as group_name %}Your administrator rights on the group {{ group_name }} have been revoked.{% endblocktrans %}

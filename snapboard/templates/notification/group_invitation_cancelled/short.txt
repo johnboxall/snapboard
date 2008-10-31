@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans with invitation.group.name as group_name %}Invitation cancelled{% endblocktrans %}

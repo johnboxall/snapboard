@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans with group.name as group_name %}New administrator in group {{ group_name }}{% endblocktrans %}

@@ -116,6 +116,35 @@ class Invitation(models.Model):
                 'sent_by': self.sent_by,
                 'sent_to': self.sent_to }
 
+    def notify_received(instance, **kwargs):
+        '''
+        Notifies of new invitations.
+        '''
+        if not notification:
+            return
+        if instance.accepted is None:
+            notification.send(
+                [instance.sent_to],
+                'group_invitation_received',
+                {'invitation': instance})
+    notify_received = staticmethod(notify_received)
+
+    def notify_cancelled(instance, **kwargs):
+        '''
+        Notifies of cancelled invitations.
+        '''
+        if not notification:
+            return
+        if instance.accepted is None:
+            notification.send(
+                [instance.sent_to],
+                'group_invitation_cancelled',
+                {'invitation': instance})
+    notify_cancelled = staticmethod(notify_cancelled)
+
+signals.post_save.connect(Invitation.notify_received, sender=Invitation)
+signals.pre_delete.connect(Invitation.notify_cancelled, sender=Invitation)
+
 class Category(models.Model):
 
     label = models.CharField(max_length=32, verbose_name=_('label'))
@@ -163,7 +192,7 @@ class Category(models.Model):
         elif self.view_perms == USERS:
             flag = user.is_authenticated()
         elif self.view_perms == CUSTOM:
-            flag = user.is_superuser or self.view_group.has_user(user)
+            flag = user.is_superuser or (user.is_authenticated() and self.view_group.has_user(user))
         return flag
 
     def can_read(self, user):
@@ -173,7 +202,7 @@ class Category(models.Model):
         elif self.read_perms == USERS:
             flag = user.is_authenticated()
         elif self.read_perms == CUSTOM:
-            flag = user.is_superuser or self.read_group.has_user(user)
+            flag = user.is_superuser or (user.is_authenticated() and self.read_group.has_user(user))
         return flag
 
     def can_post(self, user):
@@ -181,7 +210,7 @@ class Category(models.Model):
         if self.post_perms == USERS:
             flag = user.is_authenticated()
         elif self.post_perms == CUSTOM:
-            flag = user.is_superuser or self.post_group.has_user(user)
+            flag = user.is_superuser or (user.is_authenticated() and self.post_group.has_user(user))
         return flag
 
     def can_create_thread(self, user):
@@ -189,7 +218,7 @@ class Category(models.Model):
         if self.new_thread_perms == USERS:
             flag = user.is_authenticated()
         elif self.new_thread_perms == CUSTOM:
-            flag = user.is_superuser or self.new_thread_group.has_user(user)
+            flag = user.is_superuser or (user.is_authenticated() and self.new_thread_group.has_user(user))
         return flag
 
     class Meta:
@@ -287,7 +316,7 @@ class Post(models.Model):
     objects = models.Manager() # needs to be explicit due to below
     view_manager = managers.PostManager()
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         _log.debug('user = %s, ip = %s' % (threadlocals.get_current_ip(),
             threadlocals.get_current_user()))
 
@@ -303,7 +332,7 @@ class Post(models.Model):
         elif not self.id:
             # only do the following on creation, not modification
             self.odate = datetime.now()
-        super(Post, self).save()
+        super(Post, self).save(force_insert, force_update)
 
 
     def management_save(self):
@@ -312,7 +341,7 @@ class Post(models.Model):
         elif not self.id:
             # only do the following on creation, not modification
             self.odate = datetime.now()
-        super(Post, self).save()
+        super(Post, self).save(False, False)
 
     def notify(self, **kwargs):
         if not notification:

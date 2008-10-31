@@ -1,0 +1,1 @@
+{% load i18n snapboard_tags %}{% blocktrans with new_admin.username as admin_name and group.name as group_name %}{{ admin_name }} is now an administrator of the group {{ group_name }}.{% endblocktrans %}

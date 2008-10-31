@@ -1,0 +1,2 @@
+{% load i18n snapboard_tags %}{% blocktrans with invitation.group.name as group_name and invitation.sent_by.username as sent_by %}The invitation to join the group {{ group_name }} that was sent to you by {{ sent_by }} has been cancelled by an administrator of the group.
+{% endblocktrans %}

@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans with group.name as group_name %}Administrator rights removed on group {{ group_name }}{% endblocktrans %}

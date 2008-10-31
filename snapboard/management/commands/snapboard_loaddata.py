@@ -1,4 +1,5 @@
 from optparse import make_option
+from StringIO import StringIO
 import os
 
 from django.core.management.base import BaseCommand
@@ -79,11 +80,12 @@ class Command(BaseCommand):
 
         try:
             try:
-                objects = SNAPboardDeserializer(f)
+                objects = list(SNAPboardDeserializer(f))
             except PreprocessingRequired, e:
-                converter_versions = (v for v in converters.iterkeys() if v > e.version)
+                converter_versions = [v for v in converters.iterkeys() if v > e.version]
                 converter_versions.sort()
-                stream = f
+                f.seek(0)
+                stream = StringIO(f.read())
                 stream.seek(0)
                 for v in converter_versions:
                     stream = converters[v](stream)
@@ -142,8 +144,25 @@ def to_0_2_1(stream):
     '''
     Sets the is_private attribute of Post objects.
     '''
-    raise NotImplementedError
-    stream.close()
+    try:
+        from lxml import etree
+        from lxml.builder import E
+    except ImportError:
+        print 'lxml could not be found. It is required for the conversion to work. Get lxml at http://codespeak.net/lxml/'
+        import sys
+        sys.exit(1)
+    stream.seek(0)
+    tree = etree.parse(stream)
+    stream.truncate()
+    root = tree.getroot()
+    # TODO: Test this with lxml2
+    for elt in root.findall('.//field[@name=private]'):
+        if len(elt):
+            # The element has children: set is_private=True on its parent
+            elt.getparent().append(E.field('True', {'name': 'is_private', 'type': 'BooleanField'}))
+    tree.write(stream)
+    stream.seek(0)
+    return stream
 
 # Mapping of version triples to converters
 converters = {

@@ -1,0 +1,1 @@
+{% load i18n snapboard_tags %}{% blocktrans with new_member.username as member_name and group.name as group_name %}{{ member_name }} is now a member of the group {{ group_name }}.{% endblocktrans %}
