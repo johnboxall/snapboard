@@ -1,0 +1,12 @@
+snapboard contains translatable strings in four types of files: .py, .js, .html
+and .txt.
+
+Strings in .py, .html and .txt files belong to the django domain. Strings in
+JavaScript files belong to the djangojs domain. To create the corresponding .po
+files, run
+
+    django-admin.py makemessages -l XX -e '.html,.txt'
+    django-admin.py makemessages -l XX -d djangojs
+
+where XX is the code for your locale.
+

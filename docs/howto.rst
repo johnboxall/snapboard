@@ -14,7 +14,10 @@ __ http://www.djangoproject.com/
 Get the dependencies
 ====================
 
-SNAPboard depends on  `django-pagination`__. To install `django-pagination`, 
+django-pagination
+-----------------
+
+SNAPboard depends on `django-pagination`__. To install django-pagination, 
 download :file:`django-pagination-1.0.4.tar.gz` (or any later version), then
 run the following commands:
 
@@ -25,6 +28,41 @@ __ http://code.google.com/p/django-pagination/
     tar xvf django-pagination-1.0.4.tar.gz
     cd django-pagination
     python setup.py install
+
+django-notification
+-------------------
+
+`django-notification`__ is not required for SNAPboard to run, but if it is not
+installed, your users will not receive email notifications—for example, when
+one of their watched threads is updated.
+
+__ http://code.google.com/p/django-notification/
+
+To install django-notification you will need to fetch the source code from
+their subversion repository and place the package on your Python interpreter's
+search path. This is explained in the next section.
+
+django-mailer
+-------------
+
+`django-mailer`__ is recommended by django-notification. It provides an
+asynchronous email sending facility. When django-notification—and possibly
+other applications—call ``mailer.send_mail()``, the email is usually not sent
+immediately; instead, it is queued and you must run ``manage.py send_mail`` for
+any queued email to be sent to your SMTP server. Of course, ``manage.py
+send_mail`` should be scheduled to run regularly. On UNIX systems, this would
+be achieved with cron.
+
+__ http://code.google.com/p/django-mailer/
+
+You should read django-mailer's documentation for more information. As for 
+django-notification, django-mailer must currently be installed from
+the sources in the project's subversion repository.
+
+.. note::
+
+    If django-mailer is installed on your system, django-notification will
+    attempt to use it, even if it is not configured properly.
 
 Get SNAPboard
 =============
@@ -45,16 +83,16 @@ directory, then run:
 
     __ http://subversion.tigris.org/
 
-For Python to find the `snapboard` package that is inside the directory 
+For Python to find the snapboard package that is inside the directory 
 where you loaded the SNAPboard development trunk, that directory needs to be on
 Python's search path. One way is to make the `PYTHONPATH` environment variable
 point to the directory. Another way, which is available on UNIX
 systems, is to make a symbolic link from a standard Python module directory to 
-the `snapboard` package. For example, you can run 
+the snapboard package. For example, you can run 
 ``ln -s ~/snapboard-trunk/snapboard /usr/lib/python2.5/site-packages/``. This 
 will typically require root privileges.
 
-To test that `snapboard` is on your path, launch a python shell and run ``import 
+To test that snapboard is on your path, launch a python shell and run ``import 
 snapboard``.
 
 Tune your project's settings
@@ -72,7 +110,7 @@ values.
     If you are testing SNAPboard, we recommend that you use SQLite because it is
     fast and easy to use in such setting.
 
-Then, add `snapboard` and `pagination` to the `INSTALLED_APPS` setting::
+Then, add ``snapboard`` and ``pagination`` to the `INSTALLED_APPS` setting::
 
     INSTALLED_APPS = (
         'django.contrib.auth',
@@ -81,9 +119,21 @@ Then, add `snapboard` and `pagination` to the `INSTALLED_APPS` setting::
         'snapboard',
     )
 
+If you use django-notification, add ``notification`` and, if django-mailer is
+installed, add ``mailer``::
+
+    INSTALLED_APPS = (
+        'django.contrib.auth',
+        ...
+        'pagination',
+        'notification',
+        'mailer',
+        'snapboard',
+    )
+
 Edit the `TEMPLATE_CONTEXT_PROCESSORS` setting to add 
-`django.core.context_processors.request` and 
-`snapboard.views.snapboard_default_context`::
+``django.core.context_processors.request`` and 
+``snapboard.views.snapboard_default_context``::
 
     TEMPLATE_CONTEXT_PROCESSORS = (
         "django.core.context_processors.auth",
@@ -132,11 +182,14 @@ files.
 a login form. This is useful assuming you make SNAPboard inherit a custom 
 base template which already has a login form: just set it to `False`.
 
-`SNAP_POST_FILTER` indicates the formatting "language" your users can 
+`SNAP_POST_FILTER` indicates the formatting language your users can 
 use on the forums. You should not change this setting after your forum has 
 been receiving posts as existing messages would be rendered incorrectly.
 If in doubt, choose 'bbcode'. SNAPboard comes with an edition toolbar to 
 make BBcode easy to use for your users. It is also widely adoped.
+
+Finally, don't forget some of Django's optional settings such as
+`LOGIN_REDIRECT_URL`, `EMAIL_HOST`, etc.
 
 Add SNAPboard to your `urlconf`
 ===============================
@@ -160,6 +213,21 @@ administration interface, you can re-use the following code::
             {'template_name': 'snapboard/signout.html'}, 'auth_logout'),
         (r'^admin/(.*)', admin.site.root),
     )
+
+If you use django-notification, you need to add the following under the initial
+definition of `urlpatterns`::
+
+    urlpatterns += patterns('',
+        # As long as we don't include django-notification's urlconf, we must define the URL for 
+        # 'notification_notices' ourselves because of notification/models.py:251.
+        (r'^notices/', 'django.views.generic.simple.redirect_to', {'url': '/snapboard/'}, 'notification_notices'),
+    )
+
+SNAPboard doesn't yet have an online version of the notices sent
+to users and a bug in django-notification causes an error when the named url
+'notification_notices' doesn't exist. To work around that we create a fake URL
+handler that just redirects to our forums. The issue is likely to be fixed in 
+a future release of django-notification.
 
 In a development setting, you may also want to serve the media files via
 Django's integrated web server. To do so, add::

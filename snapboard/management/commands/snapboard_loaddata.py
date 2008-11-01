@@ -155,8 +155,7 @@ def to_0_2_1(stream):
     tree = etree.parse(stream)
     stream.truncate()
     root = tree.getroot()
-    # TODO: Test this with lxml2
-    for elt in root.findall('.//field[@name=private]'):
+    for elt in root.iterfind('.//field[@name="private"]'):
         if len(elt):
             # The element has children: set is_private=True on its parent
             elt.getparent().append(E.field('True', {'name': 'is_private', 'type': 'BooleanField'}))

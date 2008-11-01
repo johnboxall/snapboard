@@ -5,7 +5,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-	# ('Your Name', 'your_email@domain.com'),
+    # ('Your Name', 'your_email@domain.com'),
 )
 
 MANAGERS = ADMINS
@@ -33,8 +33,8 @@ SITE_ID = 1
 USE_I18N = True
 
 LANGUAGES = (
-	('en', 'English'),
-	('fr', 'Français'),
+    ('en', 'English'),
+    ('fr', 'Français'),
 )
 
 #LANGUAGE_CODE = 'fr'
@@ -57,66 +57,74 @@ SECRET_KEY = '1gzez%G"e42%r(25%%n&@jjvp0g_&#)idxt$)$2%0@%+$at7#@'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-	'django.template.loaders.filesystem.load_template_source',
-	'django.template.loaders.app_directories.load_template_source',
-#	 'django.template.loaders.eggs.load_template_source',
+    'django.template.loaders.filesystem.load_template_source',
+    'django.template.loaders.app_directories.load_template_source',
+#     'django.template.loaders.eggs.load_template_source',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-	"django.core.context_processors.auth",
-	"django.core.context_processors.debug",
-	"django.core.context_processors.i18n",
-	"django.core.context_processors.request",
-	"snapboard.views.snapboard_default_context",
+    "django.core.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.request",
+    "snapboard.views.snapboard_default_context",
 )
 
 MIDDLEWARE_CLASSES = (
-	'django.middleware.common.CommonMiddleware',
-	'django.contrib.sessions.middleware.SessionMiddleware',
-	'django.contrib.auth.middleware.AuthenticationMiddleware',
-	'django.middleware.doc.XViewMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.doc.XViewMiddleware',
 
-	# django-pagination is used by the default templates
-	'pagination.middleware.PaginationMiddleware',
+    # django-pagination is used by the default templates
+    'pagination.middleware.PaginationMiddleware',
 
-	# SNAPBoard middleware
-	'snapboard.middleware.threadlocals.ThreadLocals',
+    # SNAPBoard middleware
+    'snapboard.middleware.threadlocals.ThreadLocals',
 
-	# These are optional
-	'snapboard.middleware.ban.IPBanMiddleware',
-	'snapboard.middleware.ban.UserBanMiddleware',
+    # These are optional
+    'snapboard.middleware.ban.IPBanMiddleware',
+    'snapboard.middleware.ban.UserBanMiddleware',
 )
 
 ROOT_URLCONF = 'examplesite.urls'
 
 TEMPLATE_DIRS = (
-	# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-	# Always use forward slashes, even on Windows.
-	# Don't forget to use absolute paths, not relative paths.
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
 )
 
+use_mailer = False
+use_notification = False
 try:
-	import notification
+    import notification
 except ImportError:
-	use_notification = False
-	print 'django-notification not found: email notifications to users will not be available'
+    print 'django-notification not found: email notifications to users will not be available'
 else:
-	use_notification = True
+    use_notification = True
+    try:
+        import mailer
+    except ImportError:
+        pass
+    else:
+        use_mailer = True
 
 INSTALLED_APPS = (
-	'django.contrib.admin',
-	'django.contrib.auth',
-	'django.contrib.contenttypes',
-	'django.contrib.markup',
-	'django.contrib.sessions',
-	'django.contrib.sites',
-	'snapboard',
-	'pagination',
-	'mailer',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.markup',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'snapboard',
+    'pagination',
 )
 
 if use_notification:
-	INSTALLED_APPS = INSTALLED_APPS + ('notification',)
+    INSTALLED_APPS = INSTALLED_APPS + ('notification',)
+if use_mailer:
+    INSTALLED_APPS = INSTALLED_APPS + ('mailer',)
 
 LOGIN_REDIRECT_URL = '/snapboard/'
 
@@ -140,6 +148,6 @@ import os
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'snapboard/media')
 
 try:
-	from settings_local import *
+    from settings_local import *
 except ImportError:
-	pass
+    pass

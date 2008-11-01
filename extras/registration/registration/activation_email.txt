@@ -1,13 +1,11 @@
-{% load i18n %}
-{% blocktrans with site.name as site_name %}
-Hi,
+{% load i18n %}{% filter wordwrap:72 %}{% blocktrans with site.name as site_name %}Hi,
 
 This is an automatic email to help you complete your registration
 with {{ site_name }}.
 
 Please open the following link in your web browser. If the link
-is split over several lines, you will need to copy it in the
-address bar of your web browser, with no line separators.{% endblocktrans %}
+is split over several lines, you may need to copy it in the
+address bar of your web browser.{% endblocktrans %}
 
 http://{{ site.domain }}{% url registration_activate activation_key %}
 
@@ -17,4 +15,4 @@ this email.
 
 Best regards,
 {{ site_name }}
-{% endblocktrans %}
+{% endblocktrans %}{% endfilter%}
