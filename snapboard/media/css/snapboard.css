@@ -38,7 +38,7 @@ padding:5px;
 }
 
 div.snapboard .forummenu-first {
-background-image:url('/media/img/cdd_topleft.png');
+background-image:url('../img/cdd_topleft.png');
 background-position:top right;
 background-repeat:no-repeat;
 }

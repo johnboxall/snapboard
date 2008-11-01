@@ -3,8 +3,8 @@
 
 {% block sbreg_body_main %}
 	{% if account %}
-		{% blocktrans %}Thank you. Your account is now activated. Your username is 
-		<b>{{ account.username }}</b>.{% endblocktrans %}
+		{% blocktrans with account.username as username %}Thank you. Your account is now activated. Your username is 
+		<b>{{ username }}</b>.{% endblocktrans %}
 	{% else %}
 		{% url registration_register as reg_url %}
 		{% blocktrans count expiration_days as days %}
