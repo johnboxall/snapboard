@@ -45,6 +45,8 @@ SNAPboard requires Django 1.0.''',
     packages=['snapboard',],
     package_dir={'snapboard': 'snapboard'},
     package_data={'snapboard': [
+        'media/*/*.*',
+        'media/*/*/*.*',
         'templates/*.*',
         'templates/snapboard/*.*',
         'templates/notification/*.*',
