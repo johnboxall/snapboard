@@ -1,0 +1,126 @@
+# SNAPBoard registration templates translations
+# Copyright (C) Julien Demoor 2008
+# This file is distributed under the same license as the SNAPBoard package.
+# Julien Demoor <jdemoor> at <gmail.com> 2008
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sbextras.registration-0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-11-05 12:37+0100\n"
+"PO-Revision-Date: 2008-11-05 12:35+0100\n"
+"Last-Translator: Julien Demoor <jdemoor> at <gmail.com>\n"
+"Language-Team: FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: registration/activate.html:6
+#, python-format
+msgid ""
+"Thank you. Your \n"
+"\t\taccount is now activated. Your username is \n"
+"\t\t<b>%(username)s</b>."
+msgstr ""
+"Merci. Votre compte est \n"
+"\t\tà présent activé. Votre nom d'utilisateur est \n"
+"\t\t<b>%(username)s</b>."
+
+#: registration/activate.html:11
+#, python-format
+msgid ""
+"\n"
+"\t\tYour account could not be activated.\n"
+"\t\tThis may be because it is already active or because you waited over \n"
+"\t\t%(days)s day to activate it. \n"
+"\t\tIf this is not the case, please contact the website administrator. \n"
+"\t\tOtherwise, you may <a href=\"%(reg_url)s\">register again.</a>\n"
+"\t\t"
+msgid_plural ""
+"\n"
+"\t\tYour account could not be activated.\n"
+"\t\tThis may be because it is already active or because you waited over \n"
+"\t\t%(days)s days to activate it. \n"
+"\t\tIf this is not the case, please contact the website administrator. \n"
+"\t\tOtherwise, you may <a href=\"%(reg_url)s\">register again.</a>\n"
+"\t\t"
+msgstr[0] ""
+"\n"
+"\t\tNous n'avons pas pu activer votre compte.\n"
+"\t\tLa raison peut être qu'il est déjà actif ou que vous avez attendu \n"
+"\t\t%(days)s jour pour l'activer. \n"
+"\t\tSi tel n'est pas le cas, veuillez contacter l'administrateur du site. \n"
+"\t\tVous pouvez également <a href=\"%(reg_url)s\">créer un compte à nouveau.</a>\n"
+"\t\t"
+msgstr[1] ""
+"\n"
+"\t\tNous n'avons pas pu activer votre compte.\n"
+"\t\tLa raison peut être qu'il est déjà actif ou que vous avez attendu \n"
+"\t\t%(days)s jours pour l'activer. \n"
+"\t\tSi tel n'est pas le cas, veuillez contacter l'administrateur du site. \n"
+"\t\tVous pouvez également <a href=\"%(reg_url)s\">créer un compte à nouveau.</a>\n"
+"\t\t"
+
+#: registration/activation_email.txt:1
+#, python-format
+msgid ""
+"Hi,\n"
+"\n"
+"This is an automatic email to help you complete your registration\n"
+"with %(site_name)s.\n"
+"\n"
+"Please open the following link in your web browser. If the link\n"
+"is split over several lines, you may need to copy it in the\n"
+"address bar."
+msgstr ""
+"Bonjour,\n"
+"\n"
+"Ce message vous a été envoyé automatiquement dans le but de vous aider \n"
+"à compléter votre inscription sur %(site_name)s.\n"
+"\n"
+"Veuillez ouvrir le lien suivant dans votre navigateur. Si le lien \n"
+"apparait sur plusieurs lignes, vous pouvez le copier dans la barre \n"
+"d'adresse."
+
+#: registration/activation_email.txt:12
+#, python-format
+msgid ""
+"\n"
+"If there is a problem with your registration, please reply to\n"
+"this email.\n"
+"\n"
+"Best regards,\n"
+"%(site_name)s\n"
+msgstr ""
+"\n"
+"En cas de problème avec votre inscription, vous pouvez répondre \n"
+"à cet email.\n"
+"\n"
+"%(site_name)s\n"
+
+#: registration/activation_email_subject.txt:1
+#, python-format
+msgid "Your registration on %(site_name)s"
+msgstr "Votre inscription sur %(site_name)s"
+
+#: registration/login.html:12
+msgid "Log in"
+msgstr "Connexion"
+
+#: registration/logout.html:5
+msgid "You have been logged out. Thank you for your visit and see you soon!"
+msgstr "Vous êtes à présent déconnecté. Merci de votre visite et à bientôt."
+
+#: registration/registration_complete.html:5
+msgid ""
+"Thank you for registering. You will very soon receive an email with \n"
+"a confirmation link. Please follow this link in order to complete your "
+"registration."
+msgstr ""
+"Merci de votre inscription. Vous recevrez très bientôt un email avec \n"
+"un lien de confirmation. Veuillez suivre le lien afin de compléter "
+"l'activation de votre compte."
+
+#: registration/registration_form.html:11
+msgid "Submit"
+msgstr "Envoyer"
