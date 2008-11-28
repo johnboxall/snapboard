@@ -264,7 +264,7 @@ def favorite_index(request):
     This page shows the threads/discussions that have been marked as 'watched'
     by the user.
     '''
-    thread_list = Thread.view_manager.get_favorites(request.user)
+    thread_list = filter(lambda t: t.category.can_view(request.user), Thread.view_manager.get_favorites(request.user))
 
     render_dict = {'title': _("Watched Discussions"), 'threads': thread_list}
 
@@ -302,6 +302,7 @@ def thread_index(request):
         thread_list = Thread.view_manager.get_user_query_set(request.user)
     else:
         thread_list = Thread.view_manager.get_query_set()
+    thread_list = filter(lambda t: t.category.can_view(request.user), thread_list)
     render_dict = {'title': _("Recent Discussions"), 'threads': thread_list}
     return render_to_response('snapboard/thread_index.html',
             render_dict,
