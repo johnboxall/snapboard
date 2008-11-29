@@ -367,7 +367,7 @@ class Post(models.Model):
                 all_recipients = all_recipients.union(recipients)
 
     def get_absolute_url(self):
-        return ''.join(('/threads/id/', str(self.thread.id), '/#post', str(self.id)))
+        return reverse('snapboard_locate_post', args=(self.id,))
 
     def get_edit_form(self):
         from forms import PostForm
