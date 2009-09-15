@@ -53,10 +53,10 @@ PERM_CHOICES_RESTRICTED = (
 )
 
 class PermissionError(PermissionDenied):
-    '''
+    """
     Raised when a user tries to perform a forbidden operation, as per the 
     permissions defined by Category objects.
-    '''
+    """
     pass
 
 def is_user_banned(user):
@@ -66,18 +66,17 @@ def is_ip_banned(ip):
     return ip in settings.SNAP_BANNED_IPS
 
 class Group(models.Model):
-    '''
+    """
     User-administerable group, be used to assign permissions to possibly 
     several users.
 
     Administrators of the group need to be explicitely added to the users
     list to be considered members.
-    '''
-
+    """
     name = models.CharField(_('name'), max_length=36)
     users = models.ManyToManyField(User, verbose_name=_('users'), related_name='sb_member_of_group_set')
     admins = models.ManyToManyField(User, verbose_name=_('admins'), related_name='sb_admin_of_group_set') 
-
+    
     class Meta:
         verbose_name = _('group')
         verbose_name_plural = _('groups')
@@ -92,13 +91,12 @@ class Group(models.Model):
         return self.admins.filter(pk=user.pk).count() != 0
 
 class Invitation(models.Model):
-    '''
+    """
     Group admins create invitations for users to join their group.
 
     Staff with site admin access can assign users to groups without
     restriction.
-    '''
-
+    """
     group = models.ForeignKey(Group, verbose_name=_('group'), related_name='sb_invitation_set')
     sent_by = models.ForeignKey(User, verbose_name=_('sent by'), related_name='sb_sent_invitation_set')
     sent_to = models.ForeignKey(User, verbose_name=_('sent to'), related_name='sb_received_invitation_set')
@@ -117,9 +115,9 @@ class Invitation(models.Model):
                 'sent_to': self.sent_to }
 
     def notify_received(instance, **kwargs):
-        '''
+        """
         Notifies of new invitations.
-        '''
+        """
         if not notification:
             return
         if instance.accepted is None:
@@ -130,9 +128,9 @@ class Invitation(models.Model):
     notify_received = staticmethod(notify_received)
 
     def notify_cancelled(instance, **kwargs):
-        '''
+        """
         Notifies of cancelled invitations.
-        '''
+        """
         if not notification:
             return
         if instance.accepted is None:
@@ -146,9 +144,9 @@ signals.post_save.connect(Invitation.notify_received, sender=Invitation)
 signals.pre_delete.connect(Invitation.notify_cancelled, sender=Invitation)
 
 class Category(models.Model):
-
     label = models.CharField(max_length=32, verbose_name=_('label'))
-
+    slug = models.SlugField()
+    
     view_perms = models.PositiveSmallIntegerField(_('view permission'), 
         choices=PERM_CHOICES, default=ALL,
         help_text=_('Limits the category\'s visibility.'))
@@ -174,6 +172,10 @@ class Category(models.Model):
         blank=True, null=True, related_name='can_create_thread_category_set')
 
     objects = managers.CategoryManager()    # adds thread_count
+
+    class Meta:
+        verbose_name = _('category')
+        verbose_name_plural = _('categories')
 
     def __unicode__(self):
         return self.label
@@ -221,9 +223,6 @@ class Category(models.Model):
             flag = user.is_superuser or (user.is_authenticated() and self.new_thread_group.has_user(user))
         return flag
 
-    class Meta:
-        verbose_name = _('category')
-        verbose_name_plural = _('categories')
 
 class Moderator(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('category'))
@@ -236,35 +235,36 @@ class Moderator(models.Model):
 
 class Thread(models.Model):
     subject = models.CharField(max_length=160, verbose_name=_('subject'))
+    slug = models.SlugField(max_length=160)
     category = models.ForeignKey(Category, verbose_name=_('category'))
-
+    
     closed = models.BooleanField(default=False, verbose_name=_('closed'))
-
+    
     # Category sticky - will show up at the top of category listings.
     csticky = models.BooleanField(default=False, verbose_name=_('category sticky'))
-
+    
     # Global sticky - will show up at the top of home listing.
     gsticky = models.BooleanField(default=False, verbose_name=_('global sticky'))
-
+    
     objects = models.Manager() # needs to be explicit due to below
     view_manager = managers.ThreadManager()
-
-    def __unicode__(self):
-        return self.subject
-
-    def get_url(self):
-        return reverse('snapboard_thread', args=(self.id,))
-
+    
     class Meta:
         verbose_name = _('thread')
         verbose_name_plural = _('threads')
-
+    
+    def __unicode__(self):
+        return self.subject
+    
+    def get_url(self):
+        return reverse('snapboard_thread', args=(self.id,))
+    
     def count_posts(self, user, before=None):
-        '''
+        """
         Returns the number of visible posts in the thread or, if ``before`` is 
         a Post object, the number of visible posts in the thread that are
         older.
-        '''
+        """
         # This partly does what Thread.objects.get_query_set() does, except 
         # it takes into account the user and therefore knows what posts
         # are visible to him
@@ -312,9 +312,15 @@ class Post(models.Model):
     censor = models.BooleanField(default=False, verbose_name=_('censored')) # moderator level access
     freespeech = models.BooleanField(default=False, verbose_name=_('protected')) # superuser level access
 
-
     objects = models.Manager() # needs to be explicit due to below
     view_manager = managers.PostManager()
+
+    class Meta:
+        verbose_name = _('post')
+        verbose_name_plural = _('posts')
+
+    def __unicode__(self):
+        return u''.join( (unicode(self.user), u': ', unicode(self.date)) )
 
     def save(self, force_insert=False, force_update=False):
         _log.debug('user = %s, ip = %s' % (threadlocals.get_current_ip(),
@@ -333,8 +339,7 @@ class Post(models.Model):
             # only do the following on creation, not modification
             self.odate = datetime.now()
         super(Post, self).save(force_insert, force_update)
-
-
+    
     def management_save(self):
         if self.previous is not None:
             self.odate = self.previous.odate
@@ -342,7 +347,7 @@ class Post(models.Model):
             # only do the following on creation, not modification
             self.odate = datetime.now()
         super(Post, self).save(False, False)
-
+    
     def notify(self, **kwargs):
         if not notification:
             return
@@ -365,35 +370,30 @@ class Post(models.Model):
                     {'post': self}
                 )
                 all_recipients = all_recipients.union(recipients)
-
+    
     def get_absolute_url(self):
         return reverse('snapboard_locate_post', args=(self.id,))
-
+    
     def get_edit_form(self):
         from forms import PostForm
         return PostForm(initial={'post':self.text})
 
-    def __unicode__(self):
-        return u''.join( (unicode(self.user), u': ', unicode(self.date)) )
-
-    class Meta:
-        verbose_name = _('post')
-        verbose_name_plural = _('posts')
 
 # Signals make it hard to handle the notification of private recipients
 #if notification:
 #    signals.post_save.connect(Post.notify, sender=Post)
 
 class AbuseReport(models.Model):
-    '''
+    """
     When an abuse report is filed by a registered User, the post is listed
     in this table.
 
     If the abuse report is rejected as false, the post.freespeech flag can be
     set to disallow further abuse reports on said thread.
-    '''
+    """
     post = models.ForeignKey(Post, verbose_name=_('post'))
-    submitter = models.ForeignKey(User, verbose_name=_('submitter'), related_name='sb_abusereport_set')
+    submitter = models.ForeignKey(User, verbose_name=_('submitter'), 
+        related_name='sb_abusereport_set')
 
     class Meta:
         verbose_name = _('abuse report')
@@ -409,14 +409,14 @@ class WatchList(models.Model):
     # no need to be in the admin
 
 class UserSettings(models.Model):
-    '''
+    """
     User data tied to user accounts from the auth module.
 
     Real name, email, and date joined information are stored in the built-in
     auth module.
 
     After logging in, save these values in a session variable.
-    '''
+    """
     user = models.OneToOneField(User, unique=True, 
             verbose_name=_('user'), related_name='sb_usersettings')
     ppp = models.IntegerField(
@@ -444,9 +444,9 @@ class UserSettings(models.Model):
         return _('%s\'s preferences') % self.user
     
 class UserBan(models.Model):
-    '''
+    """
     This bans the user from posting messages on the forum. He can still log in.
-    '''
+    """
     user = models.ForeignKey(User, unique=True, verbose_name=_('user'), db_index=True,
             related_name='sb_userban_set',
             help_text=_('The user may still browse the forums anonymously. '
@@ -471,10 +471,10 @@ signals.post_save.connect(UserBan.update_cache, sender=UserBan)
 signals.post_delete.connect(UserBan.update_cache, sender=UserBan)
 
 class IPBan(models.Model):
-    '''
+    """
     IPs in the list are not allowed to use the boards.
     Only IPv4 addresses are supported, one per record. (patch with IPv6 and/or address range support welcome)
-    '''
+    """
     address = models.IPAddressField(unique=True, verbose_name=_('IP address'), 
             help_text=_('A person\'s IP address may change and an IP address may be '
             'used by more than one person, or by different people over time. '
@@ -497,6 +497,3 @@ class IPBan(models.Model):
 
 signals.post_save.connect(IPBan.update_cache, sender=IPBan)
 signals.post_delete.connect(IPBan.update_cache, sender=IPBan)
-
-# vim: ai ts=4 sts=4 et sw=4
-

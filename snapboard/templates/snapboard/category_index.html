@@ -3,23 +3,23 @@
 
 {% block snapboard_main %}
     <div class="index_title">
-    <h2 style="font-size: 152%;">
+    <h2>
     {% trans "Topics Category List" %}
     </h2>
     </div>
     {% if cat_list %}
         {% for category in cat_list %}
         <div class="thread">
-            <span style="font-size:medium;">
-                <b><a href="{% url snapboard_category_thread_index category.id %}">{{ category.label }}</a></b>
+            <span class="name">
+                <b><a href="{% url snapboard_category_thread_index slug=category.slug %}">{{ category.label }}</a></b>
             </span>
-            <span style="color: #999; font-size: small; float: right;">
+            <span class="moderators">
                 {% if category.moderators %}
                 {% trans "moderators" %}:  {{ category.moderators }}
                 {% endif %}
             </span>
             <br />
-            <span style="color: #999; padding-left:2em; font-size:small;">
+            <span class="count">
                 {% blocktrans count category.thread_count as cnt %}{{ cnt }} discussion{% plural %}{{ cnt }} discussions{% endblocktrans %}
             </span>
         </div>
@@ -28,6 +28,3 @@
         <p>{% trans "No categories are available." %}</p>
     {% endif %}
 {% endblock %}
-<!--
-vim: ai ts=4 sts=4 et sw=4 
--->

@@ -4,9 +4,7 @@
 
 {% block snapboard_main %}
     <div class="index_title">
-    <h2 style="font-size: 152%;">
-    {{ title }}
-    </h2>
+        <h2>{{ title }}</h2>
         {% autopaginate threads user_settings.tpp %}
         {% paginate %}
     </div>
@@ -14,11 +12,9 @@
     {% if threads %}
         {% for thread in threads %}
         <div class="thread">
-            <p style="margin-top: 10px; margin-bottom: 5px;">
-                <span style="color: #999; font-size: small; float:right;">
-                    {{ thread.post_count }} {% trans "posts started by" %} <b>{{ thread.starter }}</b>
-                </span>
-                <span style="font-size: 100%;">
+            <p>
+                <span>{{ thread.post_count }} {% trans "posts started by" %} <b>{{ thread.starter }}</b></span>
+                <span>
                     <b>
                         {% if thread.gsticky %}
                         {% trans "STICKY" %}
@@ -30,18 +26,18 @@
                         {% if thread.closed %}
                         {% trans "CLOSED" %}
                         {% endif %}
-                        <a href="{% url snapboard_thread thread.id %}">{{ thread.subject }}</a>
+                        <a href="{% url snapboard_thread thread.category.slug thread.slug %}">{{ thread.subject }}</a>
                     </b>
                 </span>
             </p>
-            <span style="color: #677; font-size: small; float:right;">
+            <span>
                 {% trans "last updated" %}
                 <span class="datetime">{{ thread.date|date:"r T" }}<span class="timestamp">{{ thread.date|timestamp }}</span></span>
                 {% ifnotequal thread.last_poster thread.starter %}
                 {% trans "by" %} {{ thread.last_poster }}
                 {% endifnotequal %}
             </span>
-            <span style="color: #888; padding-left: 2em; font-size:small;">
+            <span>
                 {% trans "category" %}:
                 <a href="{% url snapboard_category_thread_index thread.category.id %}">
                     {{ thread.category }}
@@ -55,6 +51,3 @@
         <p>{% trans "No threads are available." %}</p>
     {% endif %}
 {% endblock %}
-<!--
-vim: ai ts=4 sts=4 et sw=4 
--->

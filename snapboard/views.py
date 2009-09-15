@@ -46,6 +46,11 @@ RPC_ACTION_MAP = {
         "watch": rpc_watch,
         "quote": rpc_quote,
         }
+        
+def render(template_name, context, request=None):
+    context_instance = RequestContext(request, processors=extra_processors)
+    return render_to_response(template_name, context, 
+        context_instance=context_instance)
 
 def snapboard_default_context(request):
     """
@@ -67,10 +72,10 @@ def user_settings_context(request):
 if USE_SNAPBOARD_LOGIN_FORM:
     from snapboard.forms import LoginForm
     def login_context(request):
-        '''
+        """
         All content pages that have additional content for authenticated users but
         that are also publicly viewable should have a login form in the side panel.
-        '''
+        """
         response_dict = {}
         if not request.user.is_authenticated():
             response_dict.update({
@@ -83,9 +88,9 @@ else:
     extra_processors = [user_settings_context]
 
 def rpc(request):
-    '''
+    """
     Delegates simple rpc requests.
-    '''
+    """
     if not request.POST or not request.user.is_authenticated():
         return HttpResponseServerError()
 
@@ -125,60 +130,43 @@ def rpc(request):
     except KeyError:
         return HttpResponseServerError()
 
-def thread(request, thread_id):
-    try:
-        thr = Thread.view_manager.get(pk=thread_id)
-    except Thread.DoesNotExist:
-        raise Http404
-
+def thread(request, cslug, tslug, template="snapboard/thread.html"):
+    thr = get_object_or_404(Thread.view_manager.filter(category__slug=cslug), slug=tslug)
     if not thr.category.can_read(request.user):
         raise PermissionError
-
-    render_dict = {}
-
+    
+    ctx = {}
+    
     if request.user.is_authenticated():
-        render_dict.update({"watched": WatchList.objects.filter(user=request.user, thread=thr).count() != 0})
-
+        ctx.update({"watched": WatchList.objects.filter(user=request.user, thread=thr).count() != 0})
+    
     if request.POST:
         if not thr.category.can_post(request.user):
             raise PermissionError
-        postform = PostForm(request.POST)
+        
+        postform = PostForm(request.POST, request=request)
         if postform.is_valid():
-            postobj = Post(thread = thr,
-                    user = request.user,
-                    text = postform.cleaned_data['post'],
-                    )
-            postobj.save() # this needs to happen before many-to-many private is assigned
-
-            if len(postform.cleaned_data['private']) > 0:
-                _log.debug('thread(): new post private = %s' % postform.cleaned_data['private'])
-                postobj.private = postform.cleaned_data['private']
-                postobj.is_private = True
-                postobj.save()
-            postobj.notify()
+            postobj = postform.save(thr)
             return HttpResponseRedirect(reverse('snapboard_locate_post', args=(postobj.id,)))
     else:
-        postform = PostForm()
-
-    # this must come after the post so new messages show up
-    post_list = Post.view_manager.posts_for_thread(thread_id, request.user)
+        postform = PostForm(request=request)
+    
+    # Comes after the post so new messages show up.
+    post_list = Post.view_manager.posts_for_thread(thr.id, request.user)
     if get_user_settings(request.user).reverse_posts:
         post_list = post_list.order_by('-odate')
-
-    render_dict.update({
-            'posts': post_list,
-            'thr': thr,
-            'postform': postform,
-            })
     
-    return render_to_response('snapboard/thread.html',
-            render_dict,
-            context_instance=RequestContext(request, processors=extra_processors))
+    ctx.update({
+        'posts': post_list,
+        'thr': thr,
+        'postform': postform,
+    })
+    return render(template, ctx, request)
 
 def edit_post(request, original, next=None):
-    '''
+    """
     Edit an existing post.decorators in python
-    '''
+    """
     if not request.method == 'POST':
         raise Http404
 
@@ -218,109 +206,79 @@ def edit_post(request, original, next=None):
 
     return HttpResponseRedirect(next)
 
-##
-# Should new discussions be allowed to be private?  Leaning toward no.
-def new_thread(request, cat_id):
-    '''
-    Start a new discussion.
-    '''
-    category = get_object_or_404(Category, pk=cat_id)
-    if not category.can_create_thread(request.user):
+@login_required
+def new_thread(request, slug, template="snapboard/newthread.html"):
+    cat = get_object_or_404(Category, slug=slug)
+    if not cat.can_create_thread(request.user):
         raise PermissionError
 
-    if request.POST:
-        threadform = ThreadForm(request.POST)
-        if threadform.is_valid():
-            # create the thread
-            thread = Thread(
-                    subject = threadform.cleaned_data['subject'],
-                    category = category,
-                    )
-            thread.save()
+    threadform = ThreadForm(request.POST or None, request=request)
+    if threadform.is_valid():
+        thread = threadform.save(cat)
+        next = reverse('snapboard_thread', args=[thread.category.slug,
+            thread.slug])
+        return HttpResponseRedirect(next)
+    
+    return render(template, {"form": threadform}, request)
 
-            # create the post
-            post = Post(
-                    user = request.user,
-                    thread = thread,
-                    text = threadform.cleaned_data['post'],
-                    )
-            post.save()
-
-            # redirect to new thread
-            return HttpResponseRedirect(reverse('snapboard_thread', args=(thread.id,)))
-    else:
-        threadform = ThreadForm()
-
-    return render_to_response('snapboard/newthread.html',
-            {
-            'form': threadform,
-            },
-            context_instance=RequestContext(request, processors=extra_processors))
-new_thread = login_required(new_thread)
-
-
-def favorite_index(request):
-    '''
-    This page shows the threads/discussions that have been marked as 'watched'
+@login_required
+def favorite_index(request, template="snapboard/thread_index.html"):
+    """
+    Shows the threads/discussions that have been marked as 'watched'
     by the user.
-    '''
-    thread_list = filter(lambda t: t.category.can_view(request.user), Thread.view_manager.get_favorites(request.user))
+    """
+    qs = Thread.view_manager.get_favorites(request.user)
+    threads = filter(lambda t: t.category.can_view(request.user), qs)
+    ctx = {'title': _("Watched Discussions"), 'threads': threads}
+    return render(template, ctx, request)
 
-    render_dict = {'title': _("Watched Discussions"), 'threads': thread_list}
+@login_required
+def private_index(request, template="snapboard/thread_index.html"):
+    qs = Thread.view_manager.get_private(request.user)
+    threads = [thr for thr in qs if thr.category.can_read(request.user)]
+    ctx = {
+        'title': _("Discussions with private messages to you"),
+        'threads': threads
+    }
+    return render(template, ctx, request)
 
-    return render_to_response('snapboard/thread_index.html',
-            render_dict,
-            context_instance=RequestContext(request, processors=extra_processors))
-favorite_index = login_required(favorite_index)
+def category_thread_index(request, slug, template="snapboard/thread_index.html"):
+    cat = get_object_or_404(Category, slug=slug)
+    if not cat.can_read(request.user):
+        raise PermissionError
+    
+    threads = Thread.view_manager.get_category(cat.id)
+    ctx = {
+        'title': ''.join((_("Category: "), cat.label)), 
+        'category': cat, 
+        'threads': threads
+    }
+    return render(template, ctx, request)
 
-def private_index(request):
-    thread_list = [thr for thr in Thread.view_manager.get_private(request.user) if thr.category.can_read(request.user)]
-
-    render_dict = {'title': _("Discussions with private messages to you"), 'threads': thread_list}
-
-    return render_to_response('snapboard/thread_index.html',
-            render_dict,
-            context_instance=RequestContext(request, processors=extra_processors))
-private_index = login_required(private_index)
-
-def category_thread_index(request, cat_id):
-    try:
-        cat = Category.objects.get(pk=cat_id)
-        if not cat.can_read(request.user):
-            raise PermissionError
-        thread_list = Thread.view_manager.get_category(cat_id)
-        render_dict = ({'title': ''.join((_("Category: "), cat.label)), 'category': cat, 'threads': thread_list})
-    except Category.DoesNotExist:
-        raise Http404
-    return render_to_response('snapboard/thread_index.html',
-            render_dict,
-            context_instance=RequestContext(request, processors=extra_processors))
-
-def thread_index(request):
+def thread_index(request, template="snapboard/thread_index.html"):
     if request.user.is_authenticated():
-        # filter on user prefs
-        thread_list = Thread.view_manager.get_user_query_set(request.user)
+        qs = Thread.view_manager.get_user_query_set(request.user)
     else:
-        thread_list = Thread.view_manager.get_query_set()
-    thread_list = filter(lambda t: t.category.can_view(request.user), thread_list)
-    render_dict = {'title': _("Recent Discussions"), 'threads': thread_list}
-    return render_to_response('snapboard/thread_index.html',
-            render_dict,
-            context_instance=RequestContext(request, processors=extra_processors))
+        qs = Thread.view_manager.get_query_set()
+    threads = filter(lambda t: t.category.can_view(request.user), qs)
+    ctx = {'title': _("Recent Discussions"), 'threads': threads}
+    return render(template, ctx, request)
 
 def locate_post(request, post_id):
-    '''
+    """
     Redirects to a post, given its ID.
-    '''
+    """
     post = get_object_or_404(Post, pk=post_id)
     if not post.thread.category.can_read(request.user):
         raise PermissionError
-    if post.is_private and not (post.user==request.user or post.private.filter(pk=request.user.id).count()):
+    if post.is_private and not (post.user == request.user or post.private.filter(pk=request.user.id).count()):
         raise PermissionError
+    
     # Count the number of visible posts before the one we are looking for, 
     # as well as the total
     total = post.thread.count_posts(request.user)
     preceding_count = post.thread.count_posts(request.user, before=post.date)
+
     # Check the user's settings to locate the post in the various pages
     settings = get_user_settings(request.user)
     ppp = settings.ppp
@@ -330,34 +288,27 @@ def locate_post(request, post_id):
         page = (total - preceding_count - 1) // ppp + 1
     else:
         page = preceding_count // ppp + 1
-    return HttpResponseRedirect('%s?page=%i#snap_post%i' % (reverse('snapboard_thread', args=(post.thread.id,)), page, post.id))
+    
+    path = reverse('snapboard_thread', args=[post.thread.category.slug, post.thread.slug])
+    next = '%s?page=%i#snap_post%i' % (path, page, post.id)
+    return HttpResponseRedirect(next)
 
-def category_index(request):
-    return render_to_response('snapboard/category_index.html',
-            {
-            'cat_list': [c for c in Category.objects.all() if c.can_view(request.user)],
-            },
-            context_instance=RequestContext(request, processors=extra_processors))
+def category_index(request, template="snapboard/category_index.html"):
+    ctx = {
+        'cat_list': [c for c in Category.objects.all() if c.can_view(request.user)],
+    }
+    return render(template, ctx, request)
 
-def edit_settings(request):
-    '''
+@login_required
+def edit_settings(request, template="snapboard/edit_settings.html"):
+    """
     Allow user to edit his/her profile. Requires login.
-    '''
-    try:
-        userdata = UserSettings.objects.get(user=request.user)
-    except UserSettings.DoesNotExist:
-        userdata = UserSettings.objects.create(user=request.user)
-    if request.method == 'POST':
-        form = UserSettingsForm(request.POST, instance=userdata, user=request.user)
-        if form.is_valid():
-            form.save(commit=True)
-    else:
-        form = UserSettingsForm(instance=userdata, user=request.user)
-    return render_to_response(
-            'snapboard/edit_settings.html',
-            {'form': form},
-            context_instance=RequestContext(request, processors=extra_processors))
-edit_settings = login_required(edit_settings)
+    """
+    userdata, _ = UserSettings.objects.get_or_create(user=request.user)
+    form = UserSettingsForm(request.POST or None, instance=userdata, request=request)
+    if form.is_valid():
+        form.save(commit=True)
+    return render(template, {"form": form}, request)
 
 def manage_group(request, group_id):
     group = get_object_or_404(Group, pk=group_id)
@@ -437,10 +388,10 @@ def remove_user_from_group(request, group_id):
 remove_user_from_group = login_required(remove_user_from_group)
 
 def grant_group_admin_rights(request, group_id):
-    '''
+    """
     Although the Group model allows non-members to be admins, this view won't 
     let it.
-    '''
+    """
     group = get_object_or_404(Group, pk=group_id)
     if not group.has_admin(request.user):
         raise PermissionError
@@ -522,12 +473,12 @@ def get_user_settings(user):
         return DEFAULT_USER_SETTINGS
 
 def _brand_view(func):
-    '''
+    """
     Mark a view as belonging to SNAPboard.
 
     Allows the UserBanMiddleware to limit the ban to SNAPboard in larger 
     projects.
-    '''
+    """
     setattr(func, '_snapboard', True)
 
 _brand_view(rpc)

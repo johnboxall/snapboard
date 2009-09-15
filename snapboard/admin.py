@@ -13,6 +13,10 @@ class AbuseReportAdmin(admin.ModelAdmin):
 	model = AbuseReport
 	list_display = ('post', 'submitter')
 	
+class CategoryAdmin(admin.ModelAdmin):
+	prepopulated_fields = {"slug": ("label",)}
+    
+	
 class ThreadAdmin(admin.ModelAdmin):
 	model = Thread
 	list_display = ('subject', 'category')

@@ -9,9 +9,7 @@
 {% load extras %}
 
 {% block snapboard_main %}
-    <div id="thread_rpc_feedback" class="rpc_message">
-        <!-- This DIV is for RPC feedback messages for the whole thread-->
-    </div>
+    <div id="thread_rpc_feedback" class="rpc_message"></div>
     <p>
         <span class="thread_menu">
             {% if user.is_staff %}
@@ -43,7 +41,7 @@
             {% endif %}
         </span>
         <b style="font-size: large;">
-            <a href="{% url snapboard_category_thread_index thr.category.id %}">{{ thr.category }}</a>:
+            <a href="{% url snapboard_category_thread_index thr.category.slug %}">{{ thr.category }}</a>:
             {{ thr.subject }}
         </b>
     </p>

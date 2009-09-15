@@ -38,13 +38,13 @@ class PostManager(models.Manager):
 
 class ThreadManager(models.Manager):
     def get_query_set(self):
-        '''
+        """
         This generates a QuerySet containing Threads and additional data used
         in generating a web page with a listing of discussions.
         http://code.django.com/ qset allows the caller to specify an initial
         queryset to work with.  If this is not set, all Threads will be
         returned.
-        '''
+        """
         # number of posts in thread
         # censored threads don't count toward the total
         extra_post_count = """
@@ -113,11 +113,10 @@ class ThreadManager(models.Manager):
 
 class CategoryManager(models.Manager):
     def get_query_set(self):
-        thread_count = """
-            SELECT COUNT(*) FROM snapboard_thread
-            WHERE snapboard_thread.category_id = snapboard_category.id
-            """
-        return super(CategoryManager, self).get_query_set().extra(
-            select = {'thread_count': thread_count})
-                
-# vim: ai ts=4 sts=4 et sw=4
+        #@@@ BROKEN FOR SOME REASON
+#         thread_count = """
+#             SELECT COUNT(*) FROM snapboard_thread
+#             WHERE `snapboard_thread.category_id` = `snapboard_category.id`
+#             """
+        return super(CategoryManager, self).get_query_set()#.extra(
+#            select = {'thread_count': thread_count})

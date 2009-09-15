@@ -2,6 +2,7 @@ import os
 
 from django.db.models import signals 
 from django.conf import settings
+from django.template.defaultfilters import slugify
 
 from snapboard import models as snapboard_app
 
@@ -15,6 +16,8 @@ def test_setup(**kwargs):
         return 
 
     if Thread.objects.all().count() > 0:
+        Category.objects.all().delete()
+        Thread.objects.all().delete()
         # return, since there seem to already be threads in the database.
         return
     
@@ -42,16 +45,15 @@ def test_setup(**kwargs):
             'Skiing in the Vermont Area',
             'The Best Restaurants')
     for c in cats:
-        cat = Category.objects.get_or_create(label=c)
+        cat = Category.objects.get_or_create(label=c, slug=slugify(c))
 
     # create up to 30 posts
     tc = range(1, 50)
     for i in range(0, 35):
         print 'thread ', i, 'created'
-        cat= choice(Category.objects.all())
+        cat = choice(Category.objects.all())
         subj = choice(sampledata.objects.split('\n'))
-        thread = Thread(subject=subj, category=cat)
-        thread.save()
+        thread, _ = Thread.objects.get_or_create(subject=subj, category=cat, slug=slugify(subj))
 
         for j in range(0, choice(tc)):
             text = '\n\n'.join([sampledata.sample_data() for x in range(0, choice(range(2, 5)))])
@@ -66,5 +68,3 @@ def test_setup(**kwargs):
             post.management_save()
 
 signals.post_syncdb.connect(test_setup, sender=snapboard_app) 
-# vim: ai ts=4 sts=4 et sw=4
-

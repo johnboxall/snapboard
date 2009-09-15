@@ -13,9 +13,7 @@
             {% endifnotequal %}
         {% endif %}
 
-        <div id="post_rpc_feedback{{ post.id }}" class="rpc_message">
-            <!-- This DIV is for RPC feedback messages for individual posts -->
-        </div>
+        <div id="post_rpc_feedback{{ post.id }}" class="rpc_message"></div>
         <p class="post_header">
             <span class="post_menuright">
                 {% if user.is_authenticated  %}

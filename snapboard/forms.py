@@ -4,29 +4,51 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.forms import widgets, ValidationError
+from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 
-from snapboard.models import Category, UserSettings
+from snapboard.models import Category, UserSettings, Thread, Post
 
-class PostForm(forms.Form):
-    post = forms.CharField(
-            label = '',
-            widget=forms.Textarea(attrs={
-                'rows':'8',
-                'cols':'120',
-            }),
-        )
-    private = forms.CharField(
-            label=_("Recipients"),
-            max_length=150,
-            widget=forms.TextInput(),
-            required=False,
-            )
+class RequestFormMixin(object):
+    def __init__(self, data=None, files=None, request=None, *args, **kwargs):
+        if request is None:
+            raise TypeError("Keyword argument 'request' must be supplied.")
+        super(RequestFormMixin, self).__init__(data=data, files=files, *args, **kwargs)
+        self.request = request
+    
+class RequestForm(RequestFormMixin, forms.Form):
+    pass
+    
+class RequestModelForm(RequestFormMixin, forms.ModelForm):
+    pass  
 
+
+class PostForm(RequestForm):
+    post = forms.CharField(label = '', widget=forms.Textarea(attrs={'rows':'8',
+        'cols':'120',}))
+    private = forms.CharField(label=_("Recipients"), max_length=150, 
+        widget=forms.TextInput(), required=False)
+
+    def save(self, thread):
+        data = self.cleaned_data
+        user = self.request.user
+        
+        postobj = Post.objects.create(thread=thread, user=user, text=data['post'])
+
+        if len(data['private']):
+            _log.debug('thread(): new post private = %s' % data['private'])
+            postobj.private = data['private']
+            postobj.is_private = True
+            postobj.save()
+    
+        postobj.notify()
+
+        return postobj
+    
     def clean_private(self):
         recipients = self.cleaned_data['private']
-        if len(recipients.strip()) < 1:
+        if not len(recipients.strip()):
             return []
         recipients = filter(lambda x: len(x.strip()) > 0, recipients.split(','))
         recipients = Set([x.strip() for x in recipients]) # string of usernames
@@ -41,57 +63,38 @@ class PostForm(forms.Form):
         return u
 
 
+class ThreadForm(RequestForm):
+    subject = forms.CharField(max_length=80, label=_('Subject'),
+        widget=forms.TextInput(attrs={'size': '80',}))
+    post = forms.CharField(label=_('Message'), widget=forms.Textarea(
+        attrs={'rows':'8', 'cols': '80',}))
 
-class ThreadForm(forms.Form):
-#    def __init__( self, *args, **kwargs ):
-#        super( ThreadForm, self ).__init__( *args, **kwargs )
-#        self.fields['category'] = forms.ChoiceField(
-#                label = _('Category'),
-#                choices = [(str(x.id), x.label) for x in Category.objects.all()] 
-#                )
+    def save(self, category):
+        data = self.cleaned_data
+        user = self.request.user
+        subj = data['subject']
+        thread = Thread.objects.create(subject=subj, category=category, slug=slugify(subj))
+        post = Post.objects.create(user=user, thread=thread, text=data['post'])
+        return thread
 
-#    # this is here to set the order
-#    category = forms.CharField(label=_('Category'))
 
-    subject = forms.CharField(max_length=80,
-            label=_('Subject'),
-            widget=forms.TextInput(
-                attrs={
-                    'size': '80',
-                })
-            )
-    post = forms.CharField(widget=forms.Textarea(
-            attrs={
-                'rows':'8',
-                'cols': '80',
-            }),
-            label=_('Message')
-        )
-
-#    def clean_category(self):
-#        id = int(self.cleaned_data['category'])
-#        return id
-
-class UserSettingsForm(forms.ModelForm):
-
-    def __init__(self, *pa, **ka):
-        user = ka.pop('user')
-        self.user = user
-        super(UserSettingsForm, self).__init__(*pa, **ka)
-        self.fields['frontpage_filters'].choices = [
-            (cat.id, cat.label) for cat in Category.objects.all() if 
-            cat.can_read(user)
-        ]
-
+class UserSettingsForm(RequestModelForm):
     frontpage_filters = forms.MultipleChoiceField(label=_('Front page categories'))
-
+    
     class Meta:
         model = UserSettings
         exclude = ('user',)
-
+    
+    def __init__(self, *args, **kwargs):
+        super(UserSettingsForm, self).__init__(*args, **kwargs)
+        self.fields['frontpage_filters'].choices = [
+            (cat.id, cat.label) for cat in Category.objects.all() if 
+            cat.can_read(self.request.user)
+        ]
+    
     def clean_frontpage_filters(self):
         frontpage_filters = [cat for cat in (Category.objects.get(pk=id) for id in
-                self.cleaned_data['frontpage_filters']) if cat.can_read(self.user)]
+                self.cleaned_data['frontpage_filters']) if cat.can_read(self.request.user)]
         return frontpage_filters
 
 class LoginForm(forms.Form):
@@ -123,5 +126,3 @@ class InviteForm(forms.Form):
 
 class AnwserInvitationForm(forms.Form):
     decision = forms.ChoiceField(label=_('Answer'), choices=((0, _('Decline')), (1, _('Accept'))))
-
-# vim: ai ts=4 sts=4 et sw=4
