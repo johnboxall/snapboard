@@ -12,8 +12,6 @@ from snapboard.models import Category, UserSettings, Thread, Post
 
 class RequestFormMixin(object):
     def __init__(self, data=None, files=None, request=None, *args, **kwargs):
-        if request is None:
-            raise TypeError("Keyword argument 'request' must be supplied.")
         super(RequestFormMixin, self).__init__(data=data, files=files, *args, **kwargs)
         self.request = request
     
@@ -30,21 +28,39 @@ class PostForm(RequestForm):
     private = forms.CharField(label=_("Recipients"), max_length=150, 
         widget=forms.TextInput(), required=False)
 
-    def save(self, thread):
+    def edit(self, opost):
+        """Create a revision of an existing post."""
         data = self.cleaned_data
         user = self.request.user
+
+        # Create the new edition.
+        post = Post.objects.create(thread=opost.thread, user=user, 
+            text=data["post"], previous=opost)
+        post.private = opost.private.all()
+        post.is_private = opost.is_private
+        post.save()
+
+        # Update the old one.
+        opost.revision = post
+        opost.save()
         
-        postobj = Post.objects.create(thread=thread, user=user, text=data['post'])
-
-        if len(data['private']):
-            _log.debug('thread(): new post private = %s' % data['private'])
-            postobj.private = data['private']
-            postobj.is_private = True
-            postobj.save()
+        return post
     
-        postobj.notify()
-
-        return postobj
+    def save(self, thread):
+        """Create a new post."""
+        data = self.cleaned_data
+        user = self.request.user
+            
+        post = Post.objects.create(thread=thread, user=user, text=data['post'])
+        
+        if len(data['private']):
+            post.private = data['private']
+            post.is_private = True
+            post.save()
+        
+        post.notify()
+        
+        return post
     
     def clean_private(self):
         recipients = self.cleaned_data['private']
