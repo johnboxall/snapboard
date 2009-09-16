@@ -12,24 +12,25 @@ js_info_dict = {
 }
 
 urlpatterns = patterns('',
-    (r'^$', thread_index, {}, 'snapboard_index'),
+
+    (r'^$', category_index, {}, 'snapboard_category_index'),
+    (r'^threads/$', thread_index, {}, 'snapboard_index'),
+
 
     (r'^post/(?P<post_id>\d+)/$', locate_post, {}, 'snapboard_locate_post'),
-
-
-
+    (r'^edit_post/(?P<post_id>\d+)/$', edit_post, {}, 'snapboard_edit_post'),
     (r'^private/$', private_index, {}, 'snapboard_private_index'),
-    (r'^categories/$', category_index, {}, 'snapboard_category_index'),
     (r'^favorites/$', favorite_index, {}, 'snapboard_favorite_index'),
-    (r'^edit_post/(?P<original>\d+)/$', edit_post, {}, 'snapboard_edit_post'),
+    (r'^settings/$', edit_settings, {}, 'snapboard_edit_settings'),
+
+
+    (r'^(?P<slug>[-_\w]+)/new/$', new_thread, {}, 'snapboard_new_thread'),
 
     (r'^(?P<cslug>[-_\w]+)/(?P<tslug>[-_\w]+)/$', thread, {}, 'snapboard_thread'),
-    (r'^(?P<slug>[-_\w]+)/new/$', new_thread, {}, 'snapboard_new_thread'),
     (r'^(?P<slug>[-_\w]+)/$', category_thread_index, {}, 'snapboard_category_thread_index'),
 
 
 
-    (r'^settings/$', edit_settings, {}, 'snapboard_edit_settings'),
 
     # Groups
     (r'^groups/(?P<group_id>\d+)/manage/$', manage_group, {}, 'snapboard_manage_group'),

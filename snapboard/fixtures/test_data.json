@@ -1,0 +1,48 @@
+[
+    {
+        "pk": 1, 
+        "model": "snapboard.post", 
+        "fields": {
+            "freespeech": 0, 
+            "thread": 1, 
+            "text": "text", 
+            "censor": 0, 
+            "private": [], 
+            "user": 1, 
+            "ip": "127.0.0.1", 
+            "odate": "2009-09-14 18:54:25", 
+            "date": "2009-09-14 18:54:25", 
+            "previous": null, 
+            "is_private": 0, 
+            "revision": null
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "snapboard.thread", 
+        "fields": {
+            "category": 1, 
+            "csticky": 0, 
+            "gsticky": 0, 
+            "closed": 0, 
+            "subject": "subject",
+            "slug": "thread"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "snapboard.category", 
+        "fields": {
+            "read_group": null, 
+            "post_group": null, 
+            "view_group": null, 
+            "new_thread_group": null,
+            "view_perms": 1, 
+            "post_perms": 2, 
+            "new_thread_perms": 2, 
+            "read_perms": 1, 
+            "label": "label", 
+            "slug": "category"
+        }
+    }
+]

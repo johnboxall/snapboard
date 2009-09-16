@@ -62,5 +62,3 @@ def timestamp(dt):
     except:
         return u''
 register.filter('timestamp', timestamp)
-
-# vim: ai ts=4 sts=4 et sw=4

@@ -1,5 +1,4 @@
-{% load i18n %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+{% load i18n %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>{% block title %}SNAPBoard{% endblock %}</title>
@@ -10,11 +9,11 @@
     <link rel="alternate" type="application/rss+xml" title="RSS" href="{% url snapboard_feeds "latest" %}" />
     <script type="text/javascript">
         var SNAPBOARD_URLS = {
-                'rpc_preview': '{% url snapboard_rpc_preview %}',
-                'rpc_action': '{% url snapboard_rpc_action %}',
-                'rpc_postrev': '{% url snapboard_rpc_postrev %}'
-            },
-            SNAP_POST_FILTER = '{{ SNAP_POST_FILTER }}';
+            'rpc_preview': '{% url snapboard_rpc_preview %}',
+            'rpc_action': '{% url snapboard_rpc_action %}',
+            'rpc_postrev': '{% url snapboard_rpc_postrev %}'
+        },
+        SNAP_POST_FILTER = '{{ SNAP_POST_FILTER }}';
     </script>
     <script type="text/javascript" src="{% url snapboard_js_i18n %}"></script>
     <script src="{{ SNAP_MEDIA_PREFIX }}/js/yui/yahoo-dom-event.js" type="text/javascript"></script>
