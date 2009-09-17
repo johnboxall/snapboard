@@ -16,5 +16,5 @@ class LatestPosts(Feed):
     description_template = "snapboard/feeds/latest_description.html"
 
     def items(self):
-        # we should only return the non-private messages
-        return filter(lambda p: p.thread.category.can_read(self.request.user), Post.objects.filter(is_private=False).order_by('-date')[:10])
+        qs = Post.objects.filter(is_private=False).order_by('-date')[:10]
+        return [p for p in qs if p.thread.category.can_read(self.request.user)]

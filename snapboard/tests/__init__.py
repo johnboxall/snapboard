@@ -1,1 +1,1 @@
-from tests import ViewTests
+from tests import ViewsTest, RPCTest

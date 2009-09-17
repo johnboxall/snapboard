@@ -374,5 +374,3 @@ function do_quote(id) {
     get_post_to_quote(id, callback);
     return true;
 }
-
-// vim: ai ts=4 sts=4 et sw=4

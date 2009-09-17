@@ -9,17 +9,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 
 from snapboard.models import Category, UserSettings, Thread, Post
+from snapboard.utils import RequestForm, RequestModelForm
 
-class RequestFormMixin(object):
-    def __init__(self, data=None, files=None, request=None, *args, **kwargs):
-        super(RequestFormMixin, self).__init__(data=data, files=files, *args, **kwargs)
-        self.request = request
-    
-class RequestForm(RequestFormMixin, forms.Form):
-    pass
-    
-class RequestModelForm(RequestFormMixin, forms.ModelForm):
-    pass  
+
+__all__ = [
+    "PostForm", "ThreadForm", "UserSettingsForm", "LoginForm", "InviteForm", 
+    "AnwserInvitationForm"
+]
 
 
 class PostForm(RequestForm):

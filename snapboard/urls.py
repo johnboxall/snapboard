@@ -14,8 +14,15 @@ rpc_lookup_dict = {
     'field':'username',
 }
 
-urlpatterns = patterns('snapboard.views',
-    # Forum
+urlpatterns = patterns('',
+    # Feeds
+    (r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}, 'snapboard_feeds'),
+
+    # JavaScript
+    (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict, 'snapboard_js_i18n'),
+)
+
+urlpatterns += patterns('snapboard.views',
     (r'^$', 'category_index', {}, 'snapboard_category_index'),
     (r'^threads/$', 'thread_index', {}, 'snapboard_index'),
     (r'^post/(?P<post_id>\d+)/$', 'locate_post', {}, 'snapboard_locate_post'),
@@ -23,9 +30,6 @@ urlpatterns = patterns('snapboard.views',
     (r'^private/$', 'private_index', {}, 'snapboard_private_index'),
     (r'^favorites/$', 'favorite_index', {}, 'snapboard_favorite_index'),
     (r'^settings/$', 'edit_settings', {}, 'snapboard_edit_settings'),
-    (r'^(?P<slug>[-_\w]+)/new/$', 'new_thread', {}, 'snapboard_new_thread'),
-    (r'^(?P<cslug>[-_\w]+)/(?P<tslug>[-_\w]+)/$', 'thread', {}, 'snapboard_thread'),
-    (r'^(?P<slug>[-_\w]+)/$', 'category_thread_index', {}, 'snapboard_category_thread_index'),
 
     # Groups
     (r'^groups/(?P<group_id>\d+)/manage/$', 'manage_group', {}, 'snapboard_manage_group'),
@@ -38,7 +42,7 @@ urlpatterns = patterns('snapboard.views',
     (r'invitations/(?P<invitation_id>\d+)/answer/$', 'answer_invitation', {}, 'snapboard_answer_invitation'),
 
     # RPC
-    (r'^rpc/action/$', 'rpc', {}, 'snapboard_rpc_action'),
+    (r'^rpc/action/$', 'rpc', {}, 'snapboard_rpc_action'),   
 )
 
 urlpatterns += patterns('snapboard.rpc',
@@ -47,10 +51,8 @@ urlpatterns += patterns('snapboard.rpc',
     (r'^rpc/user_lookup/$', 'rpc_lookup', rpc_lookup_dict, 'snapboard_rpc_user_lookup'),
 )
 
-urlpatterns += patterns('',
-    # Feeds
-    (r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}, 'snapboard_feeds'),
-
-    # JavaScript
-    (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict, 'snapboard_js_i18n'),
+urlpatterns += patterns("snapboard.views",
+    (r'^(?P<slug>[-_\w]+)/new/$', 'new_thread', {}, 'snapboard_new_thread'),
+    (r'^(?P<cslug>[-_\w]+)/(?P<tslug>[-_\w]+)/$', 'thread', {}, 'snapboard_thread'),
+    (r'^(?P<slug>[-_\w]+)/$', 'category_thread_index', {}, 'snapboard_category_thread_index'),
 )

@@ -24,7 +24,7 @@ __all__ = [
     'PermissionError', 'is_user_banned', 'is_ip_banned', 
     'Category', 'Invitation', 'Group', 'Thread', 'Post', 'Moderator',
     'WatchList', 'AbuseReport', 'UserSettings', 'IPBan', 'UserBan',
-    ]
+]
 
 _log = logging.getLogger('snapboard.models')
 
@@ -285,7 +285,7 @@ class Post(models.Model):
     """
     # blank=True to get admin to work when the user field is missing
     user = models.ForeignKey(User, editable=False, blank=True, default=None,
-            verbose_name=_('user'), related_name='sb_created_posts_set')
+        verbose_name=_('user'), related_name='sb_created_posts_set')
 
     thread = models.ForeignKey(Thread, verbose_name=_('thread'))
     text = models.TextField(verbose_name=_('text'))
@@ -293,7 +293,7 @@ class Post(models.Model):
     ip = models.IPAddressField(verbose_name=_('ip address'), blank=True, null=True)
 
     private = models.ManyToManyField(User,
-            related_name="sb_private_posts_set", null=True, verbose_name=_('private recipients'))
+        related_name="sb_private_posts_set", null=True, verbose_name=_('private recipients'))
     # The 'private message' status is denormalized by the ``is_private`` flag.
     # It's currently quite hard to do the denormalization automatically 
     # If ManyRelatedManager._add_items() fired some signal on update, it would help.
@@ -304,9 +304,9 @@ class Post(models.Model):
     # (null or ID of post - most recent revision is always a diff of previous)
     odate = models.DateTimeField(editable=False, null=True)
     revision = models.ForeignKey("self", related_name="rev",
-            editable=False, null=True, blank=True)
+        editable=False, null=True, blank=True)
     previous = models.ForeignKey("self", related_name="prev",
-            editable=False, null=True, blank=True)
+        editable=False, null=True, blank=True)
 
     # (boolean set by mod.; true if abuse report deemed false)
     censor = models.BooleanField(default=False, verbose_name=_('censored')) # moderator level access

@@ -1,10 +1,10 @@
-import logging
 import datetime
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseServerError
+from django.http import (HttpResponse, HttpResponseRedirect, Http404, 
+    HttpResponseServerError)
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils import simplejson
@@ -19,14 +19,8 @@ except ImportError:
 from snapboard.forms import *
 from snapboard.models import *
 from snapboard.rpc import *
+from snapboard.utils import JsonResponse, render, extra_processors, get_user_settings
 
-_log = logging.getLogger('snapboard.views')
-
-DEFAULT_USER_SETTINGS  = UserSettings()
-
-# USE_SNAPBOARD_LOGIN_FORM, USE_SNAPBOARD_SIGNIN should probably be removed
-USE_SNAPBOARD_SIGNIN = getattr(settings, 'USE_SNAPBOARD_SIGNIN', False)
-USE_SNAPBOARD_LOGIN_FORM = getattr(settings, 'USE_SNAPBOARD_LOGIN_FORM', False)
 
 RPC_OBJECT_MAP = {
     "thread": Thread,
@@ -42,53 +36,7 @@ RPC_ACTION_MAP = {
     "watch": rpc_watch,
     "quote": rpc_quote,
 }
-        
-def render(template_name, context, request=None):
-    context_instance = RequestContext(request, processors=extra_processors)
-    return render_to_response(template_name, context, 
-        context_instance=context_instance)
 
-def snapboard_default_context(request):
-    """
-    Provides some default information for all templates.
-
-    This should be added to the settings variable TEMPLATE_CONTEXT_PROCESSORS
-    """
-    return {
-        'SNAP_MEDIA_PREFIX': SNAP_MEDIA_PREFIX,
-        'SNAP_POST_FILTER': SNAP_POST_FILTER,
-        'LOGIN_URL': settings.LOGIN_URL,
-        'LOGOUT_URL': settings.LOGOUT_URL,
-    }
-
-def get_user_settings(user):
-    if not user.is_authenticated():
-        return DEFAULT_USER_SETTINGS
-    try:
-        return user.sb_usersettings
-    except UserSettings.DoesNotExist:
-        return DEFAULT_USER_SETTINGS
-
-def user_settings_context(request):
-    return {'user_settings': get_user_settings(request.user)}
-
-if USE_SNAPBOARD_LOGIN_FORM:
-    from snapboard.forms import LoginForm
-    def login_context(request):
-        """
-        All content pages that have additional content for authenticated users but
-        that are also publicly viewable should have a login form in the side panel.
-        """
-        response_dict = {}
-        if not request.user.is_authenticated():
-            response_dict.update({
-                    'login_form': LoginForm(),
-                    })
-
-        return response_dict
-    extra_processors = [user_settings_context, login_context]
-else:
-    extra_processors = [user_settings_context]
 
 def rpc(request, mimetype='application/javascript'):
     """
@@ -96,8 +44,6 @@ def rpc(request, mimetype='application/javascript'):
     """
     if not request.POST or not request.user.is_authenticated():
         return HttpResponseServerError()
-
-    ctx = {}
 
     action = request.POST.get('action', '').lower()
     rpc_func = RPC_ACTION_MAP.get(action)
@@ -125,10 +71,8 @@ def rpc(request, mimetype='application/javascript'):
         return HttpResponseServerError()
     except oclass.DoesNotExist:
         return HttpResponseServerError()
-    else:
-        ctx.update(rpc_func(request, **{oclass_str: forum_object}))
-        return HttpResponse(simplejson.dumps(ctx), mimetype=mimetype)
-
+    
+    return JsonResponse(rpc_func(request, **{oclass_str: forum_object}))
 
 def thread(request, cslug, tslug, template="snapboard/thread.html"):
     thr = get_object_or_404(Thread.view_manager.filter(category__slug=cslug), slug=tslug)
@@ -289,7 +233,7 @@ def edit_settings(request, template="snapboard/edit_settings.html"):
     return render(template, {"form": form}, request)
 
 
-#@@@ Haven't looked at group functions.
+#@@@ Haven't looked at group/invitation functions.
 
 #@@@
 @login_required

@@ -374,4 +374,3 @@ def textile(text):
 if __name__ == '__main__':
     import sys
     print textile(sys.stdin.read())
-# vim: ai ts=4 sts=4 et sw=4

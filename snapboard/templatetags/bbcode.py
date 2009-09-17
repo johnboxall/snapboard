@@ -610,6 +610,3 @@ def correct(bbcode):
     parser = BBCodeParser(True)
     parser.parse(bbcode)
     return parser.render_bbcode()
-
-#vim: ai ts=4 sts=4 et sw=4
-

@@ -16,7 +16,25 @@
             "is_private": 0, 
             "revision": null
         }
-    }, 
+    },
+    {
+        "pk": 2,
+        "model": "snapboard.post", 
+        "fields": {
+            "freespeech": 0, 
+            "thread": 1, 
+            "text": "text", 
+            "censor": 0, 
+            "private": [], 
+            "user": 1, 
+            "ip": "127.0.0.1", 
+            "odate": "2009-09-14 18:54:25", 
+            "date": "2009-09-14 18:54:25", 
+            "previous": 1, 
+            "is_private": 0, 
+            "revision": null
+        }
+    },
     {
         "pk": 1, 
         "model": "snapboard.thread", 
