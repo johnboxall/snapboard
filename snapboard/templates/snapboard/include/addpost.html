@@ -47,7 +47,7 @@
             <p>{{ postform.private }}</p>
             <div id="autocomplete_div"></div>
             <script type="text/javascript"><!--
-                dataSource = new YAHOO.widget.DS_XHR("{% url snapboard_rpc_user_lookup %}", ["ResultSet.Result","name","id"]);
+                dataSource = new YAHOO.widget.DS_XHR("{% url snapboard_user_lookup %}", ["ResultSet.Result","name","id"]);
                 autoComp = new YAHOO.widget.AutoComplete("id_private","autocomplete_div",dataSource);
                 autoComp.delimChar = ","; 
                 autoComp.typeAhead = true;

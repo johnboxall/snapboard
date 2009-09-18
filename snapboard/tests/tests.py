@@ -21,6 +21,13 @@ class ViewsTest(TestCase):
         self.old_template_dir = settings.TEMPLATE_DIRS
         settings.TEMPLATE_DIRS = self.template_dirs        
         self.user = User.objects.create_user(username="test", email="test@example.com", password="!")
+        self.admin = User.objects.create_superuser(username="admin", email="admin@example.com", password="!") 
+        
+    def assertJSON(self, name, expected, klass="thread", pk=1, username="test"):
+        self.client.login(username=username, password="!")    
+        uri = reverse("snapboard_%s" % name)
+        r = self.client.post(uri, {"%s_id" % klass: pk})
+        self.assertEquals(r.content, expected)
     
     def tearDown(self):
         settings.TEMPLATE_DIRS = self.old_template_dir
@@ -101,46 +108,71 @@ class ViewsTest(TestCase):
         r = self.client.post(uri, data)
         self.assertRedirects(r, uri)
     
-    def test_rpc(self):
-        self.client.login(username="test", password="!")    
-        uri = reverse("snapboard_rpc_action")
-        data = {"action": "quote", "oid": 1}
-        r = self.client.post(uri, data)
-        expected = '{"text": "text", "author": "test"}'
-        self.assertEquals(r.content, expected)
-     
-    def test_rpc_post(self):        
-        self.client.login(username="test", password="!")
-        path = reverse("snapboard_rpc_postrev")
-        uri = "%s?orig=2&show=1" % path
-        r = self.client.get(uri)
-        expected = '{"text": "\\n<p>text\\n</p>\\n\\n\\n", "prev_id": "", "rev_id": ""}'
-        self.assertEquals(r.content, expected)
-        
-    def test_rpc_preview(self):
-        uri = reverse("snapboard_rpc_preview")
-        r = self.client.get(uri)
-        expected = '{"preview": "\\n\\n\\n"}'
-        self.assertEquals(r.content, expected)
-    
-    def test_rpc_lookup(self):
-        path = reverse("snapboard_rpc_user_lookup")
-        uri = "%s?query=test" % path
-        r = self.client.get(uri)
-        expected = '{"ResultSet": {"total": "5", "Result": [{"id": 1, "name": "test"}]}}'
-        self.assertEquals(r.content, expected)
-
     def test_feeds(self):
         for feed in feeds.keys():
             uri = reverse("snapboard_feeds", args=[feed])
             r = self.client.get(uri)
             self.assertEquals(r.status_code, 200)
-            
+    
     def test_js18n(self):
         uri = reverse("snapboard_js_i18n")
         r = self.client.get(uri)
         self.assertEquals(r.status_code, 200)
     
+    def test_post_revision(self):        
+        self.client.login(username="test", password="!")
+        path = reverse("snapboard_post_revision")
+        uri = "%s?orig=2&show=1" % path
+        r = self.client.get(uri)
+        expected = '{"text": "\\n<p>text\\n</p>\\n\\n\\n", "prev_id": "", "rev_id": ""}'
+        self.assertEquals(r.content, expected)
+    
+    def test_text_preview(self):
+        uri = reverse("snapboard_text_preview")
+        r = self.client.get(uri)
+        expected = '{"preview": "\\n\\n\\n"}'
+        self.assertEquals(r.content, expected)
+    
+    # def test_user_lookup(self):
+    #    path = reverse("snapboard_user_lookup")
+    #    uri = "%s?query=test" % path
+    #    r = self.client.get(uri)
+    #    expected = '{"ResultSet": {"total": "5", "Result": [{"id": 1, "name": "test"}]}}'
+    #    self.assertEquals(r.content, expected)
+        
+    def test_censor_post(self):
+        # self.assertJSON("censor_post", "<h1>Permission denied</h1>")
+        expected = '{"msg": "This post is censored!", "link": "uncensor"}'
+        self.assertJSON("censor_post", expected, username="admin", klass="post")
+    
+    def test_global_sticky_thread(self):
+        # self.assertJSON("gsticky", "<h1>Permission denied</h1>")
+        expected = '{"msg": "This thread is now globally sticky.", "link": "unset gsticky"}'
+        self.assertJSON("global_sticky_thread", expected, username="admin")
+    
+    def test_category_sticky_thread(self):
+        # self.assertJSON("category_sticky_thread", "<h1>Permission denied</h1>")
+        expected = '{"msg": "This thread is sticky in its category.", "link": "unset csticky"}'
+        self.assertJSON("category_sticky_thread", expected, username="admin")
+    
+    def test_close_thread(self):
+        # self.assertJSON("close_thread", "<h1>Permission denied</h1>")
+        expected = '{"msg": "This discussion is now CLOSED.", "link": "open thread"}'
+        self.assertJSON("close_thread", expected, username="admin")
+
+    def test_report_post(self):
+        expected = '{"msg": "The moderators have been notified of possible abuse", "link": ""}'
+        self.assertJSON("report_post", expected, klass="post")
+
+    def test_watch_thread(self):
+        expected = '{"msg": "This thread has been added to your favorites.", "link": "dont watch"}'
+        self.assertJSON("watch_thread", expected)
+
+    def test_quote_post(self):
+        self.assertJSON("quote_post", '{"text": "text", "author": "test"}')
+
+
+ 
     # def test_manage_group(self):
     #     pass
     # 
@@ -159,51 +191,6 @@ class ViewsTest(TestCase):
     # def test_answer_invitation(self):
     #     pass
 
-class RPCTest(TestCase):
-    urls = "snapboard.tests.test_urls"
-    fixtures = ["test_data"]
-
-    def setUp(self):
-        self.user = User.objects.create_user(username="test", email="test@example.com", password="!")
-        self.admin = User.objects.create_superuser(username="admin", email="admin@example.com", password="!") 
-    
-    def assertRPC(self, action, expected, oid=1, oclass="thread", username="test"):
-        self.client.login(username=username, password="!")    
-        uri = reverse("snapboard_rpc_action")
-        data = {"action": action, "oid": oid, "oclass": oclass}
-        r = self.client.post(uri, data)
-        self.assertEquals(r.content, expected)
-
-    def test_rpc_censor(self):
-        self.assertRPC("censor", "<h1>Permission denied</h1>")
-        expected = '{"msg": "This post is censored!", "link": "uncensor"}'
-        self.assertRPC("censor", expected, username="admin", oclass="post")
-    
-    def test_rpc_gsticky(self):
-        self.assertRPC("gsticky", "<h1>Permission denied</h1>")
-        expected = '{"msg": "This thread is now globally sticky.", "link": "unset gsticky"}'
-        self.assertRPC("gsticky", expected, username="admin")
-    
-    def test_rpc_csticky(self):
-        self.assertRPC("csticky", "<h1>Permission denied</h1>")
-        expected = '{"msg": "This thread is sticky in its category.", "link": "unset csticky"}'
-        self.assertRPC("csticky", expected, username="admin")
-    
-    def test_rpc_close(self):
-        self.assertRPC("censor", "<h1>Permission denied</h1>")
-        expected = '{"msg": "This discussion is now CLOSED.", "link": "open thread"}'
-        self.assertRPC("close", expected, username="admin")
-
-    def test_rpc_abuse(self):
-        expected = '{"msg": "The moderators have been notified of possible abuse", "link": ""}'
-        self.assertRPC("abuse", expected, oclass="post")
-
-    def test_rpc_watch(self):
-        expected = '{"msg": "This thread has been added to your favorites.", "link": "dont watch"}'
-        self.assertRPC("watch", expected)
-
-    def test_rpc_quote(self):
-        self.assertRPC("quote", '{"text": "text", "author": "test"}')
 
 
 # from unittest import TestSuite

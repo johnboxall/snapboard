@@ -3,15 +3,12 @@ from django.contrib.auth.models import User
 
 from snapboard.feeds import LatestPosts
 
-feeds = {'latest': LatestPosts}
+feeds = {
+    'latest': LatestPosts
+}
 
 js_info_dict = {
     'packages': ('snapboard',),
-}
-
-rpc_lookup_dict = {
-    'queryset':User.objects.all(),
-    'field':'username',
 }
 
 urlpatterns = patterns('',
@@ -22,7 +19,13 @@ urlpatterns = patterns('',
     (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict, 'snapboard_js_i18n'),
 )
 
+lookup_dict = {
+    'queryset':User.objects.all(),
+    'field':'username',
+}
+
 urlpatterns += patterns('snapboard.views',
+    # Forum
     (r'^$', 'category_index', {}, 'snapboard_category_index'),
     (r'^threads/$', 'thread_index', {}, 'snapboard_index'),
     (r'^post/(?P<post_id>\d+)/$', 'locate_post', {}, 'snapboard_locate_post'),
@@ -42,16 +45,18 @@ urlpatterns += patterns('snapboard.views',
     (r'invitations/(?P<invitation_id>\d+)/answer/$', 'answer_invitation', {}, 'snapboard_answer_invitation'),
 
     # RPC
-    (r'^rpc/action/$', 'rpc', {}, 'snapboard_rpc_action'),   
-)
+    (r'^rpc/post_revision/$', 'post_revision', {}, 'snapboard_post_revision'),
+    (r'^rpc/text_preview/$', 'text_preview', {}, 'snapboard_text_preview'),
+    (r'^rpc/lookup/$', 'lookup', lookup_dict, 'snapboard_user_lookup'),
+    (r'^rpc/category_sticky_thread/$', 'category_sticky_thread', {}, 'snapboard_category_sticky_thread'),
+    (r'^rpc/global_sticky_thread/$', 'global_sticky_thread', {}, 'snapboard_global_sticky_thread'),
+    (r'^rpc/close_thread/$', 'close_thread', {}, 'snapboard_close_thread'),
+    (r'^rpc/watch_thread/$', 'watch_thread', {}, 'snapboard_watch_thread'),
+    (r'^rpc/censor_post/$', 'censor_post', {}, 'snapboard_censor_post'),
+    (r'^rpc/report_post/$', 'report_post', {}, 'snapboard_report_post'),
+    (r'^rpc/quote_post/$', 'quote_post', {}, 'snapboard_quote_post'),
 
-urlpatterns += patterns('snapboard.rpc',
-    (r'^rpc/postrev/$', 'rpc_post', {}, 'snapboard_rpc_postrev'),
-    (r'^rpc/preview/$', 'rpc_preview', {}, 'snapboard_rpc_preview'),
-    (r'^rpc/user_lookup/$', 'rpc_lookup', rpc_lookup_dict, 'snapboard_rpc_user_lookup'),
-)
-
-urlpatterns += patterns("snapboard.views",
+    # Forum
     (r'^(?P<slug>[-_\w]+)/new/$', 'new_thread', {}, 'snapboard_new_thread'),
     (r'^(?P<cslug>[-_\w]+)/(?P<tslug>[-_\w]+)/$', 'thread', {}, 'snapboard_thread'),
     (r'^(?P<slug>[-_\w]+)/$', 'category_thread_index', {}, 'snapboard_category_thread_index'),

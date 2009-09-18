@@ -9,9 +9,16 @@
     <link rel="alternate" type="application/rss+xml" title="RSS" href="{% url snapboard_feeds "latest" %}" />
     <script type="text/javascript">
         var SNAPBOARD_URLS = {
-                'rpc_preview': '{% url snapboard_rpc_preview %}',
-                'rpc_action': '{% url snapboard_rpc_action %}',
-                'rpc_postrev': '{% url snapboard_rpc_postrev %}'
+                'revision': '{% url snapboard_post_revision %}',
+                'preview': '{% url snapboard_text_preview %}',
+                'lookup': '{% url snapboard_user_lookup %}',
+                'csticky': '{% url snapboard_category_sticky_thread %}',
+                'gsticky': '{% url snapboard_global_sticky_thread %}',
+                'close': '{% url snapboard_close_thread %}',
+                'watch': '{% url snapboard_watch_thread %}',
+                'censor': '{% url snapboard_censor_post %}',
+                'report': '{% url snapboard_report_post %}',
+                'quote': '{% url snapboard_quote_post %}'
             },
             SNAP_POST_FILTER = '{{ SNAP_POST_FILTER }}';
     </script>

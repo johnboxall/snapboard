@@ -1,6 +1,8 @@
 import datetime
 
 from django.conf import settings
+# AJAX_REQURIED
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import (HttpResponse, HttpResponseRedirect, Http404, 
@@ -11,68 +13,141 @@ from django.utils import simplejson
 from django.utils.translation import ugettext as _
 from django.views.decorators.http import require_POST
 
+
+from snapboard.forms import *
+from snapboard.models import *
+from snapboard.utils import *
+
 try:
     from notification import models as notification
 except ImportError:
     notification = None
 
-from snapboard.forms import *
-from snapboard.models import *
-from snapboard.rpc import *
-from snapboard.utils import JsonResponse, render, extra_processors, get_user_settings
 
+# Ajax'd #######################################################################
 
-RPC_OBJECT_MAP = {
-    "thread": Thread,
-    "post": Post,
-}
-
-RPC_ACTION_MAP = {
-    "censor": rpc_censor,
-    "gsticky": rpc_gsticky,
-    "csticky": rpc_csticky,
-    "close": rpc_close,
-    "abuse": rpc_abuse,
-    "watch": rpc_watch,
-    "quote": rpc_quote,
-}
-
-
-def rpc(request, mimetype='application/javascript'):
-    """
-    Delegates simple rpc requests.
-    """
-    if not request.POST or not request.user.is_authenticated():
-        return HttpResponseServerError()
-
-    action = request.POST.get('action', '').lower()
-    rpc_func = RPC_ACTION_MAP.get(action)
-    if rpc_func is None:
-        raise HttpResponseServerError()
-
-    if action == 'quote':
-        try:
-            return HttpResponse(simplejson.dumps(rpc_func(request, oid=int(request.POST['oid']))))
-        except (KeyError, ValueError):
-            return HttpResponseServerError()
-
-    # oclass_str will be used as a keyword in a function call, so it must
-    # be a string, not a unicode object (changed since Django went
-    # unicode). Thanks to Peter Sheats for catching this.
-    oclass_str = str(request.POST.get('oclass', '').lower())
-    oclass = RPC_OBJECT_MAP.get(oclass_str)
-    if oclass is None:
-        return HttpResponseServerError()
-
+def safe_int(s, default=None):
     try:
-        oid = int(request.POST['oid'])
-        forum_object = oclass.objects.get(pk=oid)
-    except KeyError:
-        return HttpResponseServerError()
-    except oclass.DoesNotExist:
-        return HttpResponseServerError()
-    
-    return JsonResponse(rpc_func(request, **{oclass_str: forum_object}))
+        return int(s)
+    except ValueError:
+        return default
+        
+#json_response ???
+
+def json(view):
+    def wrapper(*args, **kwargs):
+        return JsonResponse(view(*args, **kwargs))
+    return wrapper
+
+# require_posts?
+# @@@ STAFF REQUIRED IS NOT WHAT WE WANT WE NEED TO DEFINE OUR OWN THAT REIDRECTS SOEWHERE ELESZZ or that just returns an error in case shit goes shotoufsl
+
+
+#@ajax_required
+@json
+def post_revision(request):
+    show_id = safe_int(request.GET.get('show'))
+    orig_id = safe_int(request.GET.get('orig'))
+    post = get_object_or_404(Post, pk=show_id)
+    if not post.thread.category.can_read(request.user):
+        raise PermissionError
+
+    rev_id = post.revision and str(post.revision.id) or ''
+    prev_id = post.previous and str(post.previous.id) or ''
+    return {'text': sanitize(post.text), 'prev_id': prev_id, 'rev_id': rev_id}
+
+#@ajax_required
+@json
+def text_preview(request):
+    return {'preview': sanitize(request.raw_post_data )}
+
+#@ajax_required
+@login_required
+@json
+def lookup(request, queryset, field, limit=5):
+    # XXX We should probably restrict member (or other) lookups to registered users
+    obj_list = []
+    lookup = {'%s__icontains' % field: request.GET['query']}
+    for obj in queryset.filter(**lookup)[:limit]:
+        obj_list.append({"id": obj.id, "name": getattr(obj, field)}) 
+    return JsonResponse({"ResultSet": {"total": str(limit), "Result": obj_list}})
+
+#@ajax_required
+@staff_member_required
+@json
+def category_sticky_thread(request):
+    thread = get_object_or_404(Thread, pk=request.POST.get("thread_id"))
+    if toggle_boolean_field(thread, 'csticky'):
+        return {'link':_('unset csticky'), 'msg':_('This thread is sticky in its category.')}
+    else:
+        return {'link':_('set csticky'), 'msg':_('Removed thread from category sticky list')}
+
+#@ajax_required
+@staff_member_required
+@json
+def global_sticky_thread(request):
+    thread = get_object_or_404(Thread, pk=request.POST.get("thread_id"))
+    if toggle_boolean_field(thread, 'gsticky'):
+        return {'link':_('unset gsticky'), 'msg':_('This thread is now globally sticky.')}
+    else:
+        return {'link':_('set gsticky'), 'msg':_('Removed thread from global sticky list')}
+
+#@ajax_required
+@staff_member_required
+@json
+def close_thread(request):
+    thread = get_object_or_404(Thread, pk=request.POST.get("thread_id"))
+    if toggle_boolean_field(thread, 'closed'):
+        return {'link':_('open thread'), 'msg':_('This discussion is now CLOSED.')}
+    else:
+        return {'link':_('close thread'), 'msg':_('This discussion is now OPEN.')}
+
+#@ajax_required
+@login_required
+@json
+def watch_thread(request):
+    thread = get_object_or_404(Thread, pk=request.POST.get("thread_id"))
+    if not thr.category.can_read(request.user):
+        raise PermissionError
+
+    # If it exists watch it otherwise delete the watch.
+    try:
+        WatchList.objects.get(user=request.user, thread=thread).delete()
+        return {'link':_('watch'),
+                'msg':_('This thread has been removed from your favorites.')}
+    except WatchList.DoesNotExist:
+        WatchList.objects.create(user=request.user, thread=thread)
+        return {'link':_('dont watch'),
+                'msg':_('This thread has been added to your favorites.')}
+
+@staff_member_required
+@json
+def report_post(request):
+    post = get_object_or_404(Post, pk=request.POST.get("post_id"))
+    AbuseReport.objects.get_or_create(submitter=request.user, post=post)
+    return {'link': '', 'msg':_('The moderators have been notified of possible abuse')}
+
+#@ajax_required
+@staff_member_required
+@json
+def censor_post(request):
+    post = get_object_or_404(Post, pk=request.POST.get("post_id"))
+    if toggle_boolean_field(post, 'censor'):
+        return {'link':_('uncensor'), 'msg':_('This post is censored!')}
+    else:
+        return {'link':_('censor'), 'msg':_('This post is no longer censored.')}
+
+@json
+def quote_post(request):
+    post = get_object_or_404(Post.objects.selected_related(), pk=request.POST.get("post_id"))
+    if not post.thread.category.can_read(request.user):
+        raise PermissionError
+    if post.is_private and post.user != request.user and not post.private.filter(id=request.user.id).count():
+        raise PermissionDenied
+    return {'text': post.text, 'author': unicode(post.user)}
+
+
+# Views ########################################################################
 
 def thread(request, cslug, tslug, template="snapboard/thread.html"):
     thr = get_object_or_404(Thread.view_manager.filter(category__slug=cslug), slug=tslug)
@@ -395,29 +470,22 @@ def answer_invitation(request, invitation_id):
             {'form': form, 'invitation': invitation},
             context_instance=RequestContext(request, processors=extra_processors))
 
-def _brand_view(func):
+def _brand(iterable):
     """
-    Mark a view as belonging to SNAPboard.
+    Mark an iterable of objects as belonging to SNAPboard.
 
     Allows the UserBanMiddleware to limit the ban to SNAPboard in larger 
     projects.
     """
-    setattr(func, '_snapboard', True)
+    for obj in iterable:
+        setattr(obj, '_snapboard', True)
 
-_brand_view(rpc)
-_brand_view(thread)
-_brand_view(edit_post)
-_brand_view(new_thread)
-_brand_view(favorite_index)
-_brand_view(private_index)
-_brand_view(category_thread_index)
-_brand_view(thread_index)
-_brand_view(locate_post)
-_brand_view(category_index)
-_brand_view(edit_settings)
-_brand_view(manage_group)
-_brand_view(invite_user_to_group)
-_brand_view(remove_user_from_group)
-_brand_view(grant_group_admin_rights)
-_brand_view(discard_invitation)
-_brand_view(answer_invitation)
+_brand([
+    post_revision, text_preview, lookup, category_sticky_thread, 
+    global_sticky_thread, close_thread, watch_thread, censor_post, 
+    report_post, quote_post, thread, edit_post, new_thread, favorite_index,
+    private_index, category_thread_index, thread_index, locate_post,
+    category_index, edit_settings, manage_group, invite_user_to_group, 
+    remove_user_from_group, grant_group_admin_rights, discard_invitation,
+    answer_invitation
+])

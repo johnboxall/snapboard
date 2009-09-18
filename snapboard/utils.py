@@ -13,6 +13,9 @@ from snapboard.models import UserSettings
 USE_SNAPBOARD_SIGNIN = getattr(settings, 'USE_SNAPBOARD_SIGNIN', False)
 USE_SNAPBOARD_LOGIN_FORM = getattr(settings, 'USE_SNAPBOARD_LOGIN_FORM', False)
 
+# __all__ = []
+# (JsonResponse, render, extra_processors, get_user_settings,
+#    sanitize)
 
 class RequestFormMixin(object):
     def __init__(self, data=None, files=None, request=None, *args, **kwargs):
