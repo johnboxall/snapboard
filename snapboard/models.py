@@ -334,14 +334,13 @@ class Thread(models.Model):
         if before:
             qs.filter(date__lt=before.date)
         return qs.count()
-    count_posts = get_post_count #(self, user, before=None):
+    count_posts = get_post_count
     
     def update(self):
         self.update_post_count()
         self.update_last_update()
         self.update_first_post()
         self.update_last_post()
-        import pdb;pdb.set_trace()
         self.save()
     
     @staticmethod
@@ -403,9 +402,9 @@ class Post(models.Model):
 
         super(Post, self).save(force_insert, force_update)
         
-        if SNAP_NOTIFY and created and self.user is not None:
-            WatchList.objects.get_or_create(user=self.user, thread=self.thread)
-            self.notify()
+#         if SNAP_NOTIFY and created and self.user is not None:
+#             WatchList.objects.get_or_create(user=self.user, thread=self.thread)
+#             self.notify()
         
         return self
     
@@ -432,7 +431,7 @@ class Post(models.Model):
         send_mail(subj, body, settings.DEFAULT_FROM_EMAIL, recipients, fail_silently=settings.DEBUG)
     
     def get_absolute_url(self):
-        # Don't know what page this post will show up on for surz.
+        # Don't know what page this post is on.
         return reverse('snapboard_locate_post', args=(self.id,))
     
     def get_edit_form(self):
