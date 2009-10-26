@@ -7,11 +7,12 @@ class PostAdmin(admin.ModelAdmin):
 	list_filter = ('censor', 'freespeech', 'date')
 	search_fields = ('text', 'user')
 	raw_id_fields = ('thread',)
-	filter_horizontal = ('private',)
+
 
 class AbuseReportAdmin(admin.ModelAdmin):
 	model = AbuseReport
 	list_display = ('post', 'submitter')
+
 	
 class CategoryAdmin(admin.ModelAdmin):
 	prepopulated_fields = {"slug": ("label",)}
@@ -20,7 +21,9 @@ class CategoryAdmin(admin.ModelAdmin):
 class ThreadAdmin(admin.ModelAdmin):
 	model = Thread
 	list_display = ('subject', 'category')
-	list_filter = ('closed', 'csticky', 'gsticky', 'category')
+	list_filter = ('closed', 'csticky', 'gsticky', 'category', 'private',)
+	date_hierarchy = 'last_update'
+
 
 class UserBanAdmin(admin.ModelAdmin):
 	model = UserBan
@@ -28,16 +31,19 @@ class UserBanAdmin(admin.ModelAdmin):
 	search_fields = ('user', 'reason')
 	raw_id_fields = ('user',)
 
+
 class IPBanAdmin(admin.ModelAdmin):
 	model = IPBan
 	list_display = ('address', 'reason')
 	search_fields = ('address', 'reason')
+
 
 class GroupAdmin(admin.ModelAdmin):
     model = Group
     list_display = ('name',)
     search_fields = ('name',)
     filter_horizontal = ('users', 'admins')
+
 
 admin.site.register(Category)
 admin.site.register(Moderator)

@@ -18,7 +18,7 @@ function do_post (action, data, conf, conf_arg) {
     };
 
     var callback = {success:handleSuccess, failure:function (o) {}, argument: []};
-    var request = YAHOO.util.Connect.asyncRequest('POST', action, callback, post_data);
+    YAHOO.util.Connect.asyncRequest('POST', action, callback, post_data);
     return false;
 }
 

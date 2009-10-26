@@ -15,7 +15,8 @@ from snapboard.templatetags import bbcode
 register = template.Library()
 
 
-def truncatechars(text, chars=200):
+@register.filter
+def truncate(text, chars=200):
 	if len(text) < chars:
 		return text
 	try:
@@ -26,7 +27,6 @@ def truncatechars(text, chars=200):
 		return text[:chars - 1] + u'…'
 	else:
 		return text[:last_space] + u'…'
-register.filter(truncatechars)
 
 register.filter('textile', textile)
 

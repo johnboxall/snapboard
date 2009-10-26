@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import striptags
 from django.template import RequestContext
+from django.template.loader import render_to_string
 from django.utils import simplejson
 
 from snapboard.templatetags.snapboard_tags import render_filter
@@ -13,9 +14,6 @@ from snapboard.models import UserSettings
 USE_SNAPBOARD_SIGNIN = getattr(settings, 'USE_SNAPBOARD_SIGNIN', False)
 USE_SNAPBOARD_LOGIN_FORM = getattr(settings, 'USE_SNAPBOARD_LOGIN_FORM', False)
 
-# __all__ = []
-# (JsonResponse, render, extra_processors, get_user_settings,
-#    sanitize)
 
 class RequestFormMixin(object):
     def __init__(self, data=None, files=None, request=None, *args, **kwargs):
@@ -28,14 +26,15 @@ class RequestForm(RequestFormMixin, forms.Form):
 class RequestModelForm(RequestFormMixin, forms.ModelForm):
     pass  
 
-def render(template_name, context, request=None):
-    context_instance = RequestContext(request, processors=extra_processors)
+def render(template_name, context, request):
     return render_to_response(template_name, context, 
-        context_instance=context_instance)
+                              context_instance=RequestContext(request))
+
+def renders(template_name, context):
+    return render_to_string(template_name, context)
 
 
 DEFAULT_USER_SETTINGS  = UserSettings()
-
 
 def get_user_settings(user):
     if not user.is_authenticated():
@@ -44,25 +43,6 @@ def get_user_settings(user):
         return user.sb_usersettings
     except UserSettings.DoesNotExist:
         return DEFAULT_USER_SETTINGS
-
-def user_settings_context(request):
-    return {'user_settings': get_user_settings(request.user)}
-
-
-if USE_SNAPBOARD_LOGIN_FORM:
-    def login_context(request):
-        """
-        All content pages that have additional content for authenticated users but
-        that are also publicly viewable should have a login form in the side panel.
-        """
-        from snapboard.forms import LoginForm
-        ctx = {}
-        if not request.user.is_authenticated():
-            ctx.update({'login_form': LoginForm()})
-        return ctx
-    extra_processors = [user_settings_context, login_context]
-else:
-    extra_processors = [user_settings_context]
 
 
 def sanitize(text):

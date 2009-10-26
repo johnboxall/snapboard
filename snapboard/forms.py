@@ -8,7 +8,7 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 
-from snapboard.models import Category, UserSettings, Thread, Post
+from snapboard.models import Category, UserSettings, Thread, Post, WatchList
 from snapboard.utils import RequestForm, RequestModelForm
 
 
@@ -80,34 +80,53 @@ class ThreadForm(RequestForm):
         widget=forms.TextInput(attrs={'size': '80',}))
     post = forms.CharField(label=_('Message'), widget=forms.Textarea(
         attrs={'rows':'8', 'cols': '80',}))
+    private = forms.BooleanField(initial=False, required=False)
 
     def save(self, category):
         data = self.cleaned_data
         user = self.request.user
+        
         subj = data['subject']
-        thread = Thread.objects.create(subject=subj, category=category, slug=slugify(subj))
-        post = Post.objects.create(user=user, thread=thread, text=data['post'])
+        
+        thread = Thread.objects.create(
+            subject=subj,
+            category=category,
+            slug=slugify(subj),
+            private=data['private']
+        )
+        
+        ip = self.request.META.get("REMOTE_ADDR")
+        post = Post.objects.create(user=user, thread=thread, text=data['post'], ip=ip)
+        
+        
+        # Add it to you favs. 
+        
         return thread
 
 
 class UserSettingsForm(RequestModelForm):
-    frontpage_filters = forms.MultipleChoiceField(label=_('Front page categories'))
+    # frontpage_filters = forms.MultipleChoiceField(label=_('Front page categories'))
     
     class Meta:
         model = UserSettings
-        exclude = ('user',)
+        fields = ("notify_email",)
+        # exclude = ('user',)
     
     def __init__(self, *args, **kwargs):
         super(UserSettingsForm, self).__init__(*args, **kwargs)
-        self.fields['frontpage_filters'].choices = [
-            (cat.id, cat.label) for cat in Category.objects.all() if 
-            cat.can_read(self.request.user)
-        ]
+        #self.fields['frontpage_filters'].choices = [
+        #    (cat.id, cat.label) for cat in Category.objects.all() if 
+        #    cat.can_read(self.request.user)
+        #]
     
-    def clean_frontpage_filters(self):
-        frontpage_filters = [cat for cat in (Category.objects.get(pk=id) for id in
-                self.cleaned_data['frontpage_filters']) if cat.can_read(self.request.user)]
-        return frontpage_filters
+    def save(self, commit=True):
+        self.request.user.message_set.create(message="Preferences Updated.")
+        return super(UserSettingsForm, self).save(commit)
+    
+    #def clean_frontpage_filters(self):
+    #    frontpage_filters = [cat for cat in (Category.objects.get(pk=id) for id in
+    #            self.cleaned_data['frontpage_filters']) if cat.can_read(self.request.user)]
+    #    return frontpage_filters
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=30, label=_("Username"))

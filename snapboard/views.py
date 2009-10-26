@@ -76,7 +76,7 @@ def lookup(request, queryset, field, limit=5):
 @staff_member_required
 @json
 def category_sticky_thread(request):
-    thread = get_object_or_404(Thread, pk=request.POST.get("thread_id"))
+    thread = get_object_or_404(Thread, pk=request.POST.get("id"))
     if toggle_boolean_field(thread, 'csticky'):
         return {'link':_('unset csticky'), 'msg':_('This thread is sticky in its category.')}
     else:
@@ -86,7 +86,7 @@ def category_sticky_thread(request):
 @staff_member_required
 @json
 def global_sticky_thread(request):
-    thread = get_object_or_404(Thread, pk=request.POST.get("thread_id"))
+    thread = get_object_or_404(Thread, pk=request.POST.get("id"))
     if toggle_boolean_field(thread, 'gsticky'):
         return {'link':_('unset gsticky'), 'msg':_('This thread is now globally sticky.')}
     else:
@@ -96,7 +96,7 @@ def global_sticky_thread(request):
 @staff_member_required
 @json
 def close_thread(request):
-    thread = get_object_or_404(Thread, pk=request.POST.get("thread_id"))
+    thread = get_object_or_404(Thread, pk=request.POST.get("id"))
     if toggle_boolean_field(thread, 'closed'):
         return {'link':_('open thread'), 'msg':_('This discussion is now CLOSED.')}
     else:
@@ -106,8 +106,8 @@ def close_thread(request):
 @login_required
 @json
 def watch_thread(request):
-    thread = get_object_or_404(Thread, pk=request.POST.get("thread_id"))
-    if not thr.category.can_read(request.user):
+    thread = get_object_or_404(Thread, pk=request.POST.get("id"))
+    if not thread.category.can_read(request.user):
         raise PermissionError
 
     # If it exists watch it otherwise delete the watch.
@@ -123,7 +123,7 @@ def watch_thread(request):
 @staff_member_required
 @json
 def report_post(request):
-    post = get_object_or_404(Post, pk=request.POST.get("post_id"))
+    post = get_object_or_404(Post, pk=request.POST.get("id"))
     AbuseReport.objects.get_or_create(submitter=request.user, post=post)
     return {'link': '', 'msg':_('The moderators have been notified of possible abuse')}
 
@@ -131,7 +131,7 @@ def report_post(request):
 @staff_member_required
 @json
 def censor_post(request):
-    post = get_object_or_404(Post, pk=request.POST.get("post_id"))
+    post = get_object_or_404(Post, pk=request.POST.get("id"))
     if toggle_boolean_field(post, 'censor'):
         return {'link':_('uncensor'), 'msg':_('This post is censored!')}
     else:
@@ -139,7 +139,7 @@ def censor_post(request):
 
 @json
 def quote_post(request):
-    post = get_object_or_404(Post.objects.selected_related(), pk=request.POST.get("post_id"))
+    post = get_object_or_404(Post.objects.select_related(), pk=request.POST.get("id"))
     if not post.thread.category.can_read(request.user):
         raise PermissionError
     if post.is_private and post.user != request.user and not post.private.filter(id=request.user.id).count():
@@ -150,32 +150,30 @@ def quote_post(request):
 # Views ########################################################################
 
 def thread(request, cslug, tslug, template="snapboard/thread.html"):
-    thr = get_object_or_404(Thread.view_manager.filter(category__slug=cslug), slug=tslug)
+    thr = get_object_or_404(Thread.objects.filter(category__slug=cslug), slug=tslug)
     if not thr.category.can_read(request.user):
         raise PermissionError
     
     ctx = {}
     
     if request.user.is_authenticated():
-        ctx.update({"watched": WatchList.objects.filter(user=request.user, thread=thr).count() != 0})
+        ctx["watched"] = WatchList.objects.filter(user=request.user, thread=thr).count() != 0
     
+    form = PostForm(request.POST or None, request=request)
     if request.POST:
         if not thr.category.can_post(request.user):
             raise PermissionError
         
-        postform = PostForm(request.POST, request=request)
-        if postform.is_valid():
-            postobj = postform.save(thr)
-            return HttpResponseRedirect(reverse('snapboard_locate_post', args=(postobj.id,)))
-    else:
-        postform = PostForm(request=request)
+        if form.is_valid():
+            post = form.save(thr)
+            next = reverse('snapboard_locate_post', args=(post.id,))
+            return HttpResponseRedirect(next)
     
-    # Comes after the post so new messages show up.
-    post_list = Post.view_manager.posts_for_thread(thr.id, request.user)
+    post_list = thr.post_set.get_user_query_set(request.user)
     if get_user_settings(request.user).reverse_posts:
         post_list = post_list.order_by('-odate')
     
-    ctx.update({'posts': post_list, 'thr': thr, 'postform': postform})
+    ctx.update({'posts': post_list, 'thr': thr, 'postform': form, 'category': thr.category})
     return render(template, ctx, request)
 
 @require_POST
@@ -203,18 +201,17 @@ def edit_post(request, post_id):
 
 @login_required
 def new_thread(request, slug, template="snapboard/newthread.html"):
-    cat = get_object_or_404(Category, slug=slug)
-    if not cat.can_create_thread(request.user):
+    category = get_object_or_404(Category, slug=slug)
+    if not category.can_create_thread(request.user):
         raise PermissionError
-
-    threadform = ThreadForm(request.POST or None, request=request)
-    if threadform.is_valid():
-        thread = threadform.save(cat)
-        next = reverse('snapboard_thread', args=[thread.category.slug,
-            thread.slug])
+    
+    form = ThreadForm(request.POST or None, request=request)
+    if form.is_valid():
+        thr = form.save(category)
+        next = reverse('snapboard_thread', args=[thr.category.slug, thr.slug])
         return HttpResponseRedirect(next)
     
-    return render(template, {"form": threadform}, request)
+    return render(template, {"form": form, "category": category}, request)
 
 @login_required
 def favorite_index(request, template="snapboard/thread_index.html"):
@@ -238,23 +235,17 @@ def private_index(request, template="snapboard/thread_index.html"):
     return render(template, ctx, request)
 
 def category_thread_index(request, slug, template="snapboard/thread_index.html"):
-    cat = get_object_or_404(Category, slug=slug)
-    if not cat.can_read(request.user):
+    category = get_object_or_404(Category, slug=slug)
+    if not category.can_read(request.user):
         raise PermissionError
     
-    threads = Thread.view_manager.get_category(cat.id)
-    ctx = {
-        'title': ''.join((_("Category: "), cat.label)), 
-        'category': cat, 
-        'threads': threads
-    }
+    threads = category.thread_set.get_user_query_set(request.user)
+    ctx = {'title': category.label, 'category': category, 'threads': threads}
     return render(template, ctx, request)
 
 def thread_index(request, template="snapboard/thread_index.html"):
-    if request.user.is_authenticated():
-        qs = Thread.view_manager.get_user_query_set(request.user)
-    else:
-        qs = Thread.view_manager.get_query_set()
+    authed_user = request.user.is_authenticated() and request.user or None
+    qs = Thread.view_manager.get_user_query_set(authed_user)    
     threads = [thr for thr in qs if thr.category.can_view(request.user)]
     ctx = {'title': _("Recent Discussions"), 'threads': threads}
     return render(template, ctx, request)
@@ -266,8 +257,9 @@ def locate_post(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if not post.thread.category.can_read(request.user):
         raise PermissionError
-    if post.is_private and not (post.user == request.user or post.private.filter(pk=request.user.id).count()):
-        raise PermissionError
+    if post.thread.private:
+        if post.thread.starter != request.user.username and not request.user.is_staff:
+            raise PermissionError
     
     # Count the number of visible posts before the one we are looking for, 
     # as well as the total
@@ -290,23 +282,24 @@ def locate_post(request, post_id):
     return HttpResponseRedirect(next)
 
 def category_index(request, template="snapboard/category_index.html"):
-    qs = Category.objects.all()
+    qs = Category.objects.all() # select_related(depth=1) ???
     ctx = {'cat_list': [c for c in qs if c.can_view(request.user)]}
     return render(template, ctx, request)
 
 @login_required
 def edit_settings(request, template="snapboard/edit_settings.html"):
     """
-    Allow user to edit his/her profile. Requires login.
+    Allow user to edit his/her profile.
     """
     userdata, _ = UserSettings.objects.get_or_create(user=request.user)
-    data = request.POST or None
-    form = UserSettingsForm(data, instance=userdata, request=request)
+    form = UserSettingsForm(request.POST or None, instance=userdata, request=request)
     if form.is_valid():
-        form.save(commit=True)
+        form.save()
         return HttpResponseRedirect("")
     return render(template, {"form": form}, request)
 
+
+# NOTIFACTIONZZZZZZZ
 
 #@@@ Haven't looked at group/invitation functions.
 

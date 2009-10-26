@@ -1,13 +1,12 @@
-import logging
 from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models, connection
 from django.db.models import signals, Q
-from django.dispatch import dispatcher
 from django.utils.translation import ugettext_lazy as _
 
 try:
@@ -26,8 +25,8 @@ __all__ = [
     'WatchList', 'AbuseReport', 'UserSettings', 'IPBan', 'UserBan',
 ]
 
-_log = logging.getLogger('snapboard.models')
 
+SNAP_NOTIFY = getattr(settings, 'SNAP_NOTIFY', False)
 SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
 SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
         getattr(settings, 'MEDIA_URL', '') + '/snapboard')
@@ -102,7 +101,7 @@ class Invitation(models.Model):
     sent_to = models.ForeignKey(User, verbose_name=_('sent to'), related_name='sb_received_invitation_set')
     sent_date = models.DateTimeField(_('sent date'), auto_now_add=True)
     response_date = models.DateTimeField(_('response date'), blank=True, null=True)
-    accepted = models.BooleanField(_('accepted'), blank=True, null=True)
+    accepted = models.NullBooleanField(_('accepted'), blank=True)
 
     class Meta:
         verbose_name = _('invitation')
@@ -146,6 +145,13 @@ signals.pre_delete.connect(Invitation.notify_cancelled, sender=Invitation)
 class Category(models.Model):
     label = models.CharField(max_length=32, verbose_name=_('label'))
     slug = models.SlugField()
+
+    # Non-private count.
+    thread_count = models.IntegerField(default=0)
+    # Last _public_ post.
+    last_post = models.ForeignKey("snapboard.Post", null=True)
+
+    # last_thread = models.ForeignKey("snapboard.Thread", null=True)
     
     view_perms = models.PositiveSmallIntegerField(_('view permission'), 
         choices=PERM_CHOICES, default=ALL,
@@ -161,7 +167,7 @@ class Category(models.Model):
         help_text=_('Limits the ability to create new threads in the '\
         'category. Only users with permission to post can create new threads,'\
         'unless a group is specified.'), default=USERS)
-
+    
     view_group = models.ForeignKey(Group, verbose_name=_('view group'),
         blank=True, null=True, related_name='can_view_category_set')
     read_group = models.ForeignKey(Group, verbose_name=_('read group'),
@@ -170,23 +176,21 @@ class Category(models.Model):
         blank=True, null=True, related_name='can_post_category_set')
     new_thread_group = models.ForeignKey(Group, verbose_name=_('create thread group'),
         blank=True, null=True, related_name='can_create_thread_category_set')
-
-    objects = managers.CategoryManager()    # adds thread_count
-
+    
     class Meta:
         verbose_name = _('category')
         verbose_name_plural = _('categories')
 
     def __unicode__(self):
         return self.label
-
+    
     def moderators(self):
         mods = Moderator.objects.filter(category=self.id)
         if mods.count() > 0:
             return ', '.join([m.user.username for m in mods])
         else:
             return None
-
+    
     def can_view(self, user):
         flag = False
         if self.view_perms == ALL:
@@ -196,7 +200,7 @@ class Category(models.Model):
         elif self.view_perms == CUSTOM:
             flag = user.is_superuser or (user.is_authenticated() and self.view_group.has_user(user))
         return flag
-
+    
     def can_read(self, user):
         flag = False
         if self.read_perms == ALL:
@@ -206,7 +210,7 @@ class Category(models.Model):
         elif self.read_perms == CUSTOM:
             flag = user.is_superuser or (user.is_authenticated() and self.read_group.has_user(user))
         return flag
-
+    
     def can_post(self, user):
         flag = False
         if self.post_perms == USERS:
@@ -214,7 +218,7 @@ class Category(models.Model):
         elif self.post_perms == CUSTOM:
             flag = user.is_superuser or (user.is_authenticated() and self.post_group.has_user(user))
         return flag
-
+    
     def can_create_thread(self, user):
         flag = False
         if self.new_thread_perms == USERS:
@@ -222,32 +226,60 @@ class Category(models.Model):
         elif self.new_thread_perms == CUSTOM:
             flag = user.is_superuser or (user.is_authenticated() and self.new_thread_group.has_user(user))
         return flag
+    
+    def update_last_post(self):
+        """Update the last public post."""
+        from snapboard.models import Post
+        thread_pks = self.thread_set.exclude(private=True).values_list("pk", flat=True)
+        try:
+            self.last_post = Post.objects.filter(thread__id__in=thread_pks).order_by("-date")[0]
+        except IndexError:
+            pass
+        else:
+            self.save()
+        
+    def update_thread_count(self, commit=True):
+        self.thread_count = self.thread_set.filter(private=False).count()
+        if commit:
+            self.save()
+    
+    def update(self):
+        self.update_last_post()
+        self.update_thread_count()
 
 
 class Moderator(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('category'))
     user = models.ForeignKey(User, verbose_name=_('user'), related_name='sb_moderator_set')
-
+    
     class Meta:
         verbose_name = _('moderator')
         verbose_name_plural = _('moderators')
 
 
 class Thread(models.Model):
-    subject = models.CharField(max_length=160, verbose_name=_('subject'))
-    slug = models.SlugField(max_length=160)
+    subject = models.CharField(max_length=255, verbose_name=_('subject'))
+    slug = models.SlugField(max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('category'))
-    
+    private = models.BooleanField(default=False, verbose_name=_('private'))
     closed = models.BooleanField(default=False, verbose_name=_('closed'))
-    
-    # Category sticky - will show up at the top of category listings.
     csticky = models.BooleanField(default=False, verbose_name=_('category sticky'))
-    
-    # Global sticky - will show up at the top of home listing.
     gsticky = models.BooleanField(default=False, verbose_name=_('global sticky'))
     
-    objects = models.Manager() # needs to be explicit due to below
-    view_manager = managers.ThreadManager()
+    # Denormalized --- what about just having a link to 'last post'?
+    post_count = models.IntegerField(default=0)
+    starter = models.CharField(max_length=255)
+    starter_email = models.CharField(max_length=255)
+    last_poster = models.CharField(max_length=255)
+    last_poster_email = models.CharField(max_length=255)
+    last_update = models.DateTimeField(null=True)
+    
+    objects = managers.ThreadManager()#models.Manager() # needs to be explicit due to below
+    #    view_manager = managers.ThreadManager()
+    
+    # created_at
+    # updated_at etc.
+    
     
     class Meta:
         verbose_name = _('thread')
@@ -259,61 +291,98 @@ class Thread(models.Model):
     def get_url(self):
         return reverse('snapboard_thread', args=(self.id,))
     
-    def count_posts(self, user, before=None):
+    def update_post_count(self):
+        self.post_count = self.post_set.exclude(censor=True, revision__isnull=False).count()
+    
+    def update_last_update(self):
+        self.last_update = self.get_last_post().date
+    
+    def update_first_post(self):
+        post = self.get_first_post()
+        if post is not None:
+            self.starter = post.user.username
+            self.starter_email = post.user.email
+    
+    def update_last_post(self):
+        post = self.get_last_post()
+        if post is not None:
+            self.last_poster = post.user.username
+            self.last_poster_email = post.user.email
+    
+    def get_first_post(self):
+        try:
+            return self.post_set.order_by("date")[0]
+        except self.post_set.model.DoesNotExist:
+            return None
+    
+    def get_last_post(self):
+        try:
+            return self.post_set.order_by("-date")[0]
+        except self.post_set.model.DoesNotExist:
+            return None
+    
+    #TODO:
+    def get_post_count(self, user, before=None):
         """
         Returns the number of visible posts in the thread or, if ``before`` is 
         a Post object, the number of visible posts in the thread that are
         older.
         """
-        # This partly does what Thread.objects.get_query_set() does, except 
-        # it takes into account the user and therefore knows what posts
-        # are visible to him
         qs = self.post_set.filter(revision=None)
-        if user.is_authenticated():
-            qs = qs.filter(Q(user=user) | Q(is_private=False) | Q(private__exact=user))
-        if not getattr(user, 'is_staff', False):
+        if not user.is_staff:
             qs = qs.exclude(censor=True)
         if before:
             qs.filter(date__lt=before.date)
         return qs.count()
+    count_posts = get_post_count #(self, user, before=None):
+    
+    def update(self):
+        self.update_post_count()
+        self.update_last_update()
+        self.update_first_post()
+        self.update_last_post()
+        import pdb;pdb.set_trace()
+        self.save()
+    
+    @staticmethod
+    def signal(instance, **kwargs):
+        instance.category.update()
 
+signals.post_save.connect(Thread.signal, sender=Thread)
+signals.pre_delete.connect(Thread.signal, sender=Thread)
+
+
+#TODO: Remove the idea of private for posts for private threads.
+#TODO: Add link to category?
 class Post(models.Model):
     """
     Post objects store information about revisions.
 
     Both forward and backward revisions are stored as ForeignKeys.
     """
-    # blank=True to get admin to work when the user field is missing
     user = models.ForeignKey(User, editable=False, blank=True, default=None,
         verbose_name=_('user'), related_name='sb_created_posts_set')
-
     thread = models.ForeignKey(Thread, verbose_name=_('thread'))
+    # category = models.ForeignKey(Category ...)
     text = models.TextField(verbose_name=_('text'))
-    date = models.DateTimeField(editable=False,auto_now_add=True, verbose_name=_('date'))
+    date = models.DateTimeField(editable=False, auto_now_add=True, verbose_name=_('date'), null=True) 
     ip = models.IPAddressField(verbose_name=_('ip address'), blank=True, null=True)
 
-    private = models.ManyToManyField(User,
-        related_name="sb_private_posts_set", null=True, verbose_name=_('private recipients'))
-    # The 'private message' status is denormalized by the ``is_private`` flag.
-    # It's currently quite hard to do the denormalization automatically 
-    # If ManyRelatedManager._add_items() fired some signal on update, it would help.
-    # Right now it's up to the code that changes the 'private' many-to-many field to 
-    # change ``is_private``.
-    is_private = models.BooleanField(_('private'), default=False, editable=False)
 
-    # (null or ID of post - most recent revision is always a diff of previous)
     odate = models.DateTimeField(editable=False, null=True)
+    # (null or ID of post - most recent revision is always a diff of previous)
     revision = models.ForeignKey("self", related_name="rev",
         editable=False, null=True, blank=True)
     previous = models.ForeignKey("self", related_name="prev",
         editable=False, null=True, blank=True)
-
     # (boolean set by mod.; true if abuse report deemed false)
     censor = models.BooleanField(default=False, verbose_name=_('censored')) # moderator level access
     freespeech = models.BooleanField(default=False, verbose_name=_('protected')) # superuser level access
 
-    objects = models.Manager() # needs to be explicit due to below
-    view_manager = managers.PostManager()
+    #objects = models.Manager() # needs to be explicit due to below
+    #view_manager = managers.PostManager()
+    objects = managers.PostManager()
+
 
     class Meta:
         verbose_name = _('post')
@@ -323,65 +392,60 @@ class Post(models.Model):
         return u''.join( (unicode(self.user), u': ', unicode(self.date)) )
 
     def save(self, force_insert=False, force_update=False):
-        _log.debug('user = %s, ip = %s' % (threadlocals.get_current_ip(),
-            threadlocals.get_current_user()))
-
-        # hack to disallow admin setting arbitrary users to posts
-        if getattr(self, 'user_id', None) is None:
-            self.user_id = threadlocals.get_current_user().id
-
-        # disregard any modifications to ip address
-        self.ip = threadlocals.get_current_ip()
-
+        # TODO: whatever to revisions.
+        # TODO: don't notify on revision creation.
+        created = self.id is None
+        
         if self.previous is not None:
             self.odate = self.previous.odate
-        elif not self.id:
-            # only do the following on creation, not modification
+        elif created:
             self.odate = datetime.now()
+
         super(Post, self).save(force_insert, force_update)
+        
+        if SNAP_NOTIFY and created and self.user is not None:
+            WatchList.objects.get_or_create(user=self.user, thread=self.thread)
+            self.notify()
+        
+        return self
     
     def management_save(self):
+        created = self.id is None
+    
         if self.previous is not None:
             self.odate = self.previous.odate
-        elif not self.id:
-            # only do the following on creation, not modification
+        elif created:
             self.odate = datetime.now()
-        super(Post, self).save(False, False)
-    
-    def notify(self, **kwargs):
-        if not notification:
-            return
-        if not self.previous:
-            all_recipients = set()
-            if self.is_private:
-                recipients = set(self.private.all())
-                if recipients:
-                    notification.send(
-                        recipients,
-                        'private_post_received',
-                        {'post': self}
-                    )
-                    all_recipients = all_recipients.union(recipients)
-            recipients = set((wl.user for wl in WatchList.objects.filter(thread=self.thread) if wl.user not in all_recipients))
-            if recipients:
-                notification.send(
-                    recipients,
-                    'new_post_in_watched_thread',
-                    {'post': self}
-                )
-                all_recipients = all_recipients.union(recipients)
+        return super(Post, self).save(False, False)
+
+    def notify(self):
+        # TODO: should join the sub. of the thread
+        # TODO: should BCC admins
+        from snapboard.utils import renders
+        recipients = set(self.thread.watchlist_set.values_list("user__email", flat=True))
+        recipients.update([t[1] for t in settings.ADMINS])
+        
+        ctx = {"post": self}
+        subj = self.thread.subject
+        body = renders("notification/notify_body.txt", ctx)
+        
+        send_mail(subj, body, settings.DEFAULT_FROM_EMAIL, recipients, fail_silently=settings.DEBUG)
     
     def get_absolute_url(self):
+        # Don't know what page this post will show up on for surz.
         return reverse('snapboard_locate_post', args=(self.id,))
     
     def get_edit_form(self):
         from forms import PostForm
         return PostForm(initial={'post':self.text})
+        
+    @staticmethod
+    def signal(instance, **kwargs):
+        instance.thread.update()
 
+signals.post_save.connect(Post.signal, sender=Post)
+signals.pre_delete.connect(Post.signal, sender=Post)
 
-# Signals make it hard to handle the notification of private recipients
-#if notification:
-#    signals.post_save.connect(Post.notify, sender=Post)
 
 class AbuseReport(models.Model):
     """
@@ -427,8 +491,8 @@ class UserSettings(models.Model):
             choices = ((5, '5'), (10, '10'), (20, '20'), (50, '50')),
             default = 20,
             help_text = _('Threads per page'), verbose_name=_('threads per page'))
-#    notify_email = models.BooleanField(default=False, blank=True,
-#            help_text = "Email notifications for watched discussions.", verbose_name=_('notify'))
+    notify_email = models.BooleanField(default=True, blank=True,
+            help_text = "Receive email notifications about new posts in your threads.", verbose_name=_('notify'))
     reverse_posts = models.BooleanField(
             default=False,
             help_text = _('Display newest posts first.'), verbose_name=_('new posts first'))

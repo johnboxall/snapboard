@@ -38,10 +38,10 @@
     <br />
     <ul>
         <li>&#187; <b><a href="/admin/">{% trans "Admin Site" %}</a></b></li>
-        <li>&#187; <a href="/admin/snapboard/post/?censor__exact=1">{% trans "Censored posts" %}</a></li>
-        <li>&#187; <a href="/admin/snapboard/abusereport/">{% trans "Abuse Reports" %}</a></li>
-        <li>&#187; <a href="/admin/snapboard/thread/?csticky__exact=1">{% trans "Category Sticky" %}</a></li>
-        <li>&#187; <a href="/admin/snapboard/thread/?gsticky__exact=1">{% trans "Global Sticky" %}</a></li>
+        <li>&#187; <a href="{{ ADMIN_ROOT }}snapboard/post/?censor__exact=1">{% trans "Censored posts" %}</a></li>
+        <li>&#187; <a href="{{ ADMIN_ROOT }}snapboard/abusereport/">{% trans "Abuse Reports" %}</a></li>
+        <li>&#187; <a href="{{ ADMIN_ROOT }}snapboard/thread/?csticky__exact=1">{% trans "Category Sticky" %}</a></li>
+        <li>&#187; <a href="{{ ADMIN_ROOT }}snapboard/thread/?gsticky__exact=1">{% trans "Global Sticky" %}</a></li>
     </ul>
     </div>
 {% endif %}
