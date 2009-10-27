@@ -26,7 +26,7 @@ __all__ = [
 ]
 
 
-SNAP_NOTIFY = getattr(settings, 'SNAP_NOTIFY', False)
+
 SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
 SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
         getattr(settings, 'MEDIA_URL', '') + '/snapboard')
@@ -402,9 +402,9 @@ class Post(models.Model):
 
         super(Post, self).save(force_insert, force_update)
         
-#         if SNAP_NOTIFY and created and self.user is not None:
-#             WatchList.objects.get_or_create(user=self.user, thread=self.thread)
-#             self.notify()
+        if settings.SNAP_NOTIFY and created and self.user is not None:
+            WatchList.objects.get_or_create(user=self.user, thread=self.thread)
+            self.notify()
         
         return self
     
