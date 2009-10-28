@@ -96,38 +96,24 @@ class ThreadForm(RequestForm):
         )
         
         ip = self.request.META.get("REMOTE_ADDR")
-        post = Post.objects.create(user=user, thread=thread, text=data['post'], ip=ip)
-        
-        
-        # Add it to you favs. 
-        
+        post = Post.objects.create(user=user, thread=thread, text=data['post'], ip=ip)        
         return thread
 
 
 class UserSettingsForm(RequestModelForm):
-    # frontpage_filters = forms.MultipleChoiceField(label=_('Front page categories'))
-    
     class Meta:
         model = UserSettings
         fields = ("notify_email",)
-        # exclude = ('user',)
-    
+        
     def __init__(self, *args, **kwargs):
         super(UserSettingsForm, self).__init__(*args, **kwargs)
-        #self.fields['frontpage_filters'].choices = [
-        #    (cat.id, cat.label) for cat in Category.objects.all() if 
-        #    cat.can_read(self.request.user)
-        #]
-    
+
     def save(self, commit=True):
         self.request.user.message_set.create(message="Preferences Updated.")
         return super(UserSettingsForm, self).save(commit)
-    
-    #def clean_frontpage_filters(self):
-    #    frontpage_filters = [cat for cat in (Category.objects.get(pk=id) for id in
-    #            self.cleaned_data['frontpage_filters']) if cat.can_read(self.request.user)]
-    #    return frontpage_filters
 
+
+# TODO: I hope this isn't used :)
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=30, label=_("Username"))
     password = forms.CharField(widget=widgets.PasswordInput, label=_("Password"))

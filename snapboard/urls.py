@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     (r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}, 'snapboard_feeds'),
 
     # JavaScript
-    (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict, 'snapboard_js_i18n'),
+    (r'^jsi18n/$', 'django.views.i18n.null_javascript_catalog', js_info_dict, 'snapboard_js_i18n'),
 )
 
 lookup_dict = {

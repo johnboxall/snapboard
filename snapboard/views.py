@@ -291,7 +291,7 @@ def edit_settings(request, template="snapboard/edit_settings.html"):
     """
     Allow user to edit his/her profile.
     """
-    userdata, _ = UserSettings.objects.get_or_create(user=request.user)
+    userdata, _ = UserSettings.objects.get_or_create(user=request.user)    
     form = UserSettingsForm(request.POST or None, instance=userdata, request=request)
     if form.is_valid():
         form.save()

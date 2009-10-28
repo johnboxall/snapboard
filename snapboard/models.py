@@ -402,7 +402,9 @@ class Post(models.Model):
 
         super(Post, self).save(force_insert, force_update)
         
+        # Why would user be none?
         if settings.SNAP_NOTIFY and created and self.user is not None:
+            usettings, _ = UserSettings.objects.get_or_create(user=self.user)
             WatchList.objects.get_or_create(user=self.user, thread=self.thread)
             self.notify()
         
@@ -421,7 +423,15 @@ class Post(models.Model):
         # TODO: should join the sub. of the thread
         # TODO: should BCC admins
         from snapboard.utils import renders
-        recipients = set(self.thread.watchlist_set.values_list("user__email", flat=True))
+                
+        # Only mail ppl who want emails.
+        mail_dict = dict(self.thread.watchlist_set.values_list("user__id", "user__email"))
+        dont_mail_pks = UserSettings.objects.filter(user__id__in=mail_dict.keys(), notify_email=False)
+        dont_mail_pks = dont_mail_pks.values_list("user__id", flat=True)
+        for pk in dont_mail_pks:
+            mail_dict.pop(pk)
+        
+        recipients = set(mail_dict.values())
         recipients.update([t[1] for t in settings.ADMINS])
         
         ctx = {"post": self}
