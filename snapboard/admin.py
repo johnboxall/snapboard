@@ -2,40 +2,40 @@ from snapboard.models import *
 from django.contrib import admin
 
 class PostAdmin(admin.ModelAdmin):
-	model = Post
-	list_display = ('user', 'date', 'thread', 'ip')
-	list_filter = ('censor', 'freespeech', 'date')
-	search_fields = ('text', 'user')
-	raw_id_fields = ('thread',)
+    model = Post
+    list_display = ('user', 'date', 'thread', 'ip')
+    list_filter = ('censor', 'freespeech', 'date')
+    search_fields = ('text', 'user')
+    raw_id_fields = ('thread', 'user',)
 
 
 class AbuseReportAdmin(admin.ModelAdmin):
-	model = AbuseReport
-	list_display = ('post', 'submitter')
+    model = AbuseReport
+    list_display = ('post', 'submitter')
 
-	
+
 class CategoryAdmin(admin.ModelAdmin):
-	prepopulated_fields = {"slug": ("label",)}
-    
-	
+    prepopulated_fields = {"slug": ("label",)}
+
+
 class ThreadAdmin(admin.ModelAdmin):
-	model = Thread
-	list_display = ('subject', 'category')
-	list_filter = ('closed', 'csticky', 'gsticky', 'category', 'private',)
-	date_hierarchy = 'last_update'
+    model = Thread
+    list_display = ('subject', 'category')
+    list_filter = ('closed', 'csticky', 'gsticky', 'category', 'private',)
+    date_hierarchy = 'last_update'
 
 
 class UserBanAdmin(admin.ModelAdmin):
-	model = UserBan
-	list_display = ('user', 'reason')
-	search_fields = ('user', 'reason')
-	raw_id_fields = ('user',)
+    model = UserBan
+    list_display = ('user', 'reason')
+    search_fields = ('user', 'reason')
+    raw_id_fields = ('user',)
 
 
 class IPBanAdmin(admin.ModelAdmin):
-	model = IPBan
-	list_display = ('address', 'reason')
-	search_fields = ('address', 'reason')
+    model = IPBan
+    list_display = ('address', 'reason')
+    search_fields = ('address', 'reason')
 
 
 class GroupAdmin(admin.ModelAdmin):
