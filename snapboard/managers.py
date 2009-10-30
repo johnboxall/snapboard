@@ -7,15 +7,8 @@ _log = logging.getLogger('snapboard.managers')
 
 class PostManager(models.Manager):
     def get_query_set(self):
-        select = {}
-        extra_abuse_count = """
-            SELECT COUNT(*) FROM snapboard_abusereport
-                WHERE snapboard_post.id = snapboard_abusereport.post_id
-            """
-        select['abuse'] = extra_abuse_count
-
-        return super(PostManager, self).get_query_set().extra(
-            select = select).exclude(revision__isnull=False).order_by('odate')
+        return super(PostManager, self).get_query_set().exclude(
+            revision__isnull=False).order_by('odate')
 
     def get_user_query_set(self, user):
         qs = self.get_query_set()

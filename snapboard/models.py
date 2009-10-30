@@ -353,6 +353,7 @@ signals.pre_delete.connect(Thread.signal, sender=Thread)
 
 #TODO: Remove the idea of private for posts for private threads.
 #TODO: Add link to category?
+#TODO: It'd be worth it store the username / email of the poster here.
 class Post(models.Model):
     """
     Post objects store information about revisions.

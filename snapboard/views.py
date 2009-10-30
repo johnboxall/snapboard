@@ -149,6 +149,20 @@ def quote_post(request):
 
 # Views ########################################################################
 
+def category_index(request, template="snapboard/category_index.html"):
+    qs = Category.objects.all()
+    ctx = {'cat_list': [c for c in qs if c.can_view(request.user)]}
+    return render(template, ctx, request)
+
+def category_thread_index(request, slug, template="snapboard/thread_index.html"):
+    category = get_object_or_404(Category, slug=slug)
+    if not category.can_read(request.user):
+        raise PermissionError
+    
+    threads = category.thread_set.get_user_query_set(request.user)
+    ctx = {'title': category.label, 'category': category, 'threads': threads}
+    return render(template, ctx, request)
+
 def thread(request, cslug, tslug, template="snapboard/thread.html"):
     thr = get_object_or_404(Thread.objects.filter(category__slug=cslug), slug=tslug)
     if not thr.category.can_read(request.user):
@@ -169,12 +183,14 @@ def thread(request, cslug, tslug, template="snapboard/thread.html"):
             next = reverse('snapboard_locate_post', args=(post.id,))
             return HttpResponseRedirect(next)
     
-    post_list = thr.post_set.get_user_query_set(request.user)
-    if get_user_settings(request.user).reverse_posts:
+    post_list = thr.post_set.get_user_query_set(request.user).select_related("user")
+    if get_user_settings(request).reverse_posts:
         post_list = post_list.order_by('-odate')
     
-    ctx.update({'posts': post_list, 'thr': thr, 'postform': form, 'category': thr.category})
+    ctx.update({'posts': post_list, 'thr': thr, 'postform': form,  'category': thr.category})
     return render(template, ctx, request)
+
+
 
 @require_POST
 def edit_post(request, post_id):
@@ -234,14 +250,6 @@ def private_index(request, template="snapboard/thread_index.html"):
     }
     return render(template, ctx, request)
 
-def category_thread_index(request, slug, template="snapboard/thread_index.html"):
-    category = get_object_or_404(Category, slug=slug)
-    if not category.can_read(request.user):
-        raise PermissionError
-    
-    threads = category.thread_set.get_user_query_set(request.user)
-    ctx = {'title': category.label, 'category': category, 'threads': threads}
-    return render(template, ctx, request)
 
 def thread_index(request, template="snapboard/thread_index.html"):
     authed_user = request.user.is_authenticated() and request.user or None
@@ -281,10 +289,6 @@ def locate_post(request, post_id):
     next = '%s?page=%i#snap_post%i' % (path, page, post.id)
     return HttpResponseRedirect(next)
 
-def category_index(request, template="snapboard/category_index.html"):
-    qs = Category.objects.all() # select_related(depth=1) ???
-    ctx = {'cat_list': [c for c in qs if c.can_view(request.user)]}
-    return render(template, ctx, request)
 
 @login_required
 def edit_settings(request, template="snapboard/edit_settings.html"):

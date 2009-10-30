@@ -15,5 +15,5 @@ def snapboard_default_context(request):
         'LOGIN_URL': settings.LOGIN_URL,
         'LOGOUT_URL': settings.LOGOUT_URL,
         'ADMIN_ROOT': getattr(settings, "ADMIN_ROOT", "/admin/"),
-        'user_settings': get_user_settings(request.user)
+        'user_settings': get_user_settings(request)
     }

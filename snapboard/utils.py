@@ -1,6 +1,6 @@
 from django.conf import settings
 from django import forms
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import striptags
 from django.template import RequestContext
@@ -36,13 +36,23 @@ def renders(template_name, context):
 
 DEFAULT_USER_SETTINGS  = UserSettings()
 
-def get_user_settings(user):
+def get_user_settings(request):
+    if hasattr(request, "user"):
+        if hasattr(request, "_sb_settings_cache"):
+            return request._sb_settings_cache
+    
+    user = getattr(request, "user", request)
+    
     if not user.is_authenticated():
-        return DEFAULT_USER_SETTINGS
+        user_settings = DEFAULT_USER_SETTINGS
     try:
-        return user.sb_usersettings
+        user_settings = user.sb_usersettings
     except UserSettings.DoesNotExist:
-        return DEFAULT_USER_SETTINGS
+        user_settings = DEFAULT_USER_SETTINGS
+    
+    if hasattr(request, "user"):
+        request._sb_settings_cache = user_settings
+    return user_settings
 
 
 def sanitize(text):
