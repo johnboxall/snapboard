@@ -45,10 +45,11 @@ def get_user_settings(request):
     
     if not user.is_authenticated():
         user_settings = DEFAULT_USER_SETTINGS
-    try:
-        user_settings = user.sb_usersettings
-    except UserSettings.DoesNotExist:
-        user_settings = DEFAULT_USER_SETTINGS
+    else:
+        try:
+            user_settings = user.sb_usersettings
+        except UserSettings.DoesNotExist:
+            user_settings = DEFAULT_USER_SETTINGS
     
     if hasattr(request, "user"):
         request._sb_settings_cache = user_settings
