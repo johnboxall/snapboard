@@ -86,7 +86,7 @@ def thread(request, cslug, tslug, template="snapboard/thread.html"):
         ctx["watched"] = thread.watchlist_set.filter(user=request.user).count() != 0
     
     ctx.update({
-        'posts': thread.post_set.select_related("user"), 
+        'posts': thread.post_set.all(), #select_related("user"), 
         'thread': thread, 
         'form': form,  
         'category': thread.category
