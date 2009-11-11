@@ -34,18 +34,32 @@ class RequestModelForm(RequestFormMixin, forms.ModelForm):
 def render(template_name, context, request):
     return render_to_response(template_name, context, 
                               context_instance=RequestContext(request))
-                              
+
 def render_and_cache(template_name, context, request, prefix="", timeout=None):
+    
     response = render(template_name, context, request)
-    cache_key = get_request_cache_key(request)
-    cache.set(cache_key, response, timeout)
+    
+    prefix_key = get_prefix_cache_key(request)
+    prefix = cache.get(prefix_key)
+    if prefix is None:
+        import time
+        prefix = int(time.time())
+        cache.set(prefix_key, prefix)
+    
+    response_key = get_response_cache_key(prefix, request)
+    cache.set(response_key, response, timeout)
     return response
 
+# TODO: Document
+#       Last updated doesn't have to take into account ?page
+#       update.<path> --- cached timestamp
+#       <timestamp>.<path> --- cached template
+def get_response_cache_key(prefix, request):
+    return "%s.%s" % (prefix, urllib.quote(request.get_full_path()))
 
-def get_request_cache_key(request):
-    # NEEED TO THINK ABOUT THIS A LITTLE HARDER FOR POST PAGES.
-    return urllib.quote(request.path)
-    
+def get_prefix_cache_key(request):
+    return "updated.%s" % getattr(request, "path", request)
+
 
 
 def renders(template_name, context):

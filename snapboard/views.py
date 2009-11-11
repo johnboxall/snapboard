@@ -55,7 +55,7 @@ def watch(request):
 
 # TODO: invalidate on new post
 def category_list(request, template="snapboard/category_list.html"):
-    ctx = {"categories": Category.objects.all()}
+    ctx = {"categories": Category.objects.all()}    
     return render_and_cache(template, ctx, request)
 
 # TODO: invalidate on any new post in this category.
@@ -63,7 +63,6 @@ def category(request, slug, template="snapboard/category.html"):
     category = get_object_or_404(Category, slug=slug)
     threads = category.thread_set.get_user_query_set(request.user)
     ctx = {'category': category, 'threads': threads}
-    #return render(template, ctx, request)
     return render_and_cache(template, ctx, request)
 
 # TODO: invalidate on any new post.
@@ -91,15 +90,17 @@ def thread(request, cslug, tslug, template="snapboard/thread.html"):
         'form': form,  
         'category': thread.category
     })
-    return render(template, ctx, request)
+    return render_and_cache(template, ctx, request)
 
-# TODO: Ghetto search alert!    
+# TODO: Ghetto search alert!
+# TODO: Should we be caching this?  
 def search(request, template="snapboard/search.html"):
     threads = Thread.objects.get_user_query_set(request.user)
     q = request.GET.get("q")
     if q is not None:
         threads = threads.filter(name__contains=q)
-    return render_and_cache(template, {'threads': threads}, request)
+    return render(template, {'threads': threads}, request)
+    # return render_and_cache(template, {'threads': threads}, request)
 
 @login_required
 def new_thread(request, slug=None, template="snapboard/new_thread.html"):

@@ -1,12 +1,14 @@
 from datetime import datetime
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 
 from snapboard.managers import ThreadManager, PostManager
+
 
 POSTS_PER_PAGE = getattr(settings, "SNAP_POSTS_PER_PAGE", 5)
 SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
@@ -76,9 +78,29 @@ class Post(models.Model):
     def __unicode__(self):
         return u''.join([str(self.user), ': ', str(self.date)])
     
+    def invalidate_cache(self):
+        import time
+        from snapboard.utils import get_prefix_cache_key
+        
+        prefix = int(time.time())
+
+        cslug = self.thread.category.slug
+        tslug = self.thread.slug
+
+        # Views to clear:
+        home = reverse("sb_category_list")
+        latest = reverse("sb_thread_list")
+        category = reverse("sb_category", args=[cslug])
+        thread = reverse("sb_thread", args=[cslug, tslug])
+        
+        for path in [home, latest, category, thread]:      
+            prefix_key = get_prefix_cache_key(path)
+            cache.set(prefix_key, prefix)
+        
     def save(self, force_insert=False, force_update=False):
         if self.id is None:
-            self.date = datetime.now()        
+            self.date = datetime.now()
+        self.invalidate_cache()                
         return super(Post, self).save(force_insert, force_update)        
     
     def notify(self):
@@ -107,7 +129,7 @@ class Post(models.Model):
         query = "#post%i" % self.pk
         if total > POSTS_PER_PAGE:
             page = preceding_count // POSTS_PER_PAGE + 1
-            query = "?%s%s" % (page, query)
+            query = "?page=%s%s" % (page, query)
         
         args = [self.thread.category.slug, self.thread.slug]
         path = reverse('sb_thread', args=args)
