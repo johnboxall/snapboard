@@ -1,5 +1,0 @@
-{% load i18n %}{% filter wordwrap:72 %}{% blocktrans with current_site.name as site_name %}Dear {{ user }},
-
-This is an automatic notification sent to you by {{ site_name }}.
-
-{{ message }}{% endblocktrans %}{% endfilter %}

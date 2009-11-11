@@ -1,8 +1,0 @@
-{% load i18n snapboard_tags %}{% url snapboard_locate_post post.id as post_url %}{% blocktrans with post.thread.subject as post_thread_subject and post.text|truncatechars:200 as post_body and post.user.username as post_user and current_site.domain as base_url %}A message was posted in a thread that you are currently watching.
-
-See the full post at http://{{ base_url }}{{ post_url }}
-
-Thread: {{ post_thread_subject }}
-Posted by: {{ post_user }}
-
-{{ post_body }}{% endblocktrans %}
