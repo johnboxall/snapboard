@@ -1,13 +1,8 @@
-from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
-from django.views.decorators.http import require_POST
-
-
 
 from snapboard.forms import *
 from snapboard.models import *
@@ -28,7 +23,6 @@ def sticky(request):
         return {'link':_('unstick'), 'msg':_('This topic is sticky!')}
     else:
         return {'link':_('stick'), 'msg':_('This topic is not sticky.')}
-
 
 @staff_member_required
 @json_response
@@ -53,25 +47,21 @@ def watch(request):
 
 # Views ########################################################################
 
-# TODO: invalidate on new post
 def category_list(request, template="snapboard/category_list.html"):
     ctx = {"categories": Category.objects.all()}    
     return render_and_cache(template, ctx, request)
 
-# TODO: invalidate on any new post in this category.
 def category(request, slug, template="snapboard/category.html"):
     category = get_object_or_404(Category, slug=slug)
     threads = category.thread_set.get_user_query_set(request.user)
     ctx = {'category': category, 'threads': threads}
     return render_and_cache(template, ctx, request)
 
-# TODO: invalidate on any new post.
 # TODO: don't want sticky order here.
 def thread_list(request, template="snapboard/thread_list.html"):
     threads = Thread.objects.get_user_query_set(request.user)
     return render_and_cache(template, {'threads': threads}, request)
 
-# TODO: cache
 def thread(request, cslug, tslug, template="snapboard/thread.html"):
     thread = get_object_or_404(Thread.objects.filter(category__slug=cslug), slug=tslug)
     form = PostForm(request.POST or None, request=request)
@@ -85,6 +75,7 @@ def thread(request, cslug, tslug, template="snapboard/thread.html"):
         ctx["watched"] = thread.watchlist_set.filter(user=request.user).count() != 0
     
     ctx.update({
+        # TODO: select_related with null users can be bad :\
         'posts': thread.post_set.all(), #select_related("user"), 
         'thread': thread, 
         'form': form,  
@@ -124,8 +115,8 @@ def edit_settings(request, template="snapboard/edit_settings.html"):
     """
     Allow user to edit his/her profile.
     """
-    userdata, _ = UserSettings.objects.get_or_create(user=request.user)    
-    form = UserSettingsForm(request.POST or None, instance=userdata, request=request)
+    settings, _ = UserSettings.objects.get_or_create(user=request.user)
+    form = UserSettingsForm(request.POST or None, instance=settings, request=request)
     if form.is_valid():
         form.save()
         return HttpResponseRedirect("")

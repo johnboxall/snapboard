@@ -54,7 +54,9 @@ def get_latest_posts(parser, token):
     return GetLatestPosts(5)
     
     
-    
+
+# Copyright 2009, EveryBlock
+# This code is released under the GPL.
 
 def raw(parser, token):
     # Whatever is between {% raw %} and {% endraw %} will be preserved as

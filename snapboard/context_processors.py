@@ -1,3 +1,4 @@
+# TODO: this whole file is old now.
 from django.conf import settings
 
 from snapboard.models import SNAP_MEDIA_PREFIX, SNAP_POST_FILTER

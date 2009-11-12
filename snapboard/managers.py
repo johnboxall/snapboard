@@ -33,7 +33,7 @@ class ThreadManager(models.Manager):
         watch_pks = WatchList.objects.filter(user=user).values_list("id", flat=True)
         return self.filter(Q(user=user) | Q(pk__in=watch_pks)).order_by("-date")
 
-        
+
 class PostManager(models.Manager):
     def create_and_notify(self, **kwargs):
         assert "thread" in kwargs
