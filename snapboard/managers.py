@@ -35,13 +35,16 @@ class ThreadManager(models.Manager):
 
 
 class PostManager(models.Manager):
-    def create_and_notify(self, **kwargs):
-        assert "thread" in kwargs
+    def create_and_notify(self, thread, user, **kwargs):
+        post = self.create(thread=thread, user=user, **kwargs)
         
-        post = self.create(**kwargs)
+        # Auto-watch the threads you post in.
+        user.sb_watchlist.get_or_create(thread=thread)
+
+        
         post.notify()
         
-        thread = kwargs["thread"]
+        
         thread.date = post.date
         thread.save()
         

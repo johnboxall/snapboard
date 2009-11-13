@@ -1,23 +1,12 @@
+import urllib
+
 from django.conf import settings
+from django.core.cache import cache
 from django import forms
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.utils import simplejson
-from django.core.cache import cache
-
-import urllib
-
-
-from snapboard.models import UserSettings
-
-
-# __all__ = [
-#     "RequestForm", "get_user_settings", "sanitize", 
-#     "toggle_boolean_field", "JSONResponse", "safe_int", "json_response",
-#     "DEFAULT_USER_SETTINGS"
-# ]
 
 
 class RequestFormMixin(object):
@@ -36,7 +25,6 @@ def render(template_name, context, request):
                               context_instance=RequestContext(request))
 
 def render_and_cache(template_name, context, request, prefix="", timeout=None):
-    
     response = render(template_name, context, request)
     
     prefix_key = get_prefix_cache_key(request)
@@ -48,6 +36,7 @@ def render_and_cache(template_name, context, request, prefix="", timeout=None):
     
     response_key = get_response_cache_key(prefix, request)
     cache.set(response_key, response, timeout)
+    
     return response
 
 # TODO: Document
@@ -60,33 +49,8 @@ def get_response_cache_key(prefix, request):
 def get_prefix_cache_key(request):
     return "updated.%s" % getattr(request, "path", request)
 
-
-
 def renders(template_name, context):
     return render_to_string(template_name, context)
-
-
-DEFAULT_USER_SETTINGS  = UserSettings()
-
-def get_user_settings(request):
-    if hasattr(request, "user"):
-        if hasattr(request, "_sb_settings_cache"):
-            return request._sb_settings_cache
-    
-    user = getattr(request, "user", request)
-    
-    if not user.is_authenticated():
-        user_settings = DEFAULT_USER_SETTINGS
-    else:
-        try:
-            user_settings = user.sb_usersettings
-        except UserSettings.DoesNotExist:
-            user_settings = DEFAULT_USER_SETTINGS
-    
-    if hasattr(request, "user"):
-        request._sb_settings_cache = user_settings
-    return user_settings
-
 
 def sanitize(s):
     import markdown
@@ -99,8 +63,8 @@ def toggle_boolean_field(obj, field):
     return getattr(obj, field)
 
 def JSONResponse(obj):
+    from django.utils import simplejson
     return HttpResponse(simplejson.dumps(obj), mimetype='application/javascript')
-
 
 def safe_int(s, default=None):
     try:
@@ -118,10 +82,7 @@ def send_mail(subject, message, from_email, recipient_list,
               connection=None, bcc=None):
     from django.core.mail import SMTPConnection, EmailMessage
     # Send mail w/ bcc
-    #import pdb;pdb.set_trace()
-    pass
-    #connection = SMTPConnection(username=auth_user, password=auth_password,
-    #                            fail_silently=fail_silently)
-    #return EmailMessage(subject, message, from_email, recipient_list, bcc, 
-    #    connection).send()
-
+    connection = SMTPConnection(username=auth_user, password=auth_password,
+                               fail_silently=fail_silently)
+    return EmailMessage(subject, message, from_email, recipient_list, bcc, 
+       connection).send()

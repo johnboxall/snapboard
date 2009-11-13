@@ -1,22 +1,12 @@
-# TODO: this whole file is old now.
 from django.conf import settings
+from snapboard.models import MEDIA_PREFIX, POSTS_PER_PAGE, THREADS_PER_PAGE
 
-from snapboard.models import SNAP_MEDIA_PREFIX, SNAP_POST_FILTER
-from snapboard.utils import get_user_settings
 
 def snapboard_default_context(request):
-    """
-    Provides some default information for all templates.
-
-    This should be added tothesettingsvariableTEMPLATE_CONTEXT_PROCESSORS
-    """
     return {
-        'SNAP_MEDIA_PREFIX':SNAP_MEDIA_PREFIX,
-        'SNAP_POST_FILTER': SNAP_POST_FILTER,
-        'LOGIN_URL': settings.LOGIN_URL,
-        'LOGOUT_URL': settings.LOGOUT_URL,
-        'ADMIN_ROOT': getattr(settings, "ADMIN_ROOT", "/admin/"),
-        #'user_settings':get_user_settings(request)
+        'SB_MEDIA_PREFIX': MEDIA_PREFIX,
+        'SB_POSTS_PER_PAGE': POSTS_PER_PAGE,
+        'SB_THREADS_PER_PAGE': THREADS_PER_PAGE
     }
     
     

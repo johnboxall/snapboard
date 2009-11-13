@@ -16,7 +16,8 @@ class PostForm(RequestForm):
     def save(self, thread):
         data = self.cleaned_data
         user = self.request.user
-        return Post.objects.create_and_notify(thread=thread, user=user, text=data['post'])
+        ip = self.request.META.get("REMOTE_ADDR")
+        return Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
 
 class ThreadForm(RequestForm):
     subject = forms.CharField(max_length=80, label=_('Subject'))
@@ -35,7 +36,7 @@ class ThreadForm(RequestForm):
         data = self.cleaned_data
         user = self.request.user
         category = self.category or data["category"]
-        
+                
         thread = Thread.objects.create_thread(
             user=user,
             category=category,
@@ -45,7 +46,7 @@ class ThreadForm(RequestForm):
         )
         
         ip = self.request.META.get("REMOTE_ADDR")
-        Post.objects.create_and_notify(user=user, thread=thread, text=data['post'], ip=ip)
+        Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
         return thread
 
 

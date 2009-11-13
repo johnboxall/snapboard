@@ -89,7 +89,7 @@ def search(request, template="snapboard/search.html"):
     threads = Thread.objects.get_user_query_set(request.user)
     q = request.GET.get("q")
     if q is not None:
-        threads = threads.filter(name__contains=q)
+        threads = threads.filter(name__icontains=q)
     return render(template, {'threads': threads}, request)
     # return render_and_cache(template, {'threads': threads}, request)
 
@@ -105,16 +105,12 @@ def new_thread(request, slug=None, template="snapboard/new_thread.html"):
     return render(template, {"form": form, "category": category}, request)
 
 @login_required
-def favorites(request, template="snapboard/thread_list.html"):
-    """Show watch topics and ones you created."""
+def favorites(request, template="snapboard/favorites.html"):
     threads = Thread.objects.favorites(request.user)
     return render(template, {"threads": threads}, request)
 
 @login_required
 def edit_settings(request, template="snapboard/edit_settings.html"):
-    """
-    Allow user to edit his/her profile.
-    """
     settings, _ = UserSettings.objects.get_or_create(user=request.user)
     form = UserSettingsForm(request.POST or None, instance=settings, request=request)
     if form.is_valid():

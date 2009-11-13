@@ -19,26 +19,14 @@ def truncate(text, chars=200):
 	else:
 		return text[:last_space] + u'…'
 
-
-
 def markdown(value, arg=''):
     import markdown
     return markdown.markdown(value, safe_mode=True)
 register.filter('markdown', markdown)
 
-# def timestamp(dt):
-#     # Returns a timestamp usable by JavaScript from a datetime.
-#     try:
-#         return str(int(1000*mktime(dt.timetuple())))
-#     except:
-#         return u''
-# register.filter('timestamp', timestamp)
-
 @register.filter
 def dateisoformat(dt):
     return hasattr(dt, "isoformat") and dt.isoformat() or ""
-
-
 
 class GetLatestPosts(template.Node):
     def __init__(self, limit):
@@ -49,15 +37,16 @@ class GetLatestPosts(template.Node):
         context["latest_posts"] = Post.objects.order_by("-date")[0:self.limit]
         return ""
 
+# TODO: Make limit a variable.
 @register.tag
 def get_latest_posts(parser, token):
-    return GetLatestPosts(5)
+    return GetLatestPosts(6)
     
     
 
 # Copyright 2009, EveryBlock
 # This code is released under the GPL.
-
+@register.tag
 def raw(parser, token):
     # Whatever is between {% raw %} and {% endraw %} will be preserved as
     # raw, unrendered template code.
@@ -81,4 +70,3 @@ def raw(parser, token):
         start, end = tag_mapping[token.token_type]
         text.append(u'%s%s%s' % (start, token.contents, end))
     parser.unclosed_block_tag(parse_until)
-raw = register.tag(raw)

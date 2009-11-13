@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 from snapboard.urls import feeds
 
 
+# TODO: Well these are now good now.
+
 class ViewsTest(TestCase):
     urls = "snapboard.tests.test_urls"
     fixtures = ["test_data"]

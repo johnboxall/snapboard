@@ -13,6 +13,10 @@ class PostAdmin(admin.ModelAdmin):
     list_display = ('user', 'date', 'thread', 'ip')
     search_fields = ('text', 'user')
     raw_id_fields = ('thread', 'user',)
+    
+class WatchListAdmin(admin.ModelAdmin):
+    list_display = ('user', 'thread',)
+    search_fields = ('user',)
 
 
 
@@ -21,4 +25,5 @@ class PostAdmin(admin.ModelAdmin):
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Thread, ThreadAdmin)
+admin.site.register(WatchList, WatchListAdmin)
 admin.site.register(UserSettings)

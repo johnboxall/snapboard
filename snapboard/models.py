@@ -6,15 +6,13 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-
 from snapboard.managers import ThreadManager, PostManager
 
 
-POSTS_PER_PAGE = getattr(settings, "SNAP_POSTS_PER_PAGE", 5)
-SNAP_PREFIX = getattr(settings, 'SNAP_PREFIX', '/snapboard')
-SNAP_MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
+THREADS_PER_PAGE = getattr(settings, "SB_THREADS_PER_PAGE", 10)
+POSTS_PER_PAGE = getattr(settings, "SB_POSTS_PER_PAGE", 10)
+MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
         getattr(settings, 'MEDIA_URL', '') + '/snapboard')
-SNAP_POST_FILTER = getattr(settings, 'SNAP_POST_FILTER', 'markdown').lower()
 
 
 class Category(models.Model):
@@ -105,7 +103,7 @@ class Post(models.Model):
     
     def notify(self):
         from snapboard.utils import renders, send_mail
-                
+        
         # Find everyone who is watching then remove everyone who doesn't want emails.
         mail_dict = dict(self.thread.watchlist_set.values_list("user__id", "user__email"))
         dont_mail_pks = UserSettings.objects.filter(user__id__in=mail_dict.keys(), email=False)
@@ -137,6 +135,7 @@ class Post(models.Model):
         return next
     get_absolute_url = get_url
     
+
 
 class WatchList(models.Model):
     user = models.ForeignKey("auth.User", verbose_name=_('user'), related_name='sb_watchlist')
