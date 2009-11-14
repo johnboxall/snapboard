@@ -11,8 +11,8 @@ class CachedTemplateMiddleware(object):
         if request.method != 'GET':
             return
 
-        # TODO: in dev don't try to media out of the cache.
-        if "." in request.path:
+        # TODO: In DEV don't try to grab media out of the cache.
+        if settings.DEBUG and "." in request.path:
             return
         
         prefix_key = get_prefix_cache_key(request)
@@ -20,7 +20,7 @@ class CachedTemplateMiddleware(object):
         
         response_key = get_response_cache_key(prefix, request)
         response = cache.get(response_key)
-                
+        
         if response is None:
             response = view_func(request, *view_args, **view_kwargs)
         

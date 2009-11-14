@@ -3,6 +3,8 @@ from django import template
 from django.conf import settings
 
 
+LATEST_POSTS = getattr(settings, "SB_LATEST_POSTS", 6)
+
 register = template.Library()
 
 
@@ -40,7 +42,7 @@ class GetLatestPosts(template.Node):
 # TODO: Make limit a variable.
 @register.tag
 def get_latest_posts(parser, token):
-    return GetLatestPosts(6)
+    return GetLatestPosts(LATEST_POSTS)
     
     
 
