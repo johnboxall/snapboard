@@ -8,6 +8,7 @@ class ThreadAdmin(admin.ModelAdmin):
     list_display = ('user', 'name', 'category', 'sticky', 'private', 'closed')
     list_filter = ('closed', 'sticky', 'category', 'private',)
     search_fields = ('name',)
+    raw_id_field = ('user', 'category')
 
 class PostAdmin(admin.ModelAdmin):
     list_display = ('user', 'date', 'thread', 'ip')
