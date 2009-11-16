@@ -17,7 +17,7 @@ MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX',
 
 class Category(models.Model):
     name = models.CharField(max_length=64, verbose_name=_('name'))
-    description = models.CharField(max_length=255, verbose_name=_('description'))
+    description = models.CharField(max_length=255, blank=True, verbose_name=_('description'))
     slug = models.SlugField()
     
     class Meta:
