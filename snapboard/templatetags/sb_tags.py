@@ -23,7 +23,7 @@ def truncate(text, chars=200):
 
 def markdown(value, arg=''):
     import markdown
-    return markdown.markdown(value, safe_mode=True)
+    return markdown.markdown(value, safe_mode=False)
 register.filter('markdown', markdown)
 
 @register.filter
