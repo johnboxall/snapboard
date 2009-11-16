@@ -26,6 +26,8 @@ def render(template_name, context, request):
 
 def render_and_cache(template_name, context, request, prefix="", timeout=None):
     response = render(template_name, context, request)
+    if request.method == "POST":
+        return response
     
     prefix_key = get_prefix_cache_key(request)
     prefix = cache.get(prefix_key)
