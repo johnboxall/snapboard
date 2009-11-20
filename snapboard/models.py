@@ -11,8 +11,7 @@ from snapboard.managers import ThreadManager, PostManager
 
 THREADS_PER_PAGE = getattr(settings, "SB_THREADS_PER_PAGE", 10)
 POSTS_PER_PAGE = getattr(settings, "SB_POSTS_PER_PAGE", 10)
-MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX', 
-        getattr(settings, 'MEDIA_URL', '') + '/snapboard')
+MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX')
 
 
 class Category(models.Model):
@@ -27,7 +26,7 @@ class Category(models.Model):
     def __unicode__(self):
         return self.name
 
-
+# TODO: When a thread is closed / stickied we'd also like to udpate things.
 class Thread(models.Model):
     user = models.ForeignKey("auth.User", verbose_name=_('user'))
     name = models.CharField(max_length=255, verbose_name=_('subject'))
@@ -64,6 +63,9 @@ class Post(models.Model):
     user = models.ForeignKey("auth.User", verbose_name=_('user'))
     thread = models.ForeignKey(Thread, verbose_name=_('thread'))
     text = models.TextField(verbose_name=_('text'))
+    # TODO: Would be nice to have this ready to avoid double renders.
+    # rendered_text = models.TextField(verbose_name=_('rendered_text'))
+    
     date = models.DateTimeField(verbose_name=_('date'), null=True)
     ip = models.IPAddressField(verbose_name=_('ip address'), blank=True, null=True)
     

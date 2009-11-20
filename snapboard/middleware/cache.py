@@ -12,8 +12,6 @@ class CachedTemplateMiddleware(object):
         if settings.DEBUG and "." in request.path:
             return
         
-
-        # TODO: I can imagine a problem with this where a user writes {% in his post %} ... which would then be rendered on the second pass.        
         response = None
         if request.method == "GET":
             prefix_key = get_prefix_cache_key(request)
