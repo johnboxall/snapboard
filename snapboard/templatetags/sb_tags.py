@@ -39,12 +39,13 @@ class GetLatestPosts(template.Node):
         context["latest_posts"] = Post.objects.order_by("-date")[0:self.limit]
         return ""
 
-# TODO: Make limit a variable.
 @register.tag
 def get_latest_posts(parser, token):
-    return GetLatestPosts(LATEST_POSTS)
+    token = token.split_contents()[-1]
+    limit = token.isdigit() and token or LATEST_POSTS
+    return GetLatestPosts(limit)
     
-    
+
 
 # Copyright 2009, EveryBlock
 # This code is released under the GPL.

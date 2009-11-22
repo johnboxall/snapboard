@@ -35,15 +35,21 @@ class ThreadManager(models.Manager):
 
 
 class PostManager(models.Manager):
+    def get_user_query_set(self, user):
+        qs = self.get_query_set()
+        if user.is_staff:
+            return qs
+        if user.is_authenticated():
+            return qs.filter(user=user)
+        return qs.none()
+
     def create_and_notify(self, thread, user, **kwargs):
         post = self.create(thread=thread, user=user, **kwargs)
         
         # Auto-watch the threads you post in.
         user.sb_watchlist.get_or_create(thread=thread)
-
         
         post.notify()
-        
         
         thread.date = post.date
         thread.save()

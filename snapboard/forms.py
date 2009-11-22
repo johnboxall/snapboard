@@ -10,14 +10,27 @@ __all__ = ["PostForm", "ThreadForm", "UserSettingsForm"]
 
 Textarea = lambda cols: forms.Textarea(attrs={'rows':'8', 'cols': str(cols)})
 
-class PostForm(RequestForm):
+class PostForm(RequestModelForm):
     post = forms.CharField(label='', widget=Textarea(120))
     
-    def save(self, thread):
+    class Meta:
+        model = Post
+        fields = ("post",)
+    
+    def save(self, thread=None):
+
         data = self.cleaned_data
-        user = self.request.user
-        ip = self.request.META.get("REMOTE_ADDR")
-        return Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
+
+
+        # This is kinda dumb.
+        if self.instance is not None:
+            self.instance.text = data["post"]
+            self.instance.save()
+            return self.instance
+        else:
+            user = self.request.user
+            ip = self.request.META.get("REMOTE_ADDR")
+            return Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
 
 class ThreadForm(RequestForm):
     subject = forms.CharField(max_length=80, label=_('Subject'))

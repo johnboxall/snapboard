@@ -20,6 +20,7 @@ urlpatterns += patterns('snapboard.views',
     (r'^settings/$', 'edit_settings', {}, 'sb_edit_settings'),
     
     # Ajax
+    (r'^rpc/edit/$', 'edit', {}, 'sb_edit'),
     (r'^rpc/preview/$', 'preview', {}, 'sb_preview'),
     (r'^rpc/sticky/$', 'sticky', {}, 'sb_sticky'),
     (r'^rpc/close/$', 'close', {}, 'sb_close'),

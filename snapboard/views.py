@@ -13,7 +13,7 @@ from snapboard.utils import *
 
 @json_response
 def preview(request):
-    return {'preview': sanitize(request.raw_post_data )}
+    return {'preview': sanitize(request.raw_post_data)}
 
 @staff_member_required
 @json_response
@@ -44,6 +44,17 @@ def watch(request):
         WatchList.objects.create(user=request.user, thread=thread)
         return {'link':_('dont watch'), 'msg':_('This topic has been added to your favorites.')}
 
+@login_required
+@json_response
+def edit(request):
+    pk = request.POST.get("id")
+    post = get_object_or_404(Post.objects.get_user_query_set(request.user), pk=pk)
+#    import pdb;pdb.set_trace()
+    form = PostForm(request.POST, request=request, instance=post)
+    if form.is_valid():
+        post = form.save()
+        return {'preview': sanitize(post.text)}
+    return dict(form.errors)
 
 # Views ########################################################################
 
