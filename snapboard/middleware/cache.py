@@ -27,6 +27,8 @@ class CachedTemplateMiddleware(object):
             t = Template(response.content)
             response.content = t.render(RequestContext(request))
 
+        # TODO: This problem has to do with a conflict between this caching
+        #       and the built in cache middleware.
         # TODO: Safari is caching pages for too long!
         #       These headers help it forget ...
         response['Cache-Control'] = "private"    
