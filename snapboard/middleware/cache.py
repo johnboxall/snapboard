@@ -26,5 +26,9 @@ class CachedTemplateMiddleware(object):
         if response['content-type'].startswith('text/html'):
             t = Template(response.content)
             response.content = t.render(RequestContext(request))
-        
+
+        # TODO: Safari is caching pages for too long!
+        #       These headers help it forget ...
+        response['Cache-Control'] = "private"    
+        response['Expires'] = "Thu, 1 Jan 70 00:00:00 GMT"
         return response
