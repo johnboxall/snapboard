@@ -124,7 +124,14 @@ def favorites(request, template="snapboard/favorites.html"):
 def edit_settings(request, template="snapboard/edit_settings.html"):
     settings, _ = UserSettings.objects.get_or_create(user=request.user)
     form = UserSettingsForm(request.POST or None, instance=settings, request=request)
-    if form.is_valid():
-        form.save()
-        return HttpResponseRedirect("")
-    return render(template, {"form": form}, request)
+    
+    username_form = UserNameForm(request.POST or None, instance=request.user, request=request)
+    if request.POST:
+        are_forms_valid = False
+        if form.is_valid() and username_form.is_valid():
+            form.save()
+            username_form.save()
+            are_forms_valid = True
+        if are_forms_valid:
+            return HttpResponseRedirect("")
+    return render(template, {"form": form, "username_form": username_form}, request)

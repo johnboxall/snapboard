@@ -5,8 +5,14 @@ from django.utils.translation import ugettext_lazy as _
 from snapboard.models import Category, Thread, Post, WatchList, UserSettings
 from snapboard.utils import RequestForm, RequestModelForm
 
+from django.contrib.auth.models import User
 
-__all__ = ["PostForm", "ThreadForm", "UserSettingsForm"]
+try:
+    import wingdbstub
+except:
+    pass
+
+__all__ = ["PostForm", "ThreadForm", "UserSettingsForm", "UserNameForm"]
 
 Textarea = lambda cols: forms.Textarea(attrs={'rows':'8', 'cols': str(cols)})
 
@@ -74,3 +80,37 @@ class UserSettingsForm(RequestModelForm):
     def save(self, commit=True):
         self.request.user.message_set.create(message="Preferences Updated.")
         return super(UserSettingsForm, self).save(commit)
+    
+    
+class UserNameForm(RequestModelForm):
+    class Meta:
+        model = User
+        fields = ("username",)
+    
+    def __init__(self, *args, **kwargs):
+        super(UserNameForm, self).__init__(*args, **kwargs)
+    
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if not username:
+            raise forms.ValidationError("You must enter a username")
+        
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            pass
+        else:
+            if user != self.request.user:
+                raise forms.ValidationError("A user with that username already exists")
+
+        import re
+        for c in tuple(username):
+            if not re.match('([_a-z0-9])', c, re.I):
+                raise forms.ValidationError("Illegal character in username")
+        
+        return username
+            
+        
+    def save(self, commit=True):
+        # self.request.user.message_set.create(message="Preferences Updated.")
+        return super(UserNameForm, self).save(commit)    
