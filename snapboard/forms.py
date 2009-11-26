@@ -74,9 +74,6 @@ class UserSettingsForm(RequestModelForm):
         model = UserSettings
         fields = ("email",)
     
-    def __init__(self, *args, **kwargs):
-        super(UserSettingsForm, self).__init__(*args, **kwargs)
-    
     def save(self, commit=True):
         self.request.user.message_set.create(message="Preferences Updated.")
         return super(UserSettingsForm, self).save(commit)
@@ -89,6 +86,7 @@ class UserNameForm(RequestModelForm):
     
     def __init__(self, *args, **kwargs):
         super(UserNameForm, self).__init__(*args, **kwargs)
+        self.fields["username"].help_text = "30 characters or fewer. Letters, digits and underscores only."
     
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -109,8 +107,7 @@ class UserNameForm(RequestModelForm):
                 raise forms.ValidationError("Illegal character in username")
         
         return username
-            
-        
+    
     def save(self, commit=True):
         # self.request.user.message_set.create(message="Preferences Updated.")
         return super(UserNameForm, self).save(commit)    
