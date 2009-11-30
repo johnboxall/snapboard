@@ -24,18 +24,20 @@ class PostForm(RequestModelForm):
         fields = ("post",)
     
     def save(self, thread=None):
-
         data = self.cleaned_data
+        ip = self.request.META.get("REMOTE_ADDR")
 
+        # TODO: Make this less stupid.
 
-        # This is kinda dumb.
-        if self.instance is not None:
+        # Editing an existing post.
+        if self.instance.id is not None:
             self.instance.text = data["post"]
+            self.instance.ip = ip
             self.instance.save()
             return self.instance
+        # Working on a new post.
         else:
             user = self.request.user
-            ip = self.request.META.get("REMOTE_ADDR")
             return Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
 
 class ThreadForm(RequestForm):
