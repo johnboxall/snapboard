@@ -3,64 +3,43 @@
         "pk": 1, 
         "model": "snapboard.post", 
         "fields": {
-            "freespeech": 0, 
-            "thread": 1, 
+            "date": "2009-11-10 13:24:00", 
             "text": "text", 
-            "censor": 0, 
-            "private": [], 
             "user": 1, 
-            "ip": "127.0.0.1", 
-            "odate": "2009-09-14 18:54:25", 
-            "date": "2009-09-14 18:54:25", 
-            "previous": null, 
-            "is_private": 0, 
-            "revision": null
-        }
-    },
-    {
-        "pk": 2,
-        "model": "snapboard.post", 
-        "fields": {
-            "freespeech": 0, 
             "thread": 1, 
-            "text": "text", 
-            "censor": 0, 
-            "private": [], 
-            "user": 1, 
-            "ip": "127.0.0.1", 
-            "odate": "2009-09-14 18:54:25", 
-            "date": "2009-09-14 18:54:25", 
-            "previous": 1, 
-            "is_private": 0, 
-            "revision": null
+            "ip": "127.0.0.1"
         }
-    },
+    }, 
     {
-        "pk": 1, 
+        "pk": 1,
         "model": "snapboard.thread", 
         "fields": {
             "category": 1, 
-            "csticky": 0, 
-            "gsticky": 0, 
+            "name": "name", 
+            "private": 0, 
+            "sticky": 0, 
+            "user": 1, 
             "closed": 0, 
-            "subject": "subject",
+            "date": "2009-11-11 14:07:16", 
             "slug": "thread"
         }
     }, 
     {
-        "pk": 1, 
-        "model": "snapboard.category", 
+        "pk": 1,
+        "model": "snapboard.category",
         "fields": {
-            "read_group": null, 
-            "post_group": null, 
-            "view_group": null, 
-            "new_thread_group": null,
-            "view_perms": 1, 
-            "post_perms": 2, 
-            "new_thread_perms": 2, 
-            "read_perms": 1, 
-            "label": "label", 
-            "slug": "category"
+            "slug": "category",
+            "name": "name",
+            "description": "description"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "auth.user",
+        "fields": {
+            "username": "test",
+            "password": "sha1$9be6b$72557d4a56bc20aa79493a0ef4503755e58750a2",
+            "is_staff": 1
         }
     }
 ]

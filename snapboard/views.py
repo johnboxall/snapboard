@@ -39,24 +39,32 @@ def watch(request):
     thread = get_object_or_404(Thread, pk=request.POST.get("id"))
     try:
         WatchList.objects.get(user=request.user, thread=thread).delete()
-        return {'link':_('watch'), 'msg':_('This topic has been removed from your favorites.')}
+        return {
+            'link': _('watch'), 
+            'msg': _('This topic has been removed from your favorites.')
+        }
     except WatchList.DoesNotExist:
         WatchList.objects.create(user=request.user, thread=thread)
-        return {'link':_('dont watch'), 'msg':_('This topic has been added to your favorites.')}
+        return {
+            'link': _('dont watch'), 
+            'msg': _('This topic has been added to your favorites.')
+        }
 
 @login_required
 @json_response
 def edit(request):
     pk = request.POST.get("id")
     post = get_object_or_404(Post.objects.get_user_query_set(request.user), pk=pk)
-#    import pdb;pdb.set_trace()
     form = PostForm(request.POST, request=request, instance=post)
     if form.is_valid():
         post = form.save()
         return {'preview': sanitize(post.text)}
-    return dict(form.errors)
+    return form.errors
 
 # Views ########################################################################
+
+# TODO: Sticky ordering on pages.
+# TODO: Caching of admin / private views
 
 def category_list(request, template="snapboard/category_list.html"):
     ctx = {"categories": Category.objects.all()}    
@@ -68,7 +76,6 @@ def category(request, slug, template="snapboard/category.html"):
     ctx = {'category': category, 'threads': threads}
     return render_and_cache(template, ctx, request)
 
-# TODO: don't want sticky order here.
 def thread_list(request, template="snapboard/thread_list.html"):
     threads = Thread.objects.get_user_query_set(request.user)
     return render_and_cache(template, {'threads': threads}, request)
@@ -123,15 +130,12 @@ def favorites(request, template="snapboard/favorites.html"):
 @login_required
 def edit_settings(request, template="snapboard/edit_settings.html"):
     settings, _ = UserSettings.objects.get_or_create(user=request.user)
-    form = UserSettingsForm(request.POST or None, instance=settings, request=request)
-    
-    username_form = UserNameForm(request.POST or None, instance=request.user, request=request)
+    data = request.POST or None
+    form = UserSettingsForm(data, instance=settings, request=request)
+    username_form = UserNameForm(data, instance=request.user, request=request)
     if request.POST:
-        are_forms_valid = False
         if form.is_valid() and username_form.is_valid():
             form.save()
             username_form.save()
-            are_forms_valid = True
-        if are_forms_valid:
             return HttpResponseRedirect("")
     return render(template, {"form": form, "username_form": username_form}, request)

@@ -1,3 +1,4 @@
+import time
 import urllib
 
 from django.conf import settings
@@ -8,6 +9,8 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
 
+
+# Forms ########################################################################
 
 class RequestFormMixin(object):
     def __init__(self, data=None, files=None, request=None, *args, **kwargs):
@@ -20,9 +23,39 @@ class RequestForm(RequestFormMixin, forms.Form):
 class RequestModelForm(RequestFormMixin, forms.ModelForm):
     pass  
 
+# Models  ######################################################################
+
+def toggle_boolean_field(obj, field):
+    # Toggles and returns a boolean field of a model instance.
+    setattr(obj, field, (not getattr(obj, field)))
+    obj.save()
+    return getattr(obj, field)
+
+
+# Rendering ####################################################################
+
 def render(template_name, context, request):
     return render_to_response(template_name, context, 
                               context_instance=RequestContext(request))
+
+def renders(template_name, context):
+    return render_to_string(template_name, context)
+
+def JSONResponse(o):
+    from snapboard.json import dumps
+    return HttpResponse(dumps(o), mimetype='application/javascript')
+
+def json_response(view):
+    def wrapper(*args, **kwargs):
+        return JSONResponse(view(*args, **kwargs))
+    return wrapper
+
+def sanitize(s):
+    import markdown
+    return markdown.markdown(s, safe_mode=True)
+
+
+# Caching ######################################################################
 
 def render_and_cache(template_name, context, request, prefix="", timeout=None):
     response = render(template_name, context, request)
@@ -32,7 +65,7 @@ def render_and_cache(template_name, context, request, prefix="", timeout=None):
     prefix_key = get_prefix_cache_key(request)
     prefix = cache.get(prefix_key)
     if prefix is None:
-        import time
+        
         prefix = int(time.time())
         cache.set(prefix_key, prefix)
     
@@ -51,33 +84,8 @@ def get_response_cache_key(prefix, request):
 def get_prefix_cache_key(request):
     return "updated.%s" % getattr(request, "path", request)
 
-def renders(template_name, context):
-    return render_to_string(template_name, context)
 
-def sanitize(s):
-    import markdown
-    return markdown.markdown(s, safe_mode=True)
-
-def toggle_boolean_field(obj, field):
-    # Toggles and returns a boolean field of a model instance.
-    setattr(obj, field, (not getattr(obj, field)))
-    obj.save()
-    return getattr(obj, field)
-
-def JSONResponse(obj):
-    from django.utils import simplejson
-    return HttpResponse(simplejson.dumps(obj), mimetype='application/javascript')
-
-def safe_int(s, default=None):
-    try:
-        return int(s)
-    except ValueError:
-        return default
-
-def json_response(view):
-    def wrapper(*args, **kwargs):
-        return JSONResponse(view(*args, **kwargs))
-    return wrapper
+# Mail #########################################################################
 
 def send_mail(subject, message, from_email, recipient_list,
               fail_silently=False, auth_user=None, auth_password=None,
@@ -88,3 +96,13 @@ def send_mail(subject, message, from_email, recipient_list,
                                fail_silently=fail_silently)
     return EmailMessage(subject, message, from_email, recipient_list, bcc, 
        connection).send()
+
+       
+# Helpers ######################################################################
+
+def safe_int(s, default=None):
+    try:
+        return int(s)
+    except ValueError:
+        return default
+

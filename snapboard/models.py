@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 
 from django.conf import settings
 from django.core.cache import cache
@@ -26,7 +27,7 @@ class Category(models.Model):
     def __unicode__(self):
         return self.name
 
-# TODO: When a thread is closed / stickied we'd also like to udpate things.
+# TODO: Update cache when a thread is updated (sticky/delete/private etc).
 class Thread(models.Model):
     user = models.ForeignKey("auth.User", verbose_name=_('user'))
     name = models.CharField(max_length=255, verbose_name=_('subject'))
@@ -63,7 +64,7 @@ class Post(models.Model):
     user = models.ForeignKey("auth.User", verbose_name=_('user'))
     thread = models.ForeignKey(Thread, verbose_name=_('thread'))
     text = models.TextField(verbose_name=_('text'))
-    # TODO: Would be nice to have this ready to avoid double renders.
+    # TODO: Avoid double renders.
     # rendered_text = models.TextField(verbose_name=_('rendered_text'))
     
     date = models.DateTimeField(verbose_name=_('date'), null=True)
@@ -79,7 +80,6 @@ class Post(models.Model):
         return u''.join([str(self.user), ': ', str(self.date)])
     
     def invalidate_cache(self):
-        import time
         from snapboard.utils import get_prefix_cache_key
         
         prefix = int(time.time())
@@ -148,7 +148,7 @@ class UserSettings(models.Model):
     user = models.OneToOneField("auth.User", unique=True, 
             verbose_name=_('user'), related_name='sb_usersettings')
     email = models.BooleanField(default=True, 
-        help_text="Check if you would like to receive email about posts you are watching.")
+        help_text=_("Check if you would like to receive email about posts you are watching."))
     
     class Meta:
         verbose_name = _('User settings')
