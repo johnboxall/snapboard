@@ -26,11 +26,10 @@ class ThreadManager(models.Manager):
             slug = "%s-%s" % (s, counter)
             counter += 1
         return slug
-        
+    
     def favorites(self, user):
         """Returns threads watched or owned by user."""
-        from snapboard.models import WatchList
-        watch_pks = WatchList.objects.filter(user=user).values_list("id", flat=True)
+        watch_pks = user.sb_watchlist.values_list("id", flat=True)
         return self.filter(Q(user=user) | Q(pk__in=watch_pks)).order_by("-date")
 
 

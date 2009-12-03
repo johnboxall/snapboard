@@ -135,3 +135,11 @@ class ViewsTest(TestCase):
             uri = reverse("sb_feeds", args=[feed])
             r = self.client.get(uri)
             self.assertEquals(r.status_code, 200)
+    
+    def test_thread_slug(self):
+        # No problems with dupe slugs right? There is a existing thread w/ slug "thread"
+        self.login()
+        uri = reverse("sb_new_thread", args=["category"])        
+        r = self.client.post(uri, {"subject": "thread", "post": "post"})
+        new_thread = Thread.objects.order_by("-date")[0]
+        self.assertEquals(new_thread.slug, "thread-1")

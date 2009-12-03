@@ -1,5 +1,4 @@
 from django import forms
-from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from snapboard.models import Category, Thread, Post, WatchList, UserSettings
@@ -51,20 +50,21 @@ class ThreadForm(RequestForm):
         super(ThreadForm, self).__init__(*args, **kwargs)
         if self.category is not None:
             self.fields.pop("category")
-            # TODO: Would be nice to set the selected here.
+        # TODO: Set selected category is provided.
     
     def save(self):
         data = self.cleaned_data
         user = self.request.user
         category = self.category or data["category"]
-                
-        thread = Thread.objects.create_thread(
-            user=user,
-            category=category,
-            name=data['subject'],
-            slug=slugify(data['subject']),
-            private=data['private']
-        )
+        
+        thread = Thread.objects.create_thread(**{
+            "user": user,
+            "category": category,
+            "name": data['subject'],
+            # Find a free slug for the post.
+            "slug": Thread.objects.get_slug(data['subject']),
+            "private": data['private']
+        })
         
         ip = self.request.META.get("REMOTE_ADDR")
         Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)

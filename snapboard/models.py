@@ -105,6 +105,7 @@ class Post(models.Model):
     
     def notify(self):
         from snapboard.utils import renders, send_mail
+        # TODO: bcc everyone on the mail - otherwise everyone sees listeners emails.
         
         # Find everyone who is watching then remove everyone who doesn't want emails.
         mail_dict = dict(self.thread.watchlist_set.values_list("user__id", "user__email"))
