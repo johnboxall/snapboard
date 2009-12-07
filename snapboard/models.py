@@ -47,8 +47,15 @@ class Thread(models.Model):
     def __unicode__(self):
         return self.name
     
+    def is_fav(self, user):
+        # True if user is watching this thread.
+        return user.is_authenticated() and self.watchlist_set.filter(user=user).count() != 0
+    
     def get_post_count(self):
         return self.post_set.count()
+    
+    def get_posts(self):
+        return self.post_set.order_by("date")
     
     def get_last_post(self):
         try:
@@ -139,7 +146,7 @@ class Post(models.Model):
     get_absolute_url = get_url
     
 
-
+# Fav
 class WatchList(models.Model):
     user = models.ForeignKey("auth.User", verbose_name=_('user'), related_name='sb_watchlist')
     thread = models.ForeignKey(Thread, verbose_name=_('thread'))

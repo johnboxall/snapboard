@@ -87,18 +87,13 @@ def thread(request, cslug, tslug, template="snapboard/thread.html"):
         post = form.save(thread)
         return HttpResponseRedirect(post.get_url())
     
-    ctx = {}
-    
-    if request.user.is_authenticated():
-        ctx["watched"] = thread.watchlist_set.filter(user=request.user).count() != 0
-    
-    ctx.update({
-        # TODO: select_related with null users can be bad :\
-        'posts': thread.post_set.all(), #select_related("user"), 
-        'thread': thread, 
-        'form': form,  
+    ctx = {
+        'is_fav': thread.is_fav(request.user),
+        'posts': thread.get_posts(),
+        'thread': thread,
+        'form': form,
         'category': thread.category
-    })
+    }
     return render_and_cache(template, ctx, request)
 
 # TODO: Ghetto search alert!
@@ -131,11 +126,12 @@ def favorites(request, template="snapboard/favorites.html"):
 def edit_settings(request, template="snapboard/edit_settings.html"):
     settings, _ = UserSettings.objects.get_or_create(user=request.user)
     data = request.POST or None
-    form = UserSettingsForm(data, instance=settings, request=request)
-    username_form = UserNameForm(data, instance=request.user, request=request)
+    sform = UserSettingsForm(data, instance=settings, request=request)
+    uform = UserNameForm(data, instance=request.user)
     if request.POST:
-        if form.is_valid() and username_form.is_valid():
-            form.save()
-            username_form.save()
+        if sform.is_valid() and uform.is_valid():
+            sform.save()
+            uform.save()
+            request.user.message_set.create(message="Preferences Updated.")
             return HttpResponseRedirect("")
-    return render(template, {"form": form, "username_form": username_form}, request)
+    return render(template, {"sform": sform, "uform": uform}, request)
