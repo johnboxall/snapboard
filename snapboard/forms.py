@@ -1,19 +1,16 @@
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserChangeForm
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from snapboard.models import Category, Thread, Post, WatchList, UserSettings
 from snapboard.utils import RequestForm, RequestModelForm
 
-from django.contrib.auth.models import User
-
-try:
-    import wingdbstub
-except:
-    pass
 
 __all__ = ["PostForm", "ThreadForm", "UserSettingsForm", "UserNameForm"]
 
 Textarea = lambda cols: forms.Textarea(attrs={'rows':'8', 'cols': str(cols)})
+
 
 class PostForm(RequestModelForm):
     post = forms.CharField(label='', widget=Textarea(120))
@@ -75,15 +72,10 @@ class UserSettingsForm(RequestModelForm):
     class Meta:
         model = UserSettings
         fields = ("email",)
+
     
-    def save(self, commit=True):
-        self.request.user.message_set.create(message="Preferences Updated.")
-        return super(UserSettingsForm, self).save(commit)
-    
-    
-class UserNameForm(RequestModelForm):
+class UserNameForm(UserChangeForm):
     class Meta:
-        model = User
         fields = ("username",)
     
     def __init__(self, *args, **kwargs):
@@ -93,7 +85,7 @@ class UserNameForm(RequestModelForm):
     def clean_username(self):
         username = self.cleaned_data['username']
         if not username:
-            raise forms.ValidationError("You must enter a username")
+            raise forms.ValidationError("You must enter a username.")
         
         try:
             user = User.objects.get(username=username)
@@ -101,15 +93,6 @@ class UserNameForm(RequestModelForm):
             pass
         else:
             if user != self.request.user:
-                raise forms.ValidationError("A user with that username already exists")
-
-        import re
-        for c in tuple(username):
-            if not re.match('([_a-z0-9])', c, re.I):
-                raise forms.ValidationError("Illegal character in username")
+                raise forms.ValidationError("A user with that username already exists.")
         
         return username
-    
-    def save(self, commit=True):
-        # self.request.user.message_set.create(message="Preferences Updated.")
-        return super(UserNameForm, self).save(commit)    
