@@ -50,6 +50,18 @@ class Thread(models.Model):
     def is_fav(self, user):
         # True if user is watching this thread.
         return user.is_authenticated() and self.watchlist_set.filter(user=user).count() != 0
+
+    def get_notify_recipients(self):
+        # Returns a set of emails watching this thread.
+        mail_dict = dict(self.watchlist_set.values_list("user__id", "user__email"))
+        dont_mail_pks = UserSettings.objects.filter(user__id__in=mail_dict.keys(), email=False)
+        dont_mail_pks = dont_mail_pks.values_list("user__id", flat=True)
+        for pk in dont_mail_pks:
+            mail_dict.pop(pk)
+        
+        recipients = set(mail_dict.values())
+        [recipients.add(t[1]) for t in settings.ADMINS]
+        return recipients
     
     def get_post_count(self):
         return self.post_set.count()
@@ -109,24 +121,14 @@ class Post(models.Model):
             self.date = datetime.now()
         self.invalidate_cache()                
         return super(Post, self).save(force_insert, force_update)        
-    
+        
     def notify(self):
-        from snapboard.utils import renders, send_mail
-        # TODO: bcc everyone on the mail - otherwise everyone sees listeners emails.
-        
-        # Find everyone who is watching then remove everyone who doesn't want emails.
-        mail_dict = dict(self.thread.watchlist_set.values_list("user__id", "user__email"))
-        dont_mail_pks = UserSettings.objects.filter(user__id__in=mail_dict.keys(), email=False)
-        dont_mail_pks = dont_mail_pks.values_list("user__id", flat=True)
-        for pk in dont_mail_pks:
-            mail_dict.pop(pk)
-        
-        recipients = set(mail_dict.values())
-        bcc = [t[1] for t in settings.ADMINS]
+        from snapboard.utils import renders, bcc_mail
         
         subj = self.thread.name
         body = renders("notify/notify_body.txt", {"post": self, "subj": subj})
-        send_mail(subj, body, settings.DEFAULT_FROM_EMAIL, recipients, bcc=bcc,
+        recipients = self.thread.get_notify_recipients()
+        bcc_mail(subj, body, settings.DEFAULT_FROM_EMAIL, recipients,
             fail_silently=settings.DEBUG)
     
     def get_url(self):

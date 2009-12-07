@@ -65,7 +65,6 @@ def render_and_cache(template_name, context, request, prefix="", timeout=None):
     prefix_key = get_prefix_cache_key(request)
     prefix = cache.get(prefix_key)
     if prefix is None:
-        
         prefix = int(time.time())
         cache.set(prefix_key, prefix)
     
@@ -87,14 +86,14 @@ def get_prefix_cache_key(request):
 
 # Mail #########################################################################
 
-def send_mail(subject, message, from_email, recipient_list,
+def bcc_mail(subject, message, from_email, recipient_list,
               fail_silently=False, auth_user=None, auth_password=None,
-              connection=None, bcc=None):
+              connection=None):
     from django.core.mail import SMTPConnection, EmailMessage
-    # Send mail w/ bcc
+    # Send mail with recipient_list BCC'ed.
     connection = SMTPConnection(username=auth_user, password=auth_password,
                                fail_silently=fail_silently)
-    return EmailMessage(subject, message, from_email, recipient_list, bcc, 
+    return EmailMessage(subject, message, from_email, None, recipient_list, 
        connection).send()
 
        
@@ -105,4 +104,3 @@ def safe_int(s, default=None):
         return int(s)
     except ValueError:
         return default
-

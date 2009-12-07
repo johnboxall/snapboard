@@ -1,17 +1,19 @@
 import os
 
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from django.contrib.auth.models import User
 
 from snapboard.urls import feeds
 from snapboard.models import *
+from snapboard.utils import *
 
 
 class ViewsTest(TestCase):
     urls = "snapboard.tests.test_urls"
-    fixtures = ["test_data"]
+    fixtures = ["test_data.json"]
 #     template_dirs = [
 #         os.path.join(os.path.dirname(__file__), '../templates'),
 #     ]
@@ -41,8 +43,6 @@ class ViewsTest(TestCase):
         if post is None:
             post = {"id": pk}
         r = self.client.post(uri, post)
-
-        
         
         if expected is not None:
             self.assertEquals(r.content, expected)
@@ -143,3 +143,21 @@ class ViewsTest(TestCase):
         r = self.client.post(uri, {"subject": "thread", "post": "post"})
         new_thread = Thread.objects.order_by("-date")[0]
         self.assertEquals(new_thread.slug, "thread-1")
+        
+
+class ThreadTest(TestCase):
+    fixtures = ["test_data.json"]
+
+    def test_get_notify_recipients(self):
+        # should just return a set of the admins
+        r = Thread.objects.get(pk=1).get_notify_recipients()
+        self.assertEquals(r, set([t[1] for t in settings.ADMINS]))
+        
+        
+class UtilsTest(TestCase):
+    def test_bcc_mail(self):
+        recipient_list = ["to@example.com"]
+        bcc_mail("subj", "body", "from@example.com", recipient_list)
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertEquals(mail.outbox[0].to, [])
+        self.assertEquals(mail.outbox[0].bcc, recipient_list)
