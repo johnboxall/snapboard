@@ -17,7 +17,7 @@ class PostForm(RequestModelForm):
     
     class Meta:
         model = Post
-        fields = ("post")
+        fields = ("post",)
     
     def save(self, thread=None):
         data = self.cleaned_data
@@ -35,14 +35,6 @@ class PostForm(RequestModelForm):
             user = self.request.user
             # subscribe user hack
             post = Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
-            if request.POST.get('subscribe_users', ''):
-                subscribe_users = [x.strip() for x in request.POST['subscribe_users'].split(',') if x and x != ' ']
-                for user_name in subscribe_users:
-                    try:
-                        user = User.objects.get(username=user_name)
-                    except User.DoesNotExist:
-                        continue
-                    user.sb_watchlist.get_or_create(thread=post.thread)
             return post
 
 class ThreadForm(RequestForm):
@@ -73,7 +65,17 @@ class ThreadForm(RequestForm):
         })
         
         ip = self.request.META.get("REMOTE_ADDR")
-        Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
+        post = Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
+        
+        if self.request.POST.get('subscribe_users', ''):
+            subscribe_users = [x.strip() for x in self.request.POST['subscribe_users'].split(',') if x and x != ' ']
+            for user_name in subscribe_users:
+                try:
+                    user = User.objects.get(username=user_name)
+                except User.DoesNotExist:
+                    continue
+                user.sb_watchlist.get_or_create(thread=thread)
+                
         return thread
 
 
