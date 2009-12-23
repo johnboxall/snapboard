@@ -33,7 +33,6 @@ class PostForm(RequestModelForm):
         # Working on a new post.
         else:
             user = self.request.user
-            # subscribe user hack
             post = Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
             return post
 
@@ -67,6 +66,7 @@ class ThreadForm(RequestForm):
         ip = self.request.META.get("REMOTE_ADDR")
         post = Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
         
+        # subscribe user hack
         if self.request.POST.get('subscribe_users', ''):
             subscribe_users = [x.strip() for x in self.request.POST['subscribe_users'].split(',') if x and x != ' ']
             for user_name in subscribe_users:

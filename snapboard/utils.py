@@ -93,7 +93,7 @@ def bcc_mail(subject, message, from_email, recipient_list,
     # Send mail with recipient_list BCC'ed.
     connection = SMTPConnection(username=auth_user, password=auth_password,
                                fail_silently=fail_silently)
-    return EmailMessage(subject, message, from_email, None, recipient_list, 
+    return EmailMessage(subject, message, from_email, settings.BCC_MAIL_TO_ADDRESS, recipient_list, 
        connection).send()
 
        
