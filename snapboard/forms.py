@@ -17,12 +17,11 @@ class PostForm(RequestModelForm):
     
     class Meta:
         model = Post
-        fields = ("post",)
+        fields = ("post")
     
     def save(self, thread=None):
         data = self.cleaned_data
         ip = self.request.META.get("REMOTE_ADDR")
-
         # TODO: Make this less stupid.
 
         # Editing an existing post.
@@ -34,7 +33,17 @@ class PostForm(RequestModelForm):
         # Working on a new post.
         else:
             user = self.request.user
-            return Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
+            # subscribe user hack
+            post = Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)
+            if request.POST.get('subscribe_users', ''):
+                subscribe_users = [x.strip() for x in request.POST['subscribe_users'].split(',') if x and x != ' ']
+                for user_name in subscribe_users:
+                    try:
+                        user = User.objects.get(username=user_name)
+                    except User.DoesNotExist:
+                        continue
+                    user.sb_watchlist.get_or_create(thread=post.thread)
+            return post
 
 class ThreadForm(RequestForm):
     subject = forms.CharField(max_length=80, label=_('Subject'))
