@@ -2,8 +2,11 @@ from django.utils import simplejson
 from django.forms.util import ErrorDict, ErrorList
 
 
-
 class ErrorJSONEncoder(simplejson.JSONEncoder):
+    """
+    Handles encoding Django form error classes.
+    
+    """
     def default(self, o):
         if issubclass(o.__class__, ErrorDict):
             return dict(o)

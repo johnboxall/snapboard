@@ -90,11 +90,15 @@ def bcc_mail(subject, message, from_email, recipient_list,
               fail_silently=False, auth_user=None, auth_password=None,
               connection=None):
     from django.core.mail import SMTPConnection, EmailMessage
-    # Send mail with recipient_list BCC'ed.
-    connection = SMTPConnection(username=auth_user, password=auth_password,
-                               fail_silently=fail_silently)
-    return EmailMessage(subject, message, from_email, [settings.BCC_MAIL_TO_ADDRESS,], recipient_list, 
-       connection).send()
+    """
+    Sends mail with recipient_list BCC'ed. Follows BCC convention and sets "to"
+    to from_email.
+    
+    """
+    conn = SMTPConnection(username=auth_user, password=auth_password,
+       fail_silently=fail_silently)
+    return EmailMessage(subject, message, from_email, [from_email], recipient_list,
+       conn).send()
 
        
 # Helpers ######################################################################
