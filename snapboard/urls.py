@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
+from django.conf import settings
 from snapboard.feeds import LatestPosts
 
 feeds = {
@@ -7,6 +8,11 @@ feeds = {
 
 urlpatterns = patterns('django.contrib.syndication.views',
     (r'^feeds/(?P<url>.*)/$', 'feed', {'feed_dict': feeds}, 'sb_feeds'),
+)
+
+
+urlpatterns += patterns("",
+    (r'^api/', include("snapboard.api.urls"),)
 )
 
 urlpatterns += patterns('snapboard.views',
@@ -30,3 +36,6 @@ urlpatterns += patterns('snapboard.views',
     (r'^(?P<cslug>[-_\w]+)/(?P<tslug>[-_\w]+)/$', 'thread', {}, 'sb_thread'),
     (r'^(?P<slug>[-_\w]+)/$', 'category', {}, 'sb_category'),
 )
+
+
+

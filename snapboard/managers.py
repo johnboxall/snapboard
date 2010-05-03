@@ -44,13 +44,9 @@ class PostManager(models.Manager):
 
     def create_and_notify(self, thread, user, **kwargs):
         post = self.create(thread=thread, user=user, **kwargs)
-        
         # Auto-watch the threads you post in.
         user.sb_watchlist.get_or_create(thread=thread)
-        
         post.notify()
-        
         thread.date = post.date
         thread.save()
-        
         return post

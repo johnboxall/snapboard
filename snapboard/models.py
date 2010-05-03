@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from snapboard.fields import SignalSlugField, fields_updated
 from snapboard.managers import ThreadManager, PostManager
 
 
@@ -14,11 +15,16 @@ THREADS_PER_PAGE = getattr(settings, "SB_THREADS_PER_PAGE", 10)
 POSTS_PER_PAGE = getattr(settings, "SB_POSTS_PER_PAGE", 10)
 MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX')
 
+# TODO: Add created/updated dates.
+# should add created...
+# should add updated...
+
 
 class Category(models.Model):
     name = models.CharField(max_length=64, verbose_name=_('name'))
-    description = models.CharField(max_length=255, blank=True, verbose_name=_('description'))
-    slug = models.SlugField()
+    description = models.CharField(max_length=255, blank=True, 
+        verbose_name=_('description'))
+    slug = SignalSlugField()
     
     class Meta:
         verbose_name = _('category')
@@ -31,7 +37,11 @@ class Category(models.Model):
 class Thread(models.Model):
     user = models.ForeignKey("auth.User", verbose_name=_('user'))
     name = models.CharField(max_length=255, verbose_name=_('subject'))
-    slug = models.SlugField(max_length=255)
+    # TODO: SignalSlugField allows you to do things when a slug is changed,
+    #       like create a redirect for a previous slug. Is this something
+    #       that should be included in the app? Or should you just be able to
+    #       swap in a proxy model for what you want...
+    slug = SignalSlugField(max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('category'))
     private = models.BooleanField(default=False, verbose_name=_('private'))
     closed = models.BooleanField(default=False, verbose_name=_('closed'))
@@ -47,7 +57,7 @@ class Thread(models.Model):
     def __unicode__(self):
         return self.name
     
-    def is_fav(self, user):
+    def is_fav(self, u):
         # True if user is watching this thread.
         return user.is_authenticated() and self.watchlist_set.filter(user=user).count() != 0
 
@@ -86,6 +96,7 @@ class Post(models.Model):
     # TODO: Avoid double renders.
     # rendered_text = models.TextField(verbose_name=_('rendered_text'))
     
+    
     date = models.DateTimeField(verbose_name=_('date'), null=True)
     ip = models.IPAddressField(verbose_name=_('ip address'), blank=True, null=True)
     
@@ -107,12 +118,14 @@ class Post(models.Model):
         tslug = self.thread.slug
 
         # Views to clear:
-        home = reverse("sb_category_list")
-        latest = reverse("sb_thread_list")
-        category = reverse("sb_category", args=[cslug])
-        thread = reverse("sb_thread", args=[cslug, tslug])
+        path = [
+            reverse("sb_category_list"),
+            reverse("sb_thread_list"),
+            reverse("sb_category", args=[cslug]),
+            reverse("sb_thread", args=[cslug, tslug])
+        ]
         
-        for path in [home, latest, category, thread]:      
+        for path in paths:
             prefix_key = get_prefix_cache_key(path)
             cache.set(prefix_key, prefix)
         
@@ -131,14 +144,20 @@ class Post(models.Model):
         bcc_mail(subj, body, settings.DEFAULT_FROM_EMAIL, recipients,
             fail_silently=settings.DEBUG)
     
-    def get_url(self):
+    def _get_page_number(self):
+        # Returns the page number this post is on. If not paginated, returns None.
         posts = list(self.thread.post_set.values_list("pk", flat=True))
         total = len(posts)
         preceding_count = posts.index(self.pk)
         
-        query = "#post%i" % self.pk
         if total > POSTS_PER_PAGE:
-            page = preceding_count // POSTS_PER_PAGE + 1
+            return preceding_count // POSTS_PER_PAGE + 1
+        return None
+    
+    def get_url(self):
+        query = "#post%i" % self.pk
+        page = self._get_page_number()
+        if page is not None:
             query = "?page=%s%s" % (page, query)
         
         args = [self.thread.category.slug, self.thread.slug]
@@ -148,9 +167,9 @@ class Post(models.Model):
     get_absolute_url = get_url
     
 
-# Fav
 class WatchList(models.Model):
-    user = models.ForeignKey("auth.User", verbose_name=_('user'), related_name='sb_watchlist')
+    user = models.ForeignKey("auth.User", verbose_name=_('user'), 
+        related_name='sb_watchlist')
     thread = models.ForeignKey(Thread, verbose_name=_('thread'))
 
 
