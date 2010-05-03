@@ -2,6 +2,8 @@
 from django import template
 from django.conf import settings
 
+from snapboard.models import Post
+
 
 LATEST_POSTS = getattr(settings, "SB_LATEST_POSTS", 6)
 
@@ -18,8 +20,7 @@ def truncate(text, chars=200):
 			raise ValueError
 	except ValueError:
 		return text[:chars - 1] + u'…'
-	else:
-		return text[:last_space] + u'…'
+	return text[:last_space] + u'…'
 
 @register.filter
 def markdown(value, arg=''):
@@ -30,21 +31,53 @@ def markdown(value, arg=''):
 def dateisoformat(dt):
     return hasattr(dt, "isoformat") and dt.isoformat() or ""
 
+
 class GetLatestPosts(template.Node):
     def __init__(self, limit):
-        self.limit = limit
+        self.limit = int(limit)
     
     def render(self, context):
-        from snapboard.models import Post
         context["latest_posts"] = Post.objects.order_by("-date")[0:self.limit]
         return ""
 
 @register.tag
-def get_latest_posts(parser, token):
+def get_latest_posts(parser, token, node_cls=GetLatestPosts):
+    """
+    Returns a list of the latest posts.
+    
+    usage:
+        {% get_latest_posts %}
+    
+    """
     token = token.split_contents()[-1]
     limit = token.isdigit() and token or LATEST_POSTS
-    return GetLatestPosts(limit)
-    
+    return node_cls(limit)
+
+
+class GetUniqueLatestPosts(GetLatestPosts):
+    def render(self, context):
+        # TODO: There has got to be an easier way.
+        #       - don't show two posts from the same thread
+        #       - don't show two posts from the same user        
+        seen = set()
+        latest = []
+        for post in Post.objects.order_by("-date")[self.limit*2].iterator():
+            uid = "u%i" % post.user_id
+            tid = "t%i" % post.thread_id
+            if uid in seen or tid in seen:
+                continue
+            seen.update([uid, tid])
+            latest.append(post)
+            if len(latest) > self.limit:
+                break
+        
+        context["latest_posts"] = latest
+        return ""
+
+@register.tag
+def get_unique_latest_posts(parser, token):
+    return get_latest_posts(parser, token, node_cls=GetUniqueLatestPosts)
+
 
 
 # Copyright 2009, EveryBlock
