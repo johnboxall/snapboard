@@ -13,7 +13,7 @@ from snapboard.utils import *
 
 @json_response
 def preview(request):
-    return {'preview': sanitize(request.raw_post_data)}
+    return {'preview': sanitize(request.POST.get("text", ""))}
 
 @staff_member_required
 @json_response
@@ -65,6 +65,7 @@ def edit(request):
 
 # TODO: Sticky ordering on pages.
 # TODO: Caching of admin / private views
+# TODO: Optional caching?
 
 def category_list(request, template="snapboard/category_list.html"):
     ctx = {"categories": Category.objects.all()}    
@@ -77,7 +78,8 @@ def category(request, slug, template="snapboard/category.html"):
     return render_and_cache(template, ctx, request)
 
 def thread_list(request, template="snapboard/thread_list.html"):
-    threads = Thread.objects.get_user_query_set(request.user)
+    # Keep sticky posts from clogging up the list.
+    threads = Thread.objects.get_user_query_set(request.user).order_by("-date")
     return render_and_cache(template, {'threads': threads}, request)
 
 def thread(request, cslug, tslug, template="snapboard/thread.html"):

@@ -21,10 +21,10 @@ def truncate(text, chars=200):
 	else:
 		return text[:last_space] + u'…'
 
+@register.filter
 def markdown(value, arg=''):
     import markdown
     return markdown.markdown(value, safe_mode=False)
-register.filter('markdown', markdown)
 
 @register.filter
 def dateisoformat(dt):
