@@ -41,5 +41,21 @@
             "password": "sha1$9be6b$72557d4a56bc20aa79493a0ef4503755e58750a2",
             "is_staff": 1
         }
+    },
+    {
+        "pk": 2,
+        "model": "auth.user",
+        "fields": {
+            "username": "jiveturkey",
+            "password": "sha1$9be6b$72557d4a56bc20aa79493a0ef4503755e58750a2"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "auth.user",
+        "fields": {
+            "username": "blackdynamite",
+            "password": "sha1$9be6b$72557d4a56bc20aa79493a0ef4503755e58750a2"
+        }
     }
 ]

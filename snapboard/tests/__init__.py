@@ -1,1 +1,1 @@
-from tests import ViewsTest, ThreadTest, UtilsTest
+from tests import ViewsTest, ThreadTest, UtilsTest, APITest

@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserChangeForm
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from snapboard.models import Category, Thread, Post, WatchList, UserSettings
+from snapboard.models import Category, Thread, Post, UserSettings
 from snapboard.utils import RequestForm, RequestModelForm
 
 

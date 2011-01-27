@@ -9,7 +9,6 @@ class ThreadHandler(BaseHandler):
     allowed_methods = ('POST',)
     model = Thread
     
-    # validates?    
     def create(self, request):
         """
         Create a new post in a thread.
@@ -19,10 +18,4 @@ class ThreadHandler(BaseHandler):
         if form.is_valid():
             form.save()
             return rc.CREATED
-        
-        # NEED SOME SPECIAL FIELDS.
-        
-        #        print form.errorskeys()            
-        print form.errors
-            
         return rc.BAD_REQUEST

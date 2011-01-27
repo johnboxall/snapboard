@@ -1,4 +1,5 @@
 import os
+import base64
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -14,23 +15,22 @@ from snapboard.utils import *
 class ViewsTest(TestCase):
     urls = "snapboard.tests.test_urls"
     fixtures = ["test_data.json"]
-#     template_dirs = [
-#         os.path.join(os.path.dirname(__file__), '../templates'),
-#     ]
-    
-#     def setUp(self):
-#         self.old_snap_post_filter = settings.SNAP_POST_FILTER
-#         settings.SNAP_POST_FILTER = "markdown"
-#         self.old_template_dir = settings.TEMPLATE_DIRS
-#         settings.TEMPLATE_DIRS = self.template_dirs        
-#         self.user = User.objects.create_user(username="test", email="test@example.com", password="!")
-#         self.admin = User.objects.create_superuser(username="admin", email="admin@example.com", password="!") 
-        
-#     
-#     def tearDown(self):
-#         settings.TEMPLATE_DIRS = self.old_template_dir
-#         settings.SNAP_POST_FILTER = self.old_snap_post_filter
-#     
+    # template_dirs = [
+    #     os.path.join(os.path.dirname(__file__), '../templates'),
+    # ]
+    #    
+    # def setUp(self):
+    #     self.old_snap_post_filter = settings.SNAP_POST_FILTER
+    #     settings.SNAP_POST_FILTER = "markdown"
+    #     self.old_template_dir = settings.TEMPLATE_DIRS
+    #     settings.TEMPLATE_DIRS = self.template_dirs        
+    #     self.user = User.objects.create_user(username="test", email="test@example.com", password="!")
+    #     self.admin = User.objects.create_superuser(username="admin", email="admin@example.com", password="!")         
+    # 
+    # def tearDown(self):
+    #     settings.TEMPLATE_DIRS = self.old_template_dir
+    #     settings.SNAP_POST_FILTER = self.old_snap_post_filter
+    # 
 
     # Helpers ##################################################################
 
@@ -159,5 +159,36 @@ class UtilsTest(TestCase):
         recipient_list = ["to@example.com"]
         bcc_mail("subj", "body", "from@example.com", recipient_list)
         self.assertEquals(len(mail.outbox), 1)
-        self.assertEquals(mail.outbox[0].to, [])
+        self.assertEquals(mail.outbox[0].to, ["from@example.com"])
         self.assertEquals(mail.outbox[0].bcc, recipient_list)
+
+
+class APITest(TestCase):
+    urls = "snapboard.tests.test_urls"
+    fixtures = ["test_data.json"]
+    
+    def setUp(self):
+        self._old_SB_ENABLE_API = settings.SB_ENABLE_API
+        settings.SB_ENABLE_API = True
+    
+    def tearDown(self):
+        settings.SB_ENABLE_API = settings.SB_ENABLE_API
+    
+    def test_thread(self):
+        uri = "/api/thread/"
+        
+        # Not logged in should be denied.
+        r = self.client.post(uri, {})
+        self.assertEquals(r.content, 'Authorization Required')
+        
+        data = {
+            "user": User.objects.all()[0].pk,
+            "category": 1,
+            "name": "name",
+            "text": "text,",
+            "subscribers": 2
+        }
+        
+        auth = "Basic %s" % base64.b64encode("test:!")
+        r = self.client.post(uri, data, HTTP_AUTHORIZATION=auth)
+        

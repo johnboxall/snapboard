@@ -6,6 +6,7 @@ from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User
 
 from snapboard.fields import SignalSlugField, fields_updated
 from snapboard.managers import ThreadManager, PostManager
@@ -13,7 +14,7 @@ from snapboard.managers import ThreadManager, PostManager
 
 THREADS_PER_PAGE = getattr(settings, "SB_THREADS_PER_PAGE", 10)
 POSTS_PER_PAGE = getattr(settings, "SB_POSTS_PER_PAGE", 10)
-MEDIA_PREFIX = getattr(settings, 'SNAP_MEDIA_PREFIX')
+MEDIA_PREFIX = getattr(settings, 'SB_MEDIA_PREFIX')
 
 # TODO: Add created/updated dates.
 # should add created...
@@ -46,7 +47,9 @@ class Thread(models.Model):
     private = models.BooleanField(default=False, verbose_name=_('private'))
     closed = models.BooleanField(default=False, verbose_name=_('closed'))
     sticky = models.BooleanField(default=False, verbose_name=_('sticky'))
-    date = models.DateTimeField(verbose_name=_('date'), null=True)
+    date = models.DateTimeField(verbose_name=_('date'), null=True)    
+    subscribers = models.ManyToManyField("auth.User", 
+        related_name="subscribed_set")
     
     objects = ThreadManager()
     
@@ -59,13 +62,16 @@ class Thread(models.Model):
     
     def is_fav(self, u):
         # True if user is watching this thread.
-        return user.is_authenticated() and self.watchlist_set.filter(user=user).count() != 0
+        try:
+            return u.is_authenticated() and self.subscribers.get(user=u)
+        except User.DoesNotExist:
+            return False
 
     def get_notify_recipients(self):
         # Returns a set of emails watching this thread.
-        mail_dict = dict(self.watchlist_set.values_list("user__id", "user__email"))
+        mail_dict = dict(self.subscribers.values_list("id", "email"))
         dont_mail_pks = UserSettings.objects.filter(user__id__in=mail_dict.keys(), email=False)
-        dont_mail_pks = dont_mail_pks.values_list("user__id", flat=True)
+        dont_mail_pks = dont_mail_pks.values_list("id", flat=True)
         for pk in dont_mail_pks:
             mail_dict.pop(pk)
         
@@ -118,7 +124,7 @@ class Post(models.Model):
         tslug = self.thread.slug
 
         # Views to clear:
-        path = [
+        paths = [
             reverse("sb_category_list"),
             reverse("sb_thread_list"),
             reverse("sb_category", args=[cslug]),
@@ -166,12 +172,6 @@ class Post(models.Model):
         return next
     get_absolute_url = get_url
     
-
-class WatchList(models.Model):
-    user = models.ForeignKey("auth.User", verbose_name=_('user'), 
-        related_name='sb_watchlist')
-    thread = models.ForeignKey(Thread, verbose_name=_('thread'))
-
 
 class UserSettings(models.Model):
     user = models.OneToOneField("auth.User", unique=True, 

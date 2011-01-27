@@ -10,7 +10,7 @@ urlpatterns = patterns('django.contrib.syndication.views',
     (r'^feeds/(?P<url>.*)/$', 'feed', {'feed_dict': feeds}, 'sb_feeds'),
 )
 
-
+#if getattr(settings, "SNAP_ENABLE_API", False):
 urlpatterns += patterns("",
     (r'^api/', include("snapboard.api.urls"),)
 )

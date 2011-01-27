@@ -61,7 +61,8 @@ class GetUniqueLatestPosts(GetLatestPosts):
         #       - don't show two posts from the same user        
         seen = set()
         latest = []
-        for post in Post.objects.order_by("-date")[self.limit*2].iterator():
+        # for post in Post.objects.order_by("-date")[self.limit*2].iterator():
+        for post in Post.objects.all()[:20]: #order_by("-date")[self.limit*2].iterator():
             uid = "u%i" % post.user_id
             tid = "t%i" % post.thread_id
             if uid in seen or tid in seen:

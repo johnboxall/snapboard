@@ -1,9 +1,10 @@
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
+#from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 
+from snapboard.auth.decorators import login_required
 from snapboard.forms import *
 from snapboard.models import *
 from snapboard.utils import *
@@ -38,12 +39,13 @@ def close(request):
 def watch(request):
     thread = get_object_or_404(Thread, pk=request.POST.get("id"))
     try:
-        WatchList.objects.get(user=request.user, thread=thread).delete()
+        # todo how to delete this rel
+        # thread.subscribers.objects.get(user=request.user, thread=thread).delete()
         return {
             'link': _('watch'), 
             'msg': _('This topic has been removed from your favorites.')
         }
-    except WatchList.DoesNotExist:
+    except: # WatchList.DoesNotExist:
         WatchList.objects.create(user=request.user, thread=thread)
         return {
             'link': _('dont watch'), 
