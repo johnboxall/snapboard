@@ -1,5 +1,4 @@
 from django.contrib.admin.views.decorators import staff_member_required
-#from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
@@ -10,16 +9,17 @@ from snapboard.models import *
 from snapboard.utils import *
 
 
-# Ajax #########################################################################
+# Ajax
+# ----
 
 @json_response
 def preview(request):
-    return {'preview': sanitize(request.POST.get("text", ""))}
+    return {'preview': sanitize(request.POST.get('text', ''))}
 
 @staff_member_required
 @json_response
 def sticky(request):
-    thread = get_object_or_404(Thread, pk=request.POST.get("id"))
+    thread = get_object_or_404(Thread, pk=request.POST.get('id'))
     if toggle_boolean_field(thread, 'sticky'):
         return {'link':_('unstick'), 'msg':_('This topic is sticky!')}
     else:
@@ -28,7 +28,7 @@ def sticky(request):
 @staff_member_required
 @json_response
 def close(request):
-    thread = get_object_or_404(Thread, pk=request.POST.get("id"))
+    thread = get_object_or_404(Thread, pk=request.POST.get('id'))
     if toggle_boolean_field(thread, 'closed'):
         return {'link':_('open'), 'msg':_('This topic is closed.')}
     else:
@@ -37,9 +37,9 @@ def close(request):
 @login_required
 @json_response
 def watch(request):
-    thread = get_object_or_404(Thread, pk=request.POST.get("id"))
+    thread = get_object_or_404(Thread, pk=request.POST.get('id'))
     try:
-        # todo how to delete this rel
+        # TODO: how to delete this rel
         # thread.subscribers.objects.get(user=request.user, thread=thread).delete()
         return {
             'link': _('watch'), 
@@ -55,7 +55,7 @@ def watch(request):
 @login_required
 @json_response
 def edit(request):
-    pk = request.POST.get("id")
+    pk = request.POST.get('id')
     post = get_object_or_404(Post.objects.get_user_query_set(request.user), pk=pk)
     form = PostForm(request.POST, request=request, instance=post)
     if form.is_valid():
@@ -63,28 +63,25 @@ def edit(request):
         return {'preview': sanitize(post.text)}
     return form.errors
 
-# Views ########################################################################
+# Views
+# -----
 
-# TODO: Sticky ordering on pages.
-# TODO: Caching of admin / private views
-# TODO: Optional caching?
-
-def category_list(request, template="snapboard/category_list.html"):
-    ctx = {"categories": Category.objects.all()}    
+def category_list(request, template='snapboard/category_list.html'):
+    ctx = {'categories': Category.objects.all()}    
     return render_and_cache(template, ctx, request)
 
-def category(request, slug, template="snapboard/category.html"):
+def category(request, slug, template='snapboard/category.html'):
     category = get_object_or_404(Category, slug=slug)
     threads = category.thread_set.get_user_query_set(request.user)
     ctx = {'category': category, 'threads': threads}
     return render_and_cache(template, ctx, request)
 
-def thread_list(request, template="snapboard/thread_list.html"):
-    # Keep sticky posts from clogging up the list.
-    threads = Thread.objects.get_user_query_set(request.user).order_by("-date")
+def thread_list(request, template='snapboard/thread_list.html'):
+    # TODO: Keep sticky posts from clogging up the list.
+    threads = Thread.objects.get_user_query_set(request.user).order_by('-date')
     return render_and_cache(template, {'threads': threads}, request)
 
-def thread(request, cslug, tslug, template="snapboard/thread.html"):
+def thread(request, cslug, tslug, template='snapboard/thread.html'):
     thread = get_object_or_404(Thread.objects.filter(category__slug=cslug), slug=tslug)
     form = PostForm(request.POST or None, request=request)
     if form.is_valid():
@@ -100,18 +97,15 @@ def thread(request, cslug, tslug, template="snapboard/thread.html"):
     }
     return render_and_cache(template, ctx, request)
 
-# TODO: Ghetto search alert!
-# TODO: Should we be caching this?  
-def search(request, template="snapboard/search.html"):
+def search(request, template='snapboard/search.html'):
     threads = Thread.objects.get_user_query_set(request.user)
-    q = request.GET.get("q")
+    q = request.GET.get('q')
     if q is not None:
         threads = threads.filter(name__icontains=q)
     return render(template, {'threads': threads}, request)
-    # return render_and_cache(template, {'threads': threads}, request)
 
 @login_required
-def new_thread(request, slug=None, template="snapboard/new_thread.html"):
+def new_thread(request, slug=None, template='snapboard/new_thread.html'):
     category = None
     if slug is not None:
         category = get_object_or_404(Category, slug=slug)
@@ -119,15 +113,15 @@ def new_thread(request, slug=None, template="snapboard/new_thread.html"):
     if form.is_valid():
         thread = form.save()
         return HttpResponseRedirect(thread.get_url())
-    return render(template, {"form": form, "category": category}, request)
+    return render(template, {'form': form, 'category': category}, request)
 
 @login_required
-def favorites(request, template="snapboard/favorites.html"):
+def favorites(request, template='snapboard/favorites.html'):
     threads = Thread.objects.favorites(request.user)
-    return render(template, {"threads": threads}, request)
+    return render(template, {'threads': threads}, request)
 
 @login_required
-def edit_settings(request, template="snapboard/edit_settings.html"):
+def edit_settings(request, template='snapboard/edit_settings.html'):
     settings, _ = UserSettings.objects.get_or_create(user=request.user)
     data = request.POST or None
     sform = UserSettingsForm(data, instance=settings, request=request)
@@ -136,6 +130,6 @@ def edit_settings(request, template="snapboard/edit_settings.html"):
         if sform.is_valid() and uform.is_valid():
             sform.save()
             uform.save()
-            request.user.message_set.create(message="Preferences Updated.")
-            return HttpResponseRedirect("")
-    return render(template, {"sform": sform, "uform": uform}, request)
+            request.user.message_set.create(message='Preferences Updated.')
+            return HttpResponseRedirect('')
+    return render(template, {'sform': sform, 'uform': uform}, request)

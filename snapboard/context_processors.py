@@ -1,4 +1,5 @@
 from django.conf import settings
+
 from snapboard.models import MEDIA_PREFIX, POSTS_PER_PAGE, THREADS_PER_PAGE
 
 

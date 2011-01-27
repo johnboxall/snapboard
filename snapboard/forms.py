@@ -7,7 +7,7 @@ from snapboard.models import Category, Thread, Post, UserSettings
 from snapboard.utils import RequestForm, RequestModelForm
 
 
-__all__ = ["PostForm", "ThreadForm", "UserSettingsForm", "UserNameForm"]
+__all__ = ['PostForm', 'ThreadForm', 'UserSettingsForm', 'UserNameForm']
 
 Textarea = lambda cols: forms.Textarea(attrs={'rows':'8', 'cols': str(cols)})
 
@@ -17,16 +17,16 @@ class PostForm(RequestModelForm):
     
     class Meta:
         model = Post
-        fields = ("post",)
+        fields = ('post',)
     
     def save(self, thread=None):
         data = self.cleaned_data
-        ip = self.request.META.get("REMOTE_ADDR")
+        ip = self.request.META.get('REMOTE_ADDR')
         # TODO: Make this less stupid.
 
         # Editing an existing post.
         if self.instance.id is not None:
-            self.instance.text = data["post"]
+            self.instance.text = data['post']
             self.instance.ip = ip
             self.instance.save()
             return self.instance
@@ -43,25 +43,25 @@ class ThreadForm(RequestForm):
     category = forms.ModelChoiceField(queryset=Category.objects.all())
     
     def __init__(self, *args, **kwargs):
-        self.category = kwargs.pop("category", None)
+        self.category = kwargs.pop('category', None)
         super(ThreadForm, self).__init__(*args, **kwargs)
         if self.category is not None:
-            self.fields.pop("category")
+            self.fields.pop('category')
         # TODO: Set selected category is provided.
     
     def save(self):
         data = self.cleaned_data
         user = self.request.user
-        category = self.category or data["category"]
+        category = self.category or data['category']
         
         thread = Thread.objects.create_thread(**{
-            "user": user,
-            "category": category,
-            "name": data['subject'],
-            "private": data['private']
+            'user': user,
+            'category': category,
+            'name': data['subject'],
+            'private': data['private']
         })
         
-        ip = self.request.META.get("REMOTE_ADDR")
+        ip = self.request.META.get('REMOTE_ADDR')
         post = Post.objects.create_and_notify(thread, user, text=data['post'], ip=ip)                
         return thread
 
@@ -69,22 +69,22 @@ class ThreadForm(RequestForm):
 class UserSettingsForm(RequestModelForm):
     class Meta:
         model = UserSettings
-        fields = ("email",)
+        fields = ('email',)
 
     
 class UserNameForm(UserChangeForm):
     class Meta:
-        fields = ("username",)
+        fields = ('username',)
     
     def __init__(self, *args, **kwargs):
         super(UserNameForm, self).__init__(*args, **kwargs)
-        self.fields["username"].help_text = \
-            "30 characters or fewer. Letters, digits and underscores only."
+        self.fields['username'].help_text = \
+            '30 characters or fewer. Letters, digits and underscores only.'
     
     def clean_username(self):
         username = self.cleaned_data['username']
         if not username:
-            raise forms.ValidationError("You must enter a username.")
+            raise forms.ValidationError('You must enter a username.')
         
         try:
             user = User.objects.get(username=username)
@@ -92,6 +92,6 @@ class UserNameForm(UserChangeForm):
             pass
         else:
             if user != self.request.user:
-                raise forms.ValidationError("A user with that username already exists.")
+                raise forms.ValidationError('A user with that username already exists.')
         
         return username
