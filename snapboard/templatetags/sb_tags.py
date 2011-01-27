@@ -5,7 +5,7 @@ from django.conf import settings
 from snapboard.models import Post
 
 
-LATEST_POSTS = getattr(settings, "SB_LATEST_POSTS", 6)
+LATEST_POSTS = getattr(settings, 'SB_LATEST_POSTS', 6)
 
 register = template.Library()
 
@@ -29,7 +29,7 @@ def markdown(value, arg=''):
 
 @register.filter
 def dateisoformat(dt):
-    return hasattr(dt, "isoformat") and dt.isoformat() or ""
+    return hasattr(dt, 'isoformat') and dt.isoformat() or ''
 
 
 class GetLatestPosts(template.Node):
@@ -37,18 +37,18 @@ class GetLatestPosts(template.Node):
         self.limit = int(limit)
     
     def render(self, context):
-        context["latest_posts"] = Post.objects.order_by("-date")[0:self.limit]
-        return ""
+        context['latest_posts'] = Post.objects.order_by('-date')[0:self.limit]
+        return ''
 
 @register.tag
 def get_latest_posts(parser, token, node_cls=GetLatestPosts):
-    """
+    '''
     Returns a list of the latest posts.
     
     usage:
         {% get_latest_posts %}
     
-    """
+    '''
     token = token.split_contents()[-1]
     limit = token.isdigit() and token or LATEST_POSTS
     return node_cls(limit)
@@ -63,8 +63,8 @@ class GetUniqueLatestPosts(GetLatestPosts):
         latest = []
         # for post in Post.objects.order_by("-date")[self.limit*2].iterator():
         for post in Post.objects.all()[:20]: #order_by("-date")[self.limit*2].iterator():
-            uid = "u%i" % post.user_id
-            tid = "t%i" % post.thread_id
+            uid = 'u%i' % post.user_id
+            tid = 't%i' % post.thread_id
             if uid in seen or tid in seen:
                 continue
             seen.update([uid, tid])
@@ -72,8 +72,8 @@ class GetUniqueLatestPosts(GetLatestPosts):
             if len(latest) > self.limit:
                 break
         
-        context["latest_posts"] = latest
-        return ""
+        context['latest_posts'] = latest
+        return ''
 
 @register.tag
 def get_unique_latest_posts(parser, token):
